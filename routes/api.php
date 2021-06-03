@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('test')->group(function () {
+    Route::get('check', 'TestController@check');
+    Route::get('info', 'TestController@info');
+    Route::get('all', 'TestController@all');
+    Route::get('image', 'TestController@image');
 });
