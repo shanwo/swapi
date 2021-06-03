@@ -30,7 +30,7 @@ class TestController extends Controller
     public function all()
     {
         $this->validate([
-            'dbId' => 'Required|integer|between:0,16',
+            'dbId' => 'filled|integer|between:0,16',
         ], [
             'dbId' => '库ID',
         ]);
@@ -38,8 +38,10 @@ class TestController extends Controller
             return $this->returnApi();
         }
         $this->code = 200;
-        $this->redis::select($this->request->input('dbId',0));
-        $data = $this->redis::keys('*');
+        $db = $this->request->input('dbId',0);
+        $this->redis::SELECT($db);
+        $number = $this->redis::DBSIZE();
+        list(,$data) = $this->redis::SCAN('*', $number);
         return $this->returnApi($data);
     }
     public function image()
