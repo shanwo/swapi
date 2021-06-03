@@ -2,7 +2,11 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -14,6 +18,14 @@ class Handler extends ExceptionHandler
      */
     protected $dontReport = [
         //
+    ];
+    protected $code = 0;
+    protected $levels = [
+        500 => 'warning',
+        600 => 'error',
+        700 => 'critical',
+        800 => 'alert',
+        900 => 'emergency',
     ];
 
     /**
@@ -29,7 +41,7 @@ class Handler extends ExceptionHandler
     /**
      * Report or log an exception.
      *
-     * @param  \Throwable  $exception
+     * @param \Throwable $exception
      * @return void
      *
      * @throws \Exception
@@ -42,14 +54,47 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Throwable  $exception
+     * @param \Illuminate\Http\Request $request
+     * @param \Throwable $exception
      * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \Throwable
      */
     public function render($request, Throwable $exception)
     {
+        if ($exception instanceof MethodNotAllowedHttpException) {
+            $this->code = 500;
+        }
+        if ($exception instanceof NotFoundHttpException) {
+            $this->code = 600;
+        }
+        if ($exception instanceof QueryException) {
+            $this->code = 700;
+        }
+        if ($exception instanceof \ReflectionException) {
+            $this->code = 800;
+        }
+        if ($exception instanceof \ErrorException) {
+            $this->code = 900;
+        }
+        if ($this->code) {
+            $msg = [
+                500 => '请求类型不匹配',
+                600 => '请求地址未开放',
+                700 => '数据库语句错误',
+                800 => '服务端接口异常',
+                900 => '程序错误请重试',
+            ];
+            $result = [
+                'request' => $request->input(),
+                'data'    => $exception->getMessage(),
+                'code'    => $this->code,
+                'msg'     => $msg[$this->code],
+            ];
+            Log::log($this->levels[$this->code], 'Render Data', $result);
+            unset($result['request']);
+            return response()->json($result);
+        }
         return parent::render($request, $exception);
     }
 }
