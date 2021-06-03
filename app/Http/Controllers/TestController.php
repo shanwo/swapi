@@ -38,8 +38,8 @@ class TestController extends Controller
             return $this->returnApi();
         }
         $this->code = 999;
-        $this->redis->select($this->request->input('dbId',0));
-        $data = $this->redis->keys('*');
+        $this->redis::select($this->request->input('dbId',0));
+        $data = $this->redis::keys('*');
         return $this->returnApi($data);
     }
     public function image()
