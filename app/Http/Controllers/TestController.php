@@ -27,17 +27,17 @@ class TestController extends Controller
         exit(phpinfo());
     }
 
-    public function actionAll()
+    public function all()
     {
         $this->validate([
-            'dbId' => 'Required|IntGeLe:0,16|Alias:库ID',
+            'dbId' => 'Required|integer|between:0,16',
         ], [
-            'id' => 'ID',
+            'dbId' => '库ID',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $this->code = 999;
+        $this->code = 200;
         $this->redis::select($this->request->input('dbId',0));
         $data = $this->redis::keys('*');
         return $this->returnApi($data);
@@ -58,7 +58,7 @@ class TestController extends Controller
             $key = array_rand($body['images'], 1);
             $image = $body['images'][$key];
             $data['url'] = 'https://cn.bing.com' . $image['url'];
-            $this->code = 888;
+            $this->code = 200;
         }
         return $this->returnApi($data);
     }
