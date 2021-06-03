@@ -1,0 +1,65 @@
+<?php
+/**
+ * User: Powerless
+ * Date: 21/02/20
+ * Blog: https://wzxaini9.cn
+ */
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class TestController extends Controller
+{
+    public function __construct(Request $request)
+    {
+        parent::__construct();
+        $this->request = $request;
+    }
+
+    public function check()
+    {
+        return $this->returnApi($this->request->all());
+    }
+
+    public function info()
+    {
+        exit(phpinfo());
+    }
+
+    public function actionAll()
+    {
+        $this->validate([
+            'dbId' => 'Required|IntGeLe:0,16|Alias:库ID',
+        ], [
+            'id' => 'ID',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $this->code = 999;
+        $this->redis->select($this->request->input('dbId',0));
+        $data = $this->redis->keys('*');
+        return $this->returnApi($data);
+    }
+    public function image()
+    {
+        $array = [
+            'n'      => 8,
+            'format' => 'js',
+        ];
+        $param = http_build_query($array);
+        $url = "https://www.bing.com/HPImageArchive.aspx?" . $param;
+        $data = null;
+        $api = $this->client->get($url);
+        if ($api->getStatusCode() == 200) {
+            $body = $api->getBody()->getContents();
+            $body = json_decode($body, true);
+            $key = array_rand($body['images'], 1);
+            $image = $body['images'][$key];
+            $data['url'] = 'https://cn.bing.com' . $image['url'];
+            $this->code = 888;
+        }
+        return $this->returnApi($data);
+    }
+}
