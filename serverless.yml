@@ -1,0 +1,30 @@
+component: laravel
+name: laravel-X7rbvJ4AL
+org: '1305937303'
+app: api
+stage: prod
+inputs:
+  src: ./
+  region: ap-beijing
+  runtime: Php7
+  apigatewayConf:
+    protocols:
+      - http
+      - https
+    environment: release
+    serviceTimeout: 60
+    customDomains:
+      - domain: api.shanwo.cc
+        certificateId: mko0EtGu
+        isDefaultMapping: false
+        pathMappingSet:
+          - path: /
+            environment: release
+        protocols:
+          - https
+    autoCreateDns: true
+  isAutoCiDeploy: false
+  functionConf:
+    eip: true
+    timeout: 3
+    memorySize: 128
