@@ -13,6 +13,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::redirect('/', 'https://shanwo.cc');
+
+//微信公众号验证
+Route::get('MP_verify_wOQevRdcPyMeqMJL.txt', function () {
+    return 'wOQevRdcPyMeqMJL';
+});
+
+Route::prefix('test')->group(function () {
+    Route::get('check', 'TestController@check');
+    Route::get('info', 'TestController@info');
+    Route::get('all', 'TestController@all');
+    Route::get('image', 'TestController@image');
 });
