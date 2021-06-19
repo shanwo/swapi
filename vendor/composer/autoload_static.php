@@ -18,11 +18,11 @@ class ComposerStaticInit8bdb2faad721102b7efc3fb5c1dd8d2d
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
-        '2c102faa651ef8ea5874edb585946bce' => __DIR__ . '/..' . '/swiftmailer/swiftmailer/lib/swift_required.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
+        '2c102faa651ef8ea5874edb585946bce' => __DIR__ . '/..' . '/swiftmailer/swiftmailer/lib/swift_required.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
+        'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '538ca81a9a966a6716601ecf48f4eaef' => __DIR__ . '/..' . '/opis/closure/functions.php',
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
@@ -89,6 +89,7 @@ class ComposerStaticInit8bdb2faad721102b7efc3fb5c1dd8d2d
         ),
         'O' => 
         array (
+            'Overtrue\\Socialite\\' => 19,
             'Opis\\Closure\\' => 13,
         ),
         'M' => 
@@ -299,6 +300,10 @@ class ComposerStaticInit8bdb2faad721102b7efc3fb5c1dd8d2d
         'PhpOption\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
+        ),
+        'Overtrue\\Socialite\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/overtrue/socialite/src',
         ),
         'Opis\\Closure\\' => 
         array (
@@ -1992,6 +1997,34 @@ class ComposerStaticInit8bdb2faad721102b7efc3fb5c1dd8d2d
         'Opis\\Closure\\SecurityProvider' => __DIR__ . '/..' . '/opis/closure/src/SecurityProvider.php',
         'Opis\\Closure\\SelfReference' => __DIR__ . '/..' . '/opis/closure/src/SelfReference.php',
         'Opis\\Closure\\SerializableClosure' => __DIR__ . '/..' . '/opis/closure/src/SerializableClosure.php',
+        'Overtrue\\Socialite\\AccessToken' => __DIR__ . '/..' . '/overtrue/socialite/src/AccessToken.php',
+        'Overtrue\\Socialite\\AccessTokenInterface' => __DIR__ . '/..' . '/overtrue/socialite/src/AccessTokenInterface.php',
+        'Overtrue\\Socialite\\AuthorizeFailedException' => __DIR__ . '/..' . '/overtrue/socialite/src/AuthorizeFailedException.php',
+        'Overtrue\\Socialite\\Config' => __DIR__ . '/..' . '/overtrue/socialite/src/Config.php',
+        'Overtrue\\Socialite\\FactoryInterface' => __DIR__ . '/..' . '/overtrue/socialite/src/FactoryInterface.php',
+        'Overtrue\\Socialite\\HasAttributes' => __DIR__ . '/..' . '/overtrue/socialite/src/HasAttributes.php',
+        'Overtrue\\Socialite\\InvalidArgumentException' => __DIR__ . '/..' . '/overtrue/socialite/src/InvalidArgumentException.php',
+        'Overtrue\\Socialite\\InvalidStateException' => __DIR__ . '/..' . '/overtrue/socialite/src/InvalidStateException.php',
+        'Overtrue\\Socialite\\ProviderInterface' => __DIR__ . '/..' . '/overtrue/socialite/src/ProviderInterface.php',
+        'Overtrue\\Socialite\\Providers\\AbstractProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/AbstractProvider.php',
+        'Overtrue\\Socialite\\Providers\\BaiduProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/BaiduProvider.php',
+        'Overtrue\\Socialite\\Providers\\DouYinProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/DouYinProvider.php',
+        'Overtrue\\Socialite\\Providers\\DoubanProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/DoubanProvider.php',
+        'Overtrue\\Socialite\\Providers\\FacebookProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/FacebookProvider.php',
+        'Overtrue\\Socialite\\Providers\\FeiShuProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/FeiShuProvider.php',
+        'Overtrue\\Socialite\\Providers\\GitHubProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/GitHubProvider.php',
+        'Overtrue\\Socialite\\Providers\\GoogleProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/GoogleProvider.php',
+        'Overtrue\\Socialite\\Providers\\LinkedinProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/LinkedinProvider.php',
+        'Overtrue\\Socialite\\Providers\\OutlookProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/OutlookProvider.php',
+        'Overtrue\\Socialite\\Providers\\QQProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/QQProvider.php',
+        'Overtrue\\Socialite\\Providers\\TaobaoProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/TaobaoProvider.php',
+        'Overtrue\\Socialite\\Providers\\WeChatProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/WeChatProvider.php',
+        'Overtrue\\Socialite\\Providers\\WeWorkProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/WeWorkProvider.php',
+        'Overtrue\\Socialite\\Providers\\WeiboProvider' => __DIR__ . '/..' . '/overtrue/socialite/src/Providers/WeiboProvider.php',
+        'Overtrue\\Socialite\\SocialiteManager' => __DIR__ . '/..' . '/overtrue/socialite/src/SocialiteManager.php',
+        'Overtrue\\Socialite\\User' => __DIR__ . '/..' . '/overtrue/socialite/src/User.php',
+        'Overtrue\\Socialite\\UserInterface' => __DIR__ . '/..' . '/overtrue/socialite/src/UserInterface.php',
+        'Overtrue\\Socialite\\WeChatComponentInterface' => __DIR__ . '/..' . '/overtrue/socialite/src/WeChatComponentInterface.php',
         'PhpOption\\LazyOption' => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption/LazyOption.php',
         'PhpOption\\None' => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption/None.php',
         'PhpOption\\Option' => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption/Option.php',
