@@ -32,7 +32,6 @@ class UserController extends ApiController
         }
         $id = $this->request->input('id');
         $data = $this->userService->info($id);
-        unset($data['user_pass']);
         return $this->returnApi($data);
     }
 }
