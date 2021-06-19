@@ -26,3 +26,8 @@ Route::prefix('test')->group(function () {
     Route::get('all', 'TestController@all');
     Route::get('image', 'TestController@image');
 });
+Route::namespace('Api')->group(function () {
+    Route::prefix('user')->group(function () {
+        Route::get('info', 'UserController@info');
+    });
+});
