@@ -24,7 +24,6 @@ class UploadController extends ApiController
 
     public function file()
     {
-        dump($this->request);die;
         $this->validate([
             'file'      =>'required|file|max:102400',
             'title'     =>'nullable|string|max:64',
