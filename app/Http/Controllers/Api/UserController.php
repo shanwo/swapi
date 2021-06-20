@@ -1,7 +1,7 @@
 <?php
 /**
  * User: Powerless
- * Date: 21/06/20
+ * Date: 2021/6/20
  * Blog: https://wzxaini9.cn
  */
 
@@ -80,7 +80,7 @@ class UserController extends ApiController
             $this->userService->wxuser($appData, $third['user_id']);
             $data = $this->userService->info(['id' => $third['user_id']]);
         }
-        $token = $this->userService->token($third['user_id'], $type);
+        $token = $this->userService->token($third['user_id']);
         $data['token'] = $token;
         $arr = [$third['user_id'] => md5(dechex($third['user_id']))];
         $this->redis::setex('user:' . $token, 60 * 60 * 24 * 180, json_encode($arr));
