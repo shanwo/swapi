@@ -9,7 +9,7 @@ namespace App\Services;
 
 use App\Models\UserModel;
 
-class UserService
+class UserService extends Service
 {
     protected $userModel;
 

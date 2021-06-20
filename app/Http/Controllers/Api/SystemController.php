@@ -5,9 +5,7 @@
  * Blog: https://wzxaini9.cn
  */
 
-namespace App\Http\Controllers\Api\Tool;
-
-use App\Http\Controllers\Api\ApiController;
+namespace App\Http\Controllers\Api;
 
 class SystemController extends ApiController
 {

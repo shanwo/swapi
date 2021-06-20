@@ -30,7 +30,7 @@ class TestController extends Controller
     public function all()
     {
         $this->validate([
-            'dbId' => 'filled|integer|between:0,16',
+            'dbId' => 'filled|integer|between:0,4',
         ], [
             'dbId' => '库ID',
         ]);
@@ -44,6 +44,7 @@ class TestController extends Controller
         list(,$data) = $this->redis::SCAN('*', $number);
         return $this->returnApi($data);
     }
+
     public function image()
     {
         $array = [
