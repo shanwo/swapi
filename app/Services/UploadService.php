@@ -7,6 +7,8 @@
 
 namespace App\Services;
 
+use Qcloud\Cos\Client;
+
 class UploadService extends Service
 {
     private $oss;
@@ -15,12 +17,12 @@ class UploadService extends Service
 
     public function __construct()
     {
-        $this->oss = new \Qcloud\Cos\Client([
+        $this->oss = new Client([
             'region' => 'ap-beijing',
-            'credentials' => array(
-                'secretId' => '<SecretId>',
-                'secretKey' => '<SecretKey>'
-            )
+            'credentials' => [
+                'secretId' => 'AKIDBCxRe7KGvQgfNoztWnqfEWYKp30iSzJQ ',
+                'secretKey' => 'rRmxsWtzpNeePu85mDNGtHODlkSt32lD'
+            ]
         ]);
     }
 
