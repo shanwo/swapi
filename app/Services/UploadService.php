@@ -81,16 +81,16 @@ class UploadService extends Service
      * @return array
      * 上传文件
      */
-    public function update()
+    public function update($request)
     {
-        $file = $_FILES['file'] ?? $this->params['file'];
-        $fileName = dechex(NOW_TIME * 10000);
-        $ext = $this->getExt($file['name']);
+        $file = $request->file('file');
+        $fileName = dechex(microtime(true) * 10000);
+        $ext = $file->getClientOriginalExtension();//得到后缀；
+        $pathName = env('APP_ENV'). $this->type($ext) . date('/Y/m/');
         $type = $this->type($ext);
         if ($ext) {
             $fileName = $fileName . '.' . $ext;
         }
-        $pathName = YII_ENV . '/' . $type . date('/Y/m/');
         $receive = $this->oss->uploadFile($this->bucket, $pathName . $fileName, $file['tmp_name']);
         if ($receive['info']['http_code'] == 200) {
             $this->data['url'] = $this->ossUrl . $pathName . $fileName;
