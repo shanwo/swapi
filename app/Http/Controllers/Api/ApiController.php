@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * User: Powerless
+ * Date: 21/06/20
+ * Blog: https://wzxaini9.cn
+ */
 
 namespace App\Http\Controllers\Api;
 
@@ -9,6 +13,9 @@ use App\Http\Controllers\Controller;
 class ApiController extends Controller
 {
     protected $user_id = 0;
+    protected $appids = ['wx508dad4113cb2e4a'=>'35e78c598d44147fa46cc363c228da3e'];
+    protected $wxapi = "https://api.weixin.qq.com/";
+
     public function __construct($request)
     {
         $this->request = $request;
@@ -51,5 +58,25 @@ class ApiController extends Controller
                 }
             }
         }
+    }
+
+    public function getSession($appId, $secret, $jsCode)
+    {
+        $array = [
+            'appid'      => $appId,
+            'secret'     => $secret,
+            'js_code'    => $jsCode,
+            'grant_type' => 'authorization_code'
+        ];
+        $param = http_build_query($array);
+        $url = $this->wxapi . 'sns/jscode2session?' . $param;
+        $form['timeout'] = 3;
+        $body = null;
+        $api = $this->client->get($url, $form);
+        if ($api->getStatusCode() == 200) {
+            $body = $api->getBody()->getContents();
+            $body = json_decode($body, true);
+        }
+        return $body;
     }
 }
