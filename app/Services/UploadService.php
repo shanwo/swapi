@@ -10,16 +10,20 @@ namespace App\Services;
 class UploadService extends Service
 {
     private $oss;
+    private $bucket = 'cdn-1305937303';
+    private $ossUrl = 'https://cdn.shanwo.cc/';
+
     public function __construct()
     {
         $this->oss = new \Qcloud\Cos\Client([
-            'region' => '<Region>',
+            'region' => 'ap-beijing',
             'credentials' => array(
                 'secretId' => '<SecretId>',
                 'secretKey' => '<SecretKey>'
             )
         ]);
     }
+
     /**
      * @param $ext
      * 返回后缀所对应的文件类型
@@ -60,24 +64,6 @@ class UploadService extends Service
     }
 
     /**
-     * @param $name
-     * 返回当前文件的后缀
-     * @return mixed|string|null
-     */
-    protected function getExt($name)
-    {
-        $ext = null;
-        $intercept = mb_substr($name, '-6');
-        $str = strpos($intercept, '.');
-        if ($str !== false) {
-            $exts = explode('.', $intercept);
-            $ext = end($exts);
-            $ext = strtolower($ext);
-        }
-        return $ext;
-    }
-
-    /**
      * @return array
      * 上传文件
      */
@@ -86,12 +72,12 @@ class UploadService extends Service
         $file = $request->file('file');
         $fileName = dechex(microtime(true) * 10000);
         $ext = $file->getClientOriginalExtension();//得到后缀；
-        $pathName = env('APP_ENV'). $this->type($ext) . date('/Y/m/');
         $type = $this->type($ext);
+        $pathName = env('APP_ENV') . '/' . $type . date('/Y/m/');
         if ($ext) {
             $fileName = $fileName . '.' . $ext;
         }
-        $receive = $this->oss->uploadFile($this->bucket, $pathName . $fileName, $file['tmp_name']);
+        $receive = $this->oss->upload($this->bucket, $pathName . $fileName, $file['tmp_name']);
         if ($receive['info']['http_code'] == 200) {
             $this->data['url'] = $this->ossUrl . $pathName . $fileName;
             $this->data['type'] = $type;
