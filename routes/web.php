@@ -26,11 +26,11 @@ Route::prefix('test')->group(function () {
     Route::get('all', 'TestController@all');
     Route::get('image', 'TestController@image');
 });
-Route::prefix('upload')->group(function () {
-    Route::post('file', 'UploadController@file');
-});
 Route::namespace('Api')->group(function () {
     Route::prefix('user')->group(function () {
         Route::get('info', 'UserController@info');
+    });
+    Route::prefix('upload')->group(function () {
+        Route::post('file', 'UploadController@file');
     });
 });
