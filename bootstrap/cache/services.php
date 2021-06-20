@@ -25,9 +25,10 @@
     21 => 'Fruitcake\\Cors\\CorsServiceProvider',
     22 => 'Laravel\\Tinker\\TinkerServiceProvider',
     23 => 'Carbon\\Laravel\\ServiceProvider',
-    24 => 'App\\Providers\\AppServiceProvider',
-    25 => 'App\\Providers\\EventServiceProvider',
-    26 => 'App\\Providers\\RouteServiceProvider',
+    24 => 'Overtrue\\LaravelWeChat\\ServiceProvider',
+    25 => 'App\\Providers\\AppServiceProvider',
+    26 => 'App\\Providers\\EventServiceProvider',
+    27 => 'App\\Providers\\RouteServiceProvider',
   ),
   'eager' => 
   array (
@@ -43,9 +44,10 @@
     9 => 'Fideloper\\Proxy\\TrustedProxyServiceProvider',
     10 => 'Fruitcake\\Cors\\CorsServiceProvider',
     11 => 'Carbon\\Laravel\\ServiceProvider',
-    12 => 'App\\Providers\\AppServiceProvider',
-    13 => 'App\\Providers\\EventServiceProvider',
-    14 => 'App\\Providers\\RouteServiceProvider',
+    12 => 'Overtrue\\LaravelWeChat\\ServiceProvider',
+    13 => 'App\\Providers\\AppServiceProvider',
+    14 => 'App\\Providers\\EventServiceProvider',
+    15 => 'App\\Providers\\RouteServiceProvider',
   ),
   'deferred' => 
   array (

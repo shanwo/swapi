@@ -25,9 +25,11 @@ return array(
     'a1105708a18b76903365ca1c4aa61b02' => $vendorDir . '/symfony/translation/Resources/functions.php',
     '538ca81a9a966a6716601ecf48f4eaef' => $vendorDir . '/opis/closure/functions.php',
     'e39a8b23c42d4e1452234d762b03835a' => $vendorDir . '/ramsey/uuid/src/functions.php',
-    '8825ede83f2f289127722d4e842cf7e8' => $vendorDir . '/symfony/polyfill-intl-grapheme/bootstrap.php',
     'f0906e6318348a765ffb6eb24e0d0938' => $vendorDir . '/laravel/framework/src/Illuminate/Foundation/helpers.php',
     '58571171fd5812e6e447dce228f52f4d' => $vendorDir . '/laravel/framework/src/Illuminate/Support/helpers.php',
+    '8825ede83f2f289127722d4e842cf7e8' => $vendorDir . '/symfony/polyfill-intl-grapheme/bootstrap.php',
+    'f0e7e63bbb278a92db02393536748c5f' => $vendorDir . '/overtrue/wechat/src/Kernel/Support/Helpers.php',
+    '6747f579ad6817f318cc3a7e7a0abb93' => $vendorDir . '/overtrue/wechat/src/Kernel/Helpers.php',
     'b6b991a57620e2fb6b2f66f03fe9ddc2' => $vendorDir . '/symfony/string/Resources/functions.php',
     'f67964341ef83e59f1cc6a3916599312' => $vendorDir . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Common.php',
 );
