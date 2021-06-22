@@ -7,19 +7,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Service;
 use GuzzleHttp\Client;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 
 class Controller extends BaseController
 {
     use ValidatesRequests;
 
-    protected $redis;
     protected $client;
     protected $request;
+    protected $service;
     protected $code = 100;
     protected $msg = null;
     protected $levels = [
@@ -29,14 +29,13 @@ class Controller extends BaseController
         400 => 'notice',
     ];
     protected $user_id = 0;
-    protected $appids = ['wx508dad4113cb2e4a'=>'35e78c598d44147fa46cc363c228da3e'];
     protected $wxapi = "https://api.weixin.qq.com/";
 
     public function __construct($request)
     {
         $this->request = $request;
-        $this->redis = new Redis();
         $this->client = new Client();
+        $this->service = new Service();
         $this->setToken();
     }
 
