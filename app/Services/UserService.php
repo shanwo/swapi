@@ -15,6 +15,7 @@ class UserService extends Service
 
     public function __construct()
     {
+        parent::__construct();
         $this->userModel = new UserModel();
     }
 

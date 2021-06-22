@@ -9,5 +9,8 @@ namespace App\Services;
 
 class LinkService extends Service
 {
-
+    public function __construct()
+    {
+        parent::__construct();
+    }
 }

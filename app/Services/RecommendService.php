@@ -9,5 +9,9 @@ namespace App\Services;
 
 class RecommendService extends Service
 {
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
 }
