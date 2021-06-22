@@ -9,8 +9,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SystemModel extends Model
+class ConfigModel extends Model
 {
-    protected $table = 'system';
+    protected $table = 'config';
     public $timestamps = false;
 }
