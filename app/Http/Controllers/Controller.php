@@ -65,7 +65,7 @@ class Controller extends BaseController
     {
         $result = [
             'request' => $this->request->all(),
-            'data'    => $data,
+            'data'    => (object) $data,
             'code'    => $this->code,
             'msg'     => $this->msg,
         ];
