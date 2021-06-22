@@ -12,4 +12,5 @@ use Illuminate\Database\Eloquent\Model;
 class PageModel extends Model
 {
     protected $table = 'user';
+    public $timestamps = false;
 }
