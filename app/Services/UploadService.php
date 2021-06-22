@@ -16,11 +16,13 @@ class UploadService extends Service
 
     public function __construct()
     {
+        parent::__construct();
+        $config = $this->configInfo('oss');
         $this->oss = new Client([
             'region'      => 'ap-beijing',
             'credentials' => [
-                'secretId'  => 'AKIDBCxRe7KGvQgfNoztWnqfEWYKp30iSzJQ',
-                'secretKey' => 'rRmxsWtzpNeePu85mDNGtHODlkSt32lD'
+                'secretId'  => $config['key'],
+                'secretKey' => $config['secret'],
             ]
         ]);
     }
