@@ -7,7 +7,7 @@
 
 namespace App\Http\Controllers;
 
-class PageControllers extends Controller
+class LinkController extends Controller
 {
 
 }
