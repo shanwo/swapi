@@ -18,21 +18,20 @@ class WechatService extends Service
 
     public function __construct()
     {
+        parent::__construct();
         $this->userModel = new UserModel();
     }
 
     public function driver($request)
     {
-        $plugin = $this->pluginModel->where(['name' => $this->pluginName, 'status' => 1])->first();
-        $this->config = json_decode($plugin['config'], true);
-        $config = [
+        $config = $this->configInfo('wx');
+        $socialite = new SocialiteManager([
             $this->pluginName => [
-                'client_id'     => $this->config['app_key'],
-                'client_secret' => $this->config['app_secret'],
-                'redirect'      => $this->config['callback_url'],
+                'client_id'     => $config['key'],
+                'client_secret' => $config['secret'],
+                'redirect'      => $config['callback'],
             ],
-        ];
-        $socialite = new SocialiteManager($config, $request);
+        ], $request);
         return $socialite->driver($this->pluginName);
     }
 }
