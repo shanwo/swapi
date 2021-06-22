@@ -25,12 +25,20 @@ class UploadController extends Controller
     public function file()
     {
         $this->validate([
-            'file'      =>'required|file|max:102400',
-            'title'     =>'nullable|string|max:64',
-            'desc'      =>'nullable|string|max:255',
-            'tag'       =>'nullable|string|max:64',
+            'file' => 'required|file|max:1024',
+        ], [
+            'file' => '上传文件'
         ]);
-        $data = $this->uploadService->update($this->request);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        try {
+            $data = $this->uploadService->update($this->request);
+            $this->code = 200;
+        } catch (\Exception $e) {
+            $this->msg = $e->getMessage();
+            $this->code = 400;
+        }
         return $this->returnApi($data);
     }
 }

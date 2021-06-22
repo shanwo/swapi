@@ -12,15 +12,14 @@ use Qcloud\Cos\Client;
 class UploadService extends Service
 {
     private $oss;
-    private $bucket = 'cdn-1305937303';
-    private $ossUrl = 'https://cdn.shanwo.cc/';
+    private $domain = 'https://cdn.shanwo.cc/';
 
     public function __construct()
     {
         $this->oss = new Client([
-            'region' => 'ap-beijing',
+            'region'      => 'ap-beijing',
             'credentials' => [
-                'secretId' => 'AKIDBCxRe7KGvQgfNoztWnqfEWYKp30iSzJQ ',
+                'secretId'  => 'AKIDBCxRe7KGvQgfNoztWnqfEWYKp30iSzJQ',
                 'secretKey' => 'rRmxsWtzpNeePu85mDNGtHODlkSt32lD'
             ]
         ]);
@@ -62,30 +61,29 @@ class UploadService extends Service
             default:
                 $type = 0;
         }
-        return $fileTypes[$type];
+        if(app('env') != 'prod'){
+            $path = app('env') . '/' . $fileTypes[$type] . date('/Y/m/');
+        }else{
+            $path = $fileTypes[$type] . date('/Y/m/');
+        }
+        return $path;
     }
 
     /**
-     * @return array
      * 上传文件
+     * @param $request
+     * @return mixed
      */
     public function update($request)
     {
         $file = $request->file('file');
-        $fileName = dechex(microtime(true) * 10000);
-        $ext = $file->getClientOriginalExtension();//得到后缀；
-        $type = $this->type($ext);
-        $pathName = env('APP_ENV') . '/' . $type . date('/Y/m/');
+        $ext = $file->getClientOriginalExtension();
+        $path = $this->type($ext) . dechex(microtime(true) * 10000);
         if ($ext) {
-            $fileName = $fileName . '.' . $ext;
+            $path = $path . '.' . $ext;
         }
-        $receive = $this->oss->upload($this->bucket, $pathName . $fileName, $file['tmp_name']);
-        if ($receive['info']['http_code'] == 200) {
-            $this->data['url'] = $this->ossUrl . $pathName . $fileName;
-            $this->data['type'] = $type;
-        } else {
-            $this->data['msg'] = '上传失败';
-        }
-        return $this->serviceResponse();
+        $this->oss->upload('cdn-1305937303', $path, fopen($file->getRealPath(), "rb"));
+        $data['url'] = $this->domain . $path;
+        return $data;
     }
 }
