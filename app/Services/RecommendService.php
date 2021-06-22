@@ -7,8 +7,7 @@
 
 namespace App\Services;
 
-
-class RecommendService
+class RecommendService extends Service
 {
 
 }

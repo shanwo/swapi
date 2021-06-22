@@ -7,8 +7,7 @@
 
 namespace App\Services;
 
-
-class LinkService
+class LinkService extends Service
 {
 
 }

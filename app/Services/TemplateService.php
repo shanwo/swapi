@@ -7,8 +7,7 @@
 
 namespace App\Services;
 
-
-class TemplateService
+class TemplateService extends Service
 {
 
 }

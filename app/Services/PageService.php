@@ -7,8 +7,7 @@
 
 namespace App\Services;
 
-
-class PageService
+class PageService extends Service
 {
 
 }

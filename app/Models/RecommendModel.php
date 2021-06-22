@@ -7,8 +7,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 
-class RecommendModel
+class RecommendModel extends Model
 {
-
+    protected $table = 'user';
 }
