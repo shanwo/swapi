@@ -31,6 +31,10 @@ Route::prefix('test')->group(function () {
 Route::prefix('upload')->group(function () {
     Route::post('file', 'UploadController@file');
 });
+//地区信息
+Route::prefix('area')->group(function () {
+    Route::get('lists', 'AreaController@lists');
+});
 //链接
 Route::prefix('link')->group(function () {
     Route::get('lists', 'LinkController@lists');
