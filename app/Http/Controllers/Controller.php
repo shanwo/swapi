@@ -69,6 +69,7 @@ class Controller extends BaseController
             'msg'     => $this->msg,
         ];
         Log::log($this->levels[$this->code], 'Return Api', $result);
+        \Illuminate\Support\Facades\DB::disconnect('mysql');
         return response()->json($result);
     }
 
