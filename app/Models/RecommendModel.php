@@ -11,6 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class RecommendModel extends Model
 {
-    protected $table = 'user';
+    protected $table = 'sw_recommend';
     public $timestamps = false;
 }

@@ -11,6 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ConfigModel extends Model
 {
-    protected $table = 'config';
+    protected $table = 'sw_config';
     public $timestamps = false;
 }

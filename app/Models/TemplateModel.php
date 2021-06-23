@@ -11,6 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class TemplateModel extends Model
 {
-    protected $table = 'user';
+    protected $table = 'sw_template';
     public $timestamps = false;
 }

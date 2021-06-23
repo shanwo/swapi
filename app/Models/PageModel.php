@@ -11,6 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class PageModel extends Model
 {
-    protected $table = 'user';
+    protected $table = 'sw_page';
     public $timestamps = false;
 }
