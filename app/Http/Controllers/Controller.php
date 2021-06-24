@@ -85,7 +85,7 @@ class Controller extends BaseController
 
     protected function getUserId($token)
     {
-        $auth = $this->redis::get('user:' . $token);
+        $auth = $this->redis::GET('user:' . $token);
         if (!$auth) {
             $type = $this->request->header('xcx-device-type', $this->request->server->get('xcx-device-type'));
             $where[] = ['device_type', '=', $type];
@@ -95,7 +95,7 @@ class Controller extends BaseController
             if ($userToke) {
                 $this->user_id = $userToke['user_id'];
                 $arr = [$this->user_id => md5(dechex($this->user_id))];
-                $this->redis::setex('user:' . $token, 60 * 60 * 24 * 180, json_encode($arr));
+                $this->redis::SETEX('user:' . $token, 60 * 60 * 24 * 180, json_encode($arr));
             }else{
                 $this->code = 300;
                 $this->msg = '当前账户异常，请重新登录';

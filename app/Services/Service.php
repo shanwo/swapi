@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Redis;
 
 class Service
 {
-    protected $redis;
+    public $redis;
     protected $configModel;
 
     public function __construct()
@@ -23,11 +23,11 @@ class Service
 
     public function configInfo($name)
     {
-        $config = $this->redis::get('config:' . $name);
+        $config = $this->redis::GET('config:' . $name);
         if(!$config){
             $data = $this->configModel->where(['option_name'=>$name])->first();
             $data['option_value'] = json_decode($data['option_value'],true);
-            $this->redis::setnx('config:' . $name, json_encode($data));
+            $this->redis::SETNX('config:' . $name, json_encode($data));
         }else{
             $data = json_decode($config,true);
         }

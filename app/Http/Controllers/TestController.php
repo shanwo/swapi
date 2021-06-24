@@ -7,14 +7,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Service;
 use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
     public function __construct(Request $request)
     {
-        parent::__construct();
-        $this->request = $request;
+        parent::__construct($request);
+        $this->service = new Service();
     }
 
     public function check()
@@ -39,9 +40,9 @@ class TestController extends Controller
         }
         $this->code = 200;
         $db = $this->request->input('dbId',0);
-        $this->redis::SELECT($db);
-        $number = $this->redis::DBSIZE();
-        list(,$data) = $this->redis::SCAN('*', $number);
+        $this->service->redis::SELECT($db);
+        $number = $this->service->redis::DBSIZE();
+        list(,$data) = $this->service->redis::SCAN('*', $number);
         return $this->returnApi($data);
     }
 

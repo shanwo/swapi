@@ -42,7 +42,7 @@ class UserController extends Controller
                 if ($v == md5(dechex($k))) {
                     $url = $data->getTargetUrl();
                     parse_str(parse_url($url, PHP_URL_QUERY), $query);
-                    $this->redis::setex('login:wechat:' . $query['state'], 60 * 30, $k);
+                    $this->redis::SETEX('login:wechat:' . $query['state'], 60 * 30, $k);
                 }
             }
         }
