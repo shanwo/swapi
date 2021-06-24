@@ -31,7 +31,7 @@ class TestController extends Controller
     public function all()
     {
         $this->validate([
-            'dbId' => 'filled|integer|between:0,4',
+            'dbId' => 'filled|integer|between:0,3',
         ], [
             'dbId' => '库ID',
         ]);
