@@ -64,7 +64,7 @@ class Controller extends BaseController
     {
         $result = [
             'request' => $this->request->all(),
-            'data'    => (object) $data,
+            'data'    => (object)$data,
             'code'    => $this->code,
             'msg'     => $this->msg,
         ];
@@ -94,7 +94,7 @@ class Controller extends BaseController
                 $this->user_id = $userToke['user_id'];
                 $arr = [$this->user_id => md5(dechex($this->user_id))];
                 $this->service->redis::SETEX('user:' . $token, 60 * 60 * 24 * 180, json_encode($arr));
-            }else{
+            } else {
                 $this->code = 300;
                 $this->msg = '当前账户异常，请重新登录';
                 return $this->returnApi();

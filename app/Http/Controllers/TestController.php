@@ -39,10 +39,10 @@ class TestController extends Controller
             return $this->returnApi();
         }
         $this->code = 200;
-        $db = $this->request->input('dbId',0);
+        $db = $this->request->input('dbId', 0);
         $this->service->redis::SELECT($db);
         $number = $this->service->redis::DBSIZE();
-        list(,$data) = $this->service->redis::SCAN('*', $number);
+        list(, $data) = $this->service->redis::SCAN('*', $number);
         return $this->returnApi($data);
     }
 

@@ -63,9 +63,9 @@ class UploadService extends Service
             default:
                 $type = 0;
         }
-        if(app('env') != 'prod'){
+        if (app('env') != 'prod') {
             $path = app('env') . '/' . $fileTypes[$type] . date('/Y/m/');
-        }else{
+        } else {
             $path = $fileTypes[$type] . date('/Y/m/');
         }
         return $path;

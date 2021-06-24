@@ -25,14 +25,14 @@ class AreaController extends Controller
     public function lists()
     {
         $this->validate([
-            'pid'   => 'nullable|integer|between:0,3750',
+            'pid' => 'nullable|integer|between:0,3750',
         ], [
-            'pid'   => '父ID',
+            'pid' => '父ID',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->areaService->lists($this->request);
+        $data = $this->areaService->lists($this->user_id);
         $this->code = 200;
         return $this->returnApi($data);
     }
