@@ -35,12 +35,12 @@ class Service
         return $data['option_value'];
     }
 
-    protected function setData($name, $key, $data)
+    protected function setData($key, $data)
     {
         if ($data) {
-            $this->redis::SET($name . $key, $data);
+            $this->redis::SET($key, $data);
         } else {
-            $this->redis::SETEX($name . $key, $this->timeOut, $data);
+            $this->redis::SETEX($key, $this->timeOut, $data);
         }
     }
 }

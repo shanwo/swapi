@@ -25,7 +25,7 @@ class PageService extends Service
         if (empty($lists)) {
             $where[] = ['uid', '=', $uid];
             $lists = $this->pageModel->where($where)->get()->toJson();
-            $this->setData('page:', $uid, $lists);
+            $this->setData('page:' . $uid, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;
