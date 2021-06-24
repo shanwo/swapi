@@ -22,43 +22,18 @@ class AreaService extends Service
     public function lists($request)
     {
         $pid = $request->input('pid', 0);
-        $level = $request->input('level', 0);
-        switch ($level) {
-            case 1:
-                $list = $this->redis::get('cn_area:province:' . $pid);
-                break;
-            case 2:
-                $list = $this->redis::get('cn_area:city:' . $pid);
-                break;
-            case 3:
-                $list = $this->redis::get('cn_area:district:' . $pid);
-                break;
-            default:
-                $list = $this->redis::get('cn_area:all');
-        }
-        if (!$list) {
-            $where = [];
-            if ($pid) $where[] = ['pid', '=', $pid];
-            if($level) $where[] = ['level', '=', $level];
-            $list = $this->areaModel->where($where)->get()->toArray();
+        $lists = $this->redis::get('cn_area:' . $pid);
+        if (empty($lists)) {
+            $where[] = ['pid', '=', $pid];
+            $lists = $this->areaModel->where($where)->get()->toJson();
             ini_set('max_execution_time', '0');
-            switch ($level) {
-                case 1:
-                    $this->redis::set('cn_area:province:' . $pid, json_encode($list));
-                    break;
-                case 2:
-                    $this->redis::set('cn_area:city:' . $pid, json_encode($list));
-                    break;
-                case 3:
-                    $this->redis::set('cn_area:district:' . $pid, json_encode($list));
-                    break;
-                default:
-                    $this->redis::set('cn_area:all', json_encode($list));
+            if ($lists) {
+                $this->redis::set('cn_area:' . $pid, $lists);
+            } else {
+                $this->redis::setex('cn_area:' . $pid, 1, $lists);
             }
-            $data['lists'] = $list;
-        } else {
-            $data['lists'] = json_decode($list, true);
         }
+        $data['lists'] = json_decode($lists, true);
         return $data;
     }
 }

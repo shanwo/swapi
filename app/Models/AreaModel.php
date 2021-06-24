@@ -12,6 +12,5 @@ use Illuminate\Database\Eloquent\Model;
 class AreaModel extends Model
 {
     protected $table = 'cn_area';
-    protected $prefix = '';
     public $timestamps = false;
 }

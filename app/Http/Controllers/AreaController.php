@@ -25,10 +25,8 @@ class AreaController extends Controller
     public function lists()
     {
         $this->validate([
-            'level' => 'nullable|integer|between:1,3',
             'pid'   => 'nullable|integer|between:0,3750',
         ], [
-            'level' => '层级',
             'pid'   => '父ID',
         ]);
         if ($this->msg) {
