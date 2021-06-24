@@ -36,7 +36,7 @@ class Controller extends BaseController
         $this->request = $request;
         $this->client = new Client();
         $this->service = new Service();
-        $this->setToken();
+        $this->validateToken();
     }
 
     /**
@@ -74,7 +74,7 @@ class Controller extends BaseController
     }
 
 
-    private function setToken()
+    private function validateToken()
     {
         $this->code = 400;
 //        $token = $this->request->header();
@@ -85,17 +85,15 @@ class Controller extends BaseController
 
     protected function getUserId($token)
     {
-        $auth = $this->redis::GET('user:' . $token);
+        $auth = $this->service->redis::GET('user:' . $token);
         if (!$auth) {
-            $type = $this->request->header('xcx-device-type', $this->request->server->get('xcx-device-type'));
-            $where[] = ['device_type', '=', $type];
             $where[] = ['token', '=', $token];
             $userTokenModel = new UserTokenModel();
             $userToke = $userTokenModel->where($where)->first();
             if ($userToke) {
                 $this->user_id = $userToke['user_id'];
                 $arr = [$this->user_id => md5(dechex($this->user_id))];
-                $this->redis::SETEX('user:' . $token, 60 * 60 * 24 * 180, json_encode($arr));
+                $this->service->redis::SETEX('user:' . $token, 60 * 60 * 24 * 180, json_encode($arr));
             }else{
                 $this->code = 300;
                 $this->msg = '当前账户异常，请重新登录';
