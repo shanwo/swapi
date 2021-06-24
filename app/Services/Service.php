@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Redis;
 class Service
 {
     public $redis;
+    protected $timeOut = 3600;
     protected $configModel;
 
     public function __construct()
@@ -24,13 +25,22 @@ class Service
     public function configInfo($name)
     {
         $config = $this->redis::GET('config:' . $name);
-        if(!$config){
-            $data = $this->configModel->where(['option_name'=>$name])->first();
-            $data['option_value'] = json_decode($data['option_value'],true);
+        if (!$config) {
+            $data = $this->configModel->where(['option_name' => $name])->first();
+            $data['option_value'] = json_decode($data['option_value'], true);
             $this->redis::SETNX('config:' . $name, json_encode($data));
-        }else{
-            $data = json_decode($config,true);
+        } else {
+            $data = json_decode($config, true);
         }
         return $data['option_value'];
+    }
+
+    protected function setData($name, $key, $data)
+    {
+        if ($data) {
+            $this->redis::SET($name . $key, $data);
+        } else {
+            $this->redis::SETEX($name . $key, $this->timeOut, $data);
+        }
     }
 }
