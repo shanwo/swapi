@@ -12,6 +12,7 @@ use GuzzleHttp\Client;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Uuid;
 
 class Controller extends BaseController
 {
@@ -28,15 +29,21 @@ class Controller extends BaseController
         300 => 'notice',
         400 => 'notice',
     ];
-    protected $user_id = 0;
+    protected $uid = 0;
     protected $wxapi = "https://api.weixin.qq.com/";
+    private $writeUrl = [
+        'test/check',
+        'user/signin',
+    ];
 
     public function __construct($request)
     {
         $this->request = $request;
         $this->client = new Client();
         $this->service = new Service();
-        $this->validateToken();
+        if (!in_array($this->request->path(), $this->writeUrl)) {
+            $this->validateToken();
+        }
     }
 
     /**
@@ -65,11 +72,13 @@ class Controller extends BaseController
         $result = [
             'request' => $this->request->all(),
             'data'    => (object)$data,
-            'code'    => $this->code,
+            'code'    => (int)$this->code,
             'msg'     => $this->msg,
+            'uuid'    => Uuid::uuid6(),
         ];
         Log::log($this->levels[$this->code], 'Return Api', $result);
         \Illuminate\Support\Facades\DB::disconnect('mysql');
+        unset($result['request']);
         return response()->json($result);
     }
 
@@ -91,8 +100,8 @@ class Controller extends BaseController
             $userTokenModel = new UserTokenModel();
             $userToke = $userTokenModel->where($where)->first();
             if ($userToke) {
-                $this->user_id = $userToke['user_id'];
-                $arr = [$this->user_id => md5(dechex($this->user_id))];
+                $this->uid = $userToke['user_id'];
+                $arr = [$this->uid => md5(dechex($this->uid))];
                 $this->service->redis::SETEX('user:' . $token, 60 * 60 * 24 * 180, json_encode($arr));
             } else {
                 $this->code = 300;
@@ -103,7 +112,7 @@ class Controller extends BaseController
             $arr = json_decode($auth, true) ?? [];
             foreach ($arr as $k => $v) {
                 if ($v == md5(dechex($k))) {
-                    $this->user_id = $k;
+                    $this->uid = $k;
                 }
             }
         }
