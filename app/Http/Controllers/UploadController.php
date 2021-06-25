@@ -32,6 +32,7 @@ class UploadController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
+        $data = [];
         try {
             $data = $this->uploadService->update($this->request);
             $this->code = 200;
