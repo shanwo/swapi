@@ -13,26 +13,24 @@ use Illuminate\Http\Request;
 class AreaController extends Controller
 {
     protected $areaService;
-    protected $request;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
-        $this->request = $request;
         $this->areaService = new AreaService();
     }
 
     public function lists()
     {
         $this->validate([
-            'pid' => 'nullable|integer|between:0,3750',
+            'pid' => 'nullable|integer|between:0,3750|exists:cn_area,pid',
         ], [
             'pid' => '父ID',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->areaService->lists($this->user_id);
+        $data = $this->areaService->lists($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }
