@@ -41,9 +41,9 @@ class Controller extends BaseController
         $this->request = $request;
         $this->client = new Client();
         $this->service = new Service();
-        if (!in_array($this->request->path(), $this->writeUrl)) {
-            $this->validateToken();
-        }
+//        if (in_array($this->request->path(), $this->writeUrl)) {
+//            $this->validateToken();
+//        }
     }
 
     /**
@@ -86,35 +86,27 @@ class Controller extends BaseController
     private function validateToken()
     {
         $this->code = 400;
-//        $token = $this->request->header();
-//        if ($token) {
-//            $this->getUserId($token);
-//        }
+        $token = $this->request->header();
+        if ($token) {
+            $this->getUserId($token);
+        }
     }
 
     protected function getUserId($token)
     {
         $auth = $this->service->redis::GET('user:' . $token);
-        if (!$auth) {
-            $where[] = ['token', '=', $token];
-            $userTokenModel = new UserTokenModel();
-            $userToke = $userTokenModel->where($where)->first();
-            if ($userToke) {
-                $this->uid = $userToke['user_id'];
-                $arr = [$this->uid => md5(dechex($this->uid))];
-                $this->service->redis::SETEX('user:' . $token, 60 * 60 * 24 * 180, json_encode($arr));
-            } else {
-                $this->code = 300;
-                $this->msg = '当前账户异常，请重新登录';
-                return $this->returnApi();
-            }
-        } else {
+        if ($auth){
             $arr = json_decode($auth, true) ?? [];
             foreach ($arr as $k => $v) {
                 if ($v == md5(dechex($k))) {
                     $this->uid = $k;
                 }
             }
+        }
+        if(!$this->uid){
+            $this->code = 300;
+            $this->msg = '当前账户异常，请重新登录';
+            return $this->returnApi();
         }
     }
 
