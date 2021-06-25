@@ -24,7 +24,7 @@ class Service
 
     public function configInfo($name)
     {
-        $config = $this->redis::GET('config:' . $name);
+        $config = $this->getData('config:' . $name);
         if (!$config) {
             $data = $this->configModel->where(['option_name' => $name])->first();
             $data['option_value'] = json_decode($data['option_value'], true);
@@ -33,6 +33,10 @@ class Service
             $data = json_decode($config, true);
         }
         return $data['option_value'];
+    }
+    protected function getData($key)
+    {
+        return $this->redis::GET($key);
     }
 
     protected function setData($key, $data)
