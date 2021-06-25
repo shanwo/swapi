@@ -22,7 +22,7 @@ class AreaService extends Service
     public function lists($request)
     {
         $pid = $request->input('pid', 0);
-        $lists = $this->getData('cn_area:' . $pid);
+        $lists = $this->redis::GET('cn_area:' . $pid);
         if (empty($lists)) {
             $where[] = ['pid', '=', $pid];
             $lists = $this->areaModel->where($where)->get()->toJson();
