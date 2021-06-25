@@ -52,7 +52,7 @@ class UserController extends Controller
     public function info()
     {
         $this->validate([
-            'id' => 'required|integer|gt:0|exists:user,id',
+            'id' => 'required|integer|gt:0|exists:sw_user,id',
         ], [
             'id' => 'ID',
         ]);
