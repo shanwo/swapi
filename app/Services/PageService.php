@@ -30,4 +30,8 @@ class PageService extends Service
         $data['lists'] = json_decode($lists, true);
         return $data;
     }
+    public function info($id)
+    {
+        return $this->pageModel->whereKey($id)->first();
+    }
 }

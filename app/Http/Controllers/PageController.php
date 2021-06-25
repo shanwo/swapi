@@ -26,8 +26,22 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
+        $data = $this->pageService->lists($this->uid);
+        return $this->returnApi($data);
+    }
+
+    public function info()
+    {
+        $this->validate([
+            'id' => 'required|integer|gt:0|exists:sw_page,id',
+        ], [
+            'id' => 'ID',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
         $id = $this->request->input('id');
-        $data = $this->pageService->lists($id);
+        $data = $this->pageService->info($id);
         return $this->returnApi($data);
     }
 }
