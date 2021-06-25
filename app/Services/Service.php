@@ -28,7 +28,7 @@ class Service
         if (!$config) {
             $data = $this->configModel->where(['option_name' => $name])->first();
             $data['option_value'] = json_decode($data['option_value'], true);
-            $this->redis::SETNX('config:' . $name, json_encode($data));
+            $this->setData('config:' . $name, json_encode($data));
         } else {
             $data = json_decode($config, true);
         }
