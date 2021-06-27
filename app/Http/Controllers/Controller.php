@@ -29,7 +29,7 @@ class Controller extends BaseController
         300 => 'notice',
         400 => 'notice',
     ];
-    protected $uid = 0;
+    protected $uid = 1;
     protected $wxapi = "https://api.weixin.qq.com/";
     private $writeUrl = [
         'user/edit',
