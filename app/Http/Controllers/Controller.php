@@ -34,7 +34,10 @@ class Controller extends BaseController
     private $writeUrl = [
         'user/edit',
         'template/lists',
-        'template/info'
+        'template/info',
+        'page/lists',
+        'page/info',
+        'page/add',
     ];
 
     public function __construct($request)
