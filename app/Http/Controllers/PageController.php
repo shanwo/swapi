@@ -44,4 +44,9 @@ class PageController extends Controller
         $data = $this->pageService->info($id);
         return $this->returnApi($data);
     }
+
+    public function add()
+    {
+        
+    }
 }

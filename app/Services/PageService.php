@@ -24,7 +24,11 @@ class PageService extends Service
         $lists = $this->redis::GET('page:' . $uid);
         if (empty($lists)) {
             $where[] = ['uid', '=', $uid];
-            $lists = $this->pageModel->where($where)->get()->toJson();
+            $lists = $this->pageModel->where($where)->select('id','name','signature','follow','is_open','head_config','created_at')->get()->toArray();
+            foreach ($lists as $k=>&$v){
+                $v['head_config'] = json_decode($v['head_config']);
+            }
+            $lists = json_encode($lists);
             $this->setData('page:' . $uid, $lists);
         }
         $data['lists'] = json_decode($lists, true);
@@ -32,6 +36,10 @@ class PageService extends Service
     }
     public function info($id)
     {
-        return $this->pageModel->whereKey($id)->first();
+        $info = $this->pageModel->whereKey($id)->first();
+        $info['head_config'] = json_decode($info['head_config'], true);
+        $info['center_config'] = json_decode($info['center_config'], true);
+        $info['bottom_config'] = json_decode($info['bottom_config'], true);
+        return $info;
     }
 }
