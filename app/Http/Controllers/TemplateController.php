@@ -26,7 +26,22 @@ class TemplateController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->templateService->lists($this->uid);
+        $data = $this->templateService->lists();
         return $this->returnApi($data);
     }
+
+     public function info()
+     {
+         $this->validate([
+             'id' => 'required|integer|gt:0|exists:sw_template,id',
+         ], [
+             'id' => 'ID',
+         ]);
+         if ($this->msg) {
+             return $this->returnApi();
+         }
+         $id = $this->request->input('id');
+         $data = $this->templateService->info($id);
+         return $this->returnApi($data);
+     }
 }

@@ -35,6 +35,11 @@ Route::prefix('upload')->group(function () {
 Route::prefix('area')->group(function () {
     Route::get('lists', 'AreaController@lists');
 });
+//模板
+Route::prefix('template')->group(function () {
+    Route::get('lists', 'TemplateController@lists');
+    Route::get('info', 'TemplateController@info');
+});
 //链接
 Route::prefix('link')->group(function () {
     Route::get('lists', 'LinkController@lists');
@@ -58,14 +63,6 @@ Route::prefix('recommend')->group(function () {
     Route::post('add', 'RecommendController@add');
     Route::post('edit', 'RecommendController@edit');
     Route::post('status', 'RecommendController@status');
-});
-//模板
-Route::prefix('template')->group(function () {
-    Route::get('lists', 'TemplateController@lists');
-    Route::get('info', 'TemplateController@info');
-    Route::post('add', 'TemplateController@add');
-    Route::post('edit', 'TemplateController@edit');
-    Route::post('status', 'TemplateController@status');
 });
 //用户
 Route::prefix('user')->group(function () {
