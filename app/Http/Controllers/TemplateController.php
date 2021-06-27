@@ -22,11 +22,15 @@ class TemplateController extends Controller
 
     public function lists()
     {
-        $this->validate([], []);
+        $this->validate([
+            'category' => 'nullable|integer|between:0,10',
+        ], [
+            'category' => '模板类型',
+        ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->templateService->lists();
+        $data = $this->templateService->lists($this->request);
         return $this->returnApi($data);
     }
 

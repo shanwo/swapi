@@ -19,12 +19,18 @@ class TemplateService extends Service
         $this->templateModel = new TemplateModel();
     }
 
-    public function lists()
+    public function lists($request)
     {
-        $lists = $this->redis::GET('template');
+        $category = $request->input('category');
+        $lists = $this->redis::GET('template:'.$category);
         if (empty($lists)) {
-            $lists = $this->templateModel->select('category','name','image','type','created_at')->get()->toJson();
-            $this->setData('template', $lists);
+            if($category){
+                $where[] = ['category', '=', $category];
+            }else{
+                $where[] = ['hot', '=', 1];
+            }
+            $lists = $this->templateModel->select('name','preview','type','created_at')->where($where)->get()->toJson();
+            $this->setData('template:'.$category, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;
@@ -32,7 +38,7 @@ class TemplateService extends Service
     public function info($id)
     {
         $info = $this->templateModel->whereKey($id)->first();
-        $info['top_config'] = json_decode($info['top_config'], true);
+        $info['head_config'] = json_decode($info['head_config'], true);
         $info['center_config'] = json_decode($info['center_config'], true);
         $info['bottom_config'] = json_decode($info['bottom_config'], true);
         return $info;
