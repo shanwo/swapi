@@ -40,13 +40,11 @@ Route::prefix('template')->group(function () {
     Route::get('lists', 'TemplateController@lists');
     Route::get('info', 'TemplateController@info');
 });
+
 //链接
 Route::prefix('link')->group(function () {
     Route::get('lists', 'LinkController@lists');
     Route::get('info', 'LinkController@info');
-    Route::post('add', 'LinkController@add');
-    Route::post('edit', 'LinkController@edit');
-    Route::post('status', 'LinkController@status');
 });
 //页面
 Route::prefix('page')->group(function () {
