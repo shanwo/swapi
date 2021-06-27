@@ -46,6 +46,7 @@ Route::prefix('link')->group(function () {
     Route::get('lists', 'LinkController@lists');
     Route::get('info', 'LinkController@info');
 });
+
 //页面
 Route::prefix('page')->group(function () {
     Route::get('lists', 'PageController@lists');
