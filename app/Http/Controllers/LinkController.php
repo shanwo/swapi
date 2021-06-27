@@ -22,11 +22,30 @@ class LinkController extends Controller
 
     public function lists()
     {
-        $this->validate([], []);
+        $this->validate([
+            'type' => 'required|integer|between:1,10',
+        ], [
+            'type' => '链接类型',
+        ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->linkService->lists($this->uid);
+        $data = $this->linkService->lists($this->request);
+        return $this->returnApi($data);
+    }
+
+    public function info()
+    {
+        $this->validate([
+            'id' => 'required|integer|gt:0|exists:sw_link,id',
+        ], [
+            'id' => 'ID',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $id = $this->request->input('id');
+        $data = $this->linkService->info($id);
         return $this->returnApi($data);
     }
 }

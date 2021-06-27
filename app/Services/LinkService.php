@@ -19,13 +19,14 @@ class LinkService extends Service
         $this->linkModel = new LinkModel();
     }
 
-    public function lists($uid)
+    public function lists($request)
     {
-        $lists = $this->redis::GET('link:' . $uid);
+        $type = $request->input('type');
+        $lists = $this->redis::GET('link:' . $type);
         if (empty($lists)) {
-            $where[] = ['uid', '=', $uid];
-            $lists = $this->linkModel->where($where)->get()->toJson();
-            $this->setData('link:' . $uid, $lists);
+            $where[] = ['type', '=', $type];
+            $lists = $this->linkModel->select('id','name','image','url','created_at')->where($where)->get()->toJson();
+            $this->setData('link:' . $type, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;
