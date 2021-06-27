@@ -32,8 +32,9 @@ class Controller extends BaseController
     protected $uid = 0;
     protected $wxapi = "https://api.weixin.qq.com/";
     private $writeUrl = [
-        'test/check',
-        'user/signin',
+        'user/edit',
+        'template/lists',
+        'template/info'
     ];
 
     public function __construct($request)
@@ -95,7 +96,7 @@ class Controller extends BaseController
     protected function getUserId($token)
     {
         $auth = $this->service->redis::GET('user:' . $token);
-        if ($auth){
+        if ($auth) {
             $arr = json_decode($auth, true) ?? [];
             foreach ($arr as $k => $v) {
                 if ($v == md5(dechex($k))) {
@@ -103,7 +104,7 @@ class Controller extends BaseController
                 }
             }
         }
-        if(!$this->uid){
+        if (!$this->uid) {
             $this->code = 300;
             $this->msg = '当前账户异常，请重新登录';
             return $this->returnApi();
