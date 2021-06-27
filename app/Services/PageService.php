@@ -42,4 +42,19 @@ class PageService extends Service
         $info['bottom_config'] = json_decode($info['bottom_config'], true);
         return $info;
     }
+
+    public function add()
+    {
+
+    }
+
+    public function edit()
+    {
+
+    }
+
+    public function delete()
+    {
+
+    }
 }

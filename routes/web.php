@@ -53,7 +53,7 @@ Route::prefix('page')->group(function () {
     Route::get('info', 'PageController@info');
     Route::post('add', 'PageController@add');
     Route::post('edit', 'PageController@edit');
-    Route::post('status', 'PageController@status');
+    Route::post('delete', 'PageController@delete');
 });
 //推荐
 Route::prefix('recommend')->group(function () {
