@@ -80,7 +80,7 @@ class UploadService extends Service
     {
         $file = $request->file('file');
         $ext = $file->getClientOriginalExtension();
-        $path = $this->type($ext) . dechex(microtime(true) * 10000);
+        $path = $this->type($ext) . dechex(LARAVEL_START * 10000);
         if ($ext) {
             $path = $path . '.' . $ext;
         }
