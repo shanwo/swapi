@@ -145,7 +145,6 @@ class Controller extends BaseController
      */
     public function passportEncrypt($str, $key)
     {
-        srand((double)microtime() * 1000000);
         $encrypt_key = md5(rand(0, 32000));
         $ctr = 0;
         $tmp = '';
