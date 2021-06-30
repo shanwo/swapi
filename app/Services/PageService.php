@@ -8,15 +8,18 @@
 namespace App\Services;
 
 use App\Models\PageModel;
+use App\Models\TemplateModel;
 
 class PageService extends Service
 {
     protected $pageModel;
+    protected $templateModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->pageModel = new PageModel();
+        $this->templateModel = new TemplateModel();
     }
 
     public function lists($uid)
@@ -24,8 +27,8 @@ class PageService extends Service
         $lists = $this->redis::GET('page:' . $uid);
         if (empty($lists)) {
             $where[] = ['uid', '=', $uid];
-            $lists = $this->pageModel->where($where)->select('id','name','signature','follow','is_open','head_config','created_at')->get()->toArray();
-            foreach ($lists as $k=>&$v){
+            $lists = $this->pageModel->where($where)->select('id', 'name', 'signature', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
+            foreach ($lists as $k => &$v) {
                 $v['head_config'] = json_decode($v['head_config']);
             }
             $lists = json_encode($lists);
@@ -34,6 +37,7 @@ class PageService extends Service
         $data['lists'] = json_decode($lists, true);
         return $data;
     }
+
     public function info($id)
     {
         $info = $this->pageModel->whereKey($id)->first();
@@ -43,17 +47,46 @@ class PageService extends Service
         return $info;
     }
 
-    public function add()
+    public function add($request, $uid)
     {
-
+        $tid = $request->input('tid');
+        $template = $this->templateModel->whereKey($tid)->first();
+        $head = $request->input('head_config');
+        $center = $request->input('center_config');
+        $bottom = $request->input('bottom_config',[]);
+        $insert = [
+            'uid'           => $uid,
+            'template_id'   => $tid,
+            'background'    => $template['background'],
+            'name'          => $request->input('name'),
+            'signature'     => $request->input('signature'),
+            'head_config'   => json_encode($head,JSON_UNESCAPED_UNICODE),
+            'center_config' => json_encode($center,JSON_UNESCAPED_UNICODE),
+            'bottom_config' => json_encode($bottom,JSON_UNESCAPED_UNICODE),
+        ];
+        return $this->pageModel->insertGetId($insert);
     }
 
-    public function edit()
+    public function edit($request)
     {
-
+        $tid = $request->input('tid');
+        $template = $this->templateModel->whereKey($tid)->first();
+        $head = $request->input('head_config');
+        $center = $request->input('center_config');
+        $bottom = $request->input('bottom_config',[]);
+        $update = [
+            'template_id'   => $tid,
+            'background'    => $template['background'],
+            'name'          => $request->input('name'),
+            'signature'     => $request->input('signature'),
+            'head_config'   => json_encode($head,JSON_UNESCAPED_UNICODE),
+            'center_config' => json_encode($center,JSON_UNESCAPED_UNICODE),
+            'bottom_config' => json_encode($bottom,JSON_UNESCAPED_UNICODE),
+        ];
+        return $this->pageModel->whereKey($request['id'])->update($update);
     }
 
-    public function delete()
+    public function status($request)
     {
 
     }

@@ -27,6 +27,7 @@ class PageController extends Controller
             return $this->returnApi();
         }
         $data = $this->pageService->lists($this->uid);
+        $this->code = 200;
         return $this->returnApi($data);
     }
 
@@ -42,21 +43,114 @@ class PageController extends Controller
         }
         $id = $this->request->input('id');
         $data = $this->pageService->info($id);
+        $this->code = 200;
         return $this->returnApi($data);
     }
 
     public function add()
     {
-
+        $this->validate([
+            'tid'                     => 'required|integer|gt:0|exists:sw_template,id',
+            'name'                    => 'required|string|between:2,32',
+            'signature'               => 'nullable|string|max:64',
+            'background'              => 'nullable|url|max:128',
+            'head_config'             => 'required|array',
+            'head_config.badge'       => 'nullable|url|max:128',
+            'head_config.pendant'     => 'nullable|url|max:128',
+            'head_config.avatar'      => 'required|url|max:128',
+            'center_config'           => 'required|array|min:1',
+            'center_config.*.name'    => 'required|string|max:32',
+            'center_config.*.url'     => 'required|url|max:128',
+            'center_config.*.image'   => 'required|url|max:128',
+            'bottom_config'           => 'nullable|array',
+            'bottom_config.*.content' => 'nullable|string|max:32',
+            'bottom_config.*.type'    => 'nullable|string|max:8',
+            'bottom_config.*.image'   => 'nullable|url|max:128',
+        ], [
+            'tid'                     => '模板ID',
+            'name'                    => '名称',
+            'signature'               => '签名',
+            'background'              => '背景图',
+            'head_config'             => '顶部配置',
+            'head_config.badge'       => '顶部徽章',
+            'head_config.pendant'     => '顶部挂件',
+            'head_config.avatar'      => '顶部头像',
+            'center_config'           => '中部配置',
+            'center_config.*.name'    => '中部名称',
+            'center_config.*.url'     => '中部地址',
+            'center_config.*.image'   => '中部图像',
+            'bottom_config'           => '底部配置',
+            'bottom_config.*.content' => '底部内容',
+            'bottom_config.*.type'    => '底部类型',
+            'bottom_config.*.image'   => '底部图片',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $data = $this->pageService->add($this->request, $this->uid);
+        $this->code = 200;
+        return $this->returnApi($data);
     }
 
     public function edit()
     {
-
+        $this->validate([
+            'id'                      => 'required|integer|gt:0|exists:sw_page,id',
+            'tid'                     => 'required|integer|gt:0|exists:sw_template,id',
+            'name'                    => 'required|string|between:2,32',
+            'signature'               => 'nullable|string|max:64',
+            'background'              => 'nullable|url|max:128',
+            'head_config'             => 'required|array',
+            'head_config.badge'       => 'nullable|url|max:128',
+            'head_config.pendant'     => 'nullable|url|max:128',
+            'head_config.avatar'      => 'required|url|max:128',
+            'center_config'           => 'required|array|min:1',
+            'center_config.*.name'    => 'required|string|max:32',
+            'center_config.*.url'     => 'required|url|max:128',
+            'center_config.*.image'   => 'required|url|max:128',
+            'bottom_config'           => 'nullable|array',
+            'bottom_config.*.content' => 'nullable|string|max:32',
+            'bottom_config.*.type'    => 'nullable|string|max:8',
+            'bottom_config.*.image'   => 'nullable|url|max:128',
+        ], [
+            'id'                      => 'ID',
+            'tid'                     => '模板ID',
+            'name'                    => '名称',
+            'signature'               => '签名',
+            'background'              => '背景图',
+            'head_config'             => '顶部配置',
+            'head_config.badge'       => '顶部徽章',
+            'head_config.pendant'     => '顶部挂件',
+            'head_config.avatar'      => '顶部头像',
+            'center_config'           => '中部配置',
+            'center_config.*.name'    => '中部名称',
+            'center_config.*.url'     => '中部地址',
+            'center_config.*.image'   => '中部图像',
+            'bottom_config'           => '底部配置',
+            'bottom_config.*.content' => '底部内容',
+            'bottom_config.*.type'    => '底部类型',
+            'bottom_config.*.image'   => '底部图片',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $data = $this->pageService->edit($this->request);
+        $this->code = 200;
+        return $this->returnApi($data);
     }
 
-    public function delete()
+    public function status()
     {
-
+        $this->validate([
+            'id' => 'required|integer|gt:0|exists:sw_page,id',
+        ], [
+            'id' => 'ID',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $data = $this->pageService->status($this->request);
+        $this->code = 200;
+        return $this->returnApi($data);
     }
 }
