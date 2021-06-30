@@ -64,7 +64,7 @@ class PageController extends Controller
             'center_config.*.image'   => 'required|url|max:128',
             'bottom_config'           => 'nullable|array',
             'bottom_config.*.content' => 'nullable|string|max:32',
-            'bottom_config.*.type'    => 'nullable|string|max:8',
+            'bottom_config.*.type'    => 'nullable|max:8',
             'bottom_config.*.image'   => 'nullable|url|max:128',
         ], [
             'tid'                     => '模板ID',
@@ -97,21 +97,21 @@ class PageController extends Controller
         $this->validate([
             'id'                      => 'required|integer|gt:0|exists:sw_page,id',
             'tid'                     => 'required|integer|gt:0|exists:sw_template,id',
-            'name'                    => 'required|string|between:2,32',
+            'name'                    => 'required_without_all:head_config,center_config,bottom_config|required_with:head_config|string|between:2,32',
             'signature'               => 'nullable|string|max:64',
             'background'              => 'nullable|url|max:128',
-            'head_config'             => 'required|array',
+            'head_config'             => 'required_with:name|array',
             'head_config.badge'       => 'nullable|url|max:128',
             'head_config.pendant'     => 'nullable|url|max:128',
-            'head_config.avatar'      => 'required|url|max:128',
-            'center_config'           => 'required|array|min:1',
+            'head_config.avatar'      => 'required_with:name|url|max:128',
+            'center_config'           => 'required_without_all:head_config,bottom_config|array|min:1',
             'center_config.*.name'    => 'required|string|max:32',
             'center_config.*.url'     => 'required|url|max:128',
             'center_config.*.image'   => 'required|url|max:128',
-            'bottom_config'           => 'nullable|array',
-            'bottom_config.*.content' => 'nullable|string|max:32',
-            'bottom_config.*.type'    => 'nullable|string|max:8',
-            'bottom_config.*.image'   => 'nullable|url|max:128',
+            'bottom_config'           => 'required_without_all:head_config,center_config|array',
+            'bottom_config.*.content' => 'required|string|max:32',
+            'bottom_config.*.type'    => 'required|max:8',
+            'bottom_config.*.image'   => 'required|url|max:128',
         ], [
             'id'                      => 'ID',
             'tid'                     => '模板ID',
@@ -142,9 +142,13 @@ class PageController extends Controller
     public function status()
     {
         $this->validate([
-            'id' => 'required|integer|gt:0|exists:sw_page,id',
+            'id'        => 'required|integer|gt:0|exists:sw_page,id',
+            'is_open'   => 'required_without:is_delete|integer|between:0,1',
+            'is_delete' => 'required_without:is_open|integer|between:0,1',
         ], [
-            'id' => 'ID',
+            'id'        => 'ID',
+            'is_open'   => '广场',
+            'is_delete' => '删除',
         ]);
         if ($this->msg) {
             return $this->returnApi();
