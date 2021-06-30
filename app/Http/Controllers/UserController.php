@@ -61,6 +61,7 @@ class UserController extends Controller
         }
         $id = $this->request->input('id');
         $data = $this->userService->info($id);
+        $this->code = 200;
         return $this->returnApi($data);
     }
 }

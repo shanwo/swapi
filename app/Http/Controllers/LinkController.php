@@ -31,6 +31,7 @@ class LinkController extends Controller
             return $this->returnApi();
         }
         $data = $this->linkService->lists($this->request);
+        $this->code = 200;
         return $this->returnApi($data);
     }
 
@@ -46,6 +47,7 @@ class LinkController extends Controller
         }
         $id = $this->request->input('id');
         $data = $this->linkService->info($id);
+        $this->code = 200;
         return $this->returnApi($data);
     }
 }

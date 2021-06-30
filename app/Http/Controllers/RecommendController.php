@@ -27,6 +27,7 @@ class RecommendController extends Controller
             return $this->returnApi();
         }
         $data = $this->recommendService->lists($this->uid);
+        $this->code = 200;
         return $this->returnApi($data);
     }
 }

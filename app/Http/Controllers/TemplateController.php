@@ -31,6 +31,7 @@ class TemplateController extends Controller
             return $this->returnApi();
         }
         $data = $this->templateService->lists($this->request);
+        $this->code = 200;
         return $this->returnApi($data);
     }
 
@@ -46,6 +47,7 @@ class TemplateController extends Controller
          }
          $id = $this->request->input('id');
          $data = $this->templateService->info($id);
+         $this->code = 200;
          return $this->returnApi($data);
      }
 }
