@@ -55,13 +55,11 @@ Route::prefix('page')->group(function () {
     Route::post('edit', 'PageController@edit');
     Route::post('status', 'PageController@status');
 });
-//推荐
-Route::prefix('recommend')->group(function () {
-    Route::get('lists', 'RecommendController@lists');
-    Route::get('info', 'RecommendController@info');
-    Route::post('add', 'RecommendController@add');
-    Route::post('edit', 'RecommendController@edit');
-    Route::post('status', 'RecommendController@status');
+
+//首页
+Route::prefix('home')->group(function () {
+    Route::get('hot', 'HomeController@hot');
+    Route::get('recommend', 'HomeController@recommend');
 });
 //用户
 Route::prefix('user')->group(function () {
