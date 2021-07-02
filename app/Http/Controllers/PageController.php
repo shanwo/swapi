@@ -22,7 +22,9 @@ class PageController extends Controller
 
     public function lists()
     {
-        $this->validate([], []);
+        $this->validate([
+        ], [
+        ]);
         if ($this->msg) {
             return $this->returnApi();
         }

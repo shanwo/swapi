@@ -35,19 +35,19 @@ class TemplateController extends Controller
         return $this->returnApi($data);
     }
 
-     public function info()
-     {
-         $this->validate([
-             'id' => 'required|integer|gt:0|exists:sw_template,id',
-         ], [
-             'id' => 'ID',
-         ]);
-         if ($this->msg) {
-             return $this->returnApi();
-         }
-         $id = $this->request->input('id');
-         $data = $this->templateService->info($id);
-         $this->code = 200;
-         return $this->returnApi($data);
-     }
+    public function info()
+    {
+        $this->validate([
+            'id' => 'required|integer|gt:0|exists:sw_template,id',
+        ], [
+            'id' => 'ID',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $id = $this->request->input('id');
+        $data = $this->templateService->info($id);
+        $this->code = 200;
+        return $this->returnApi($data);
+    }
 }
