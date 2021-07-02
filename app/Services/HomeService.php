@@ -19,35 +19,43 @@ class HomeService extends Service
         $this->pageModel = new PageModel();
     }
 
+    //使用zset结构
     public function hot($request)
     {
-        $lists = $this->redis::GET('hot');
+        $page = $request->input('page', $this->page);
+        $lists = $this->redis::GET('hot:' . $page);
         if (empty($lists)) {
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->where($where)->select('id', 'name', 'signature', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
+            $lists = $this->pageModel->where($where)->select('id', 'name', 'signature', 'background', 'head_config')->orderBy('browse', 'DESC')->orderBy('sort', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $v['head_config'] = json_decode($v['head_config']);
             }
             $lists = json_encode($lists);
-            $this->setData('hot', $lists);
+            $this->setData('hot:' . $page, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;
     }
-
+    //使用set结构
     public function recommend($request)
     {
-        $lists = $this->redis::GET('recommend');
+        $page = $request->input('page', $this->page);
+        $lists = $this->redis::GET('recommend:' . $page);
         if (empty($lists)) {
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->where($where)->select('id', 'name', 'signature', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
+            $lists = $this->pageModel->where($where)->select('id', 'name', 'signature', 'background', 'head_config')->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $v['head_config'] = json_decode($v['head_config']);
             }
             $lists = json_encode($lists);
-            $this->setData('recommend', $lists);
+            $this->setData('recommend:' . $page, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;
+    }
+    //使用string结构
+    public function info()
+    {
+
     }
 }

@@ -23,7 +23,9 @@ class HomeController extends Controller
     public function hot()
     {
         $this->validate([
+            'page' => 'filled|integer',
         ], [
+            'page' => '页码',
         ]);
         if ($this->msg) {
             return $this->returnApi();
@@ -36,12 +38,31 @@ class HomeController extends Controller
     public function recommend()
     {
         $this->validate([
+            'page' => 'filled|integer',
         ], [
+            'page' => '页码',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
         $data = $this->homeService->recommend($this->request);
+        $this->code = 200;
+        return $this->returnApi($data);
+    }
+
+    public function info()
+    {
+        $this->validate([
+            'id' => 'filled|integer',
+            'code' => 'filled|string|between:6,16',
+        ], [
+            'page' => 'ID',
+            'size' => '闪码',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $data = $this->homeService->info($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }
