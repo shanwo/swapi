@@ -19,6 +19,7 @@ class LinkService extends Service
         $this->linkModel = new LinkModel();
     }
 
+    //使用hash结构
     public function lists($request)
     {
         $type = $request->input('type');
