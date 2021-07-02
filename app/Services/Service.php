@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Redis;
 class Service
 {
     public $redis;
+    public $page = 1;
+    public $size = 10;
     protected $timeOut = 3600;
     protected $configModel;
 
@@ -22,6 +24,7 @@ class Service
         $this->configModel = new ConfigModel();
     }
 
+    //使用hash结构
     public function configInfo($name)
     {
         $config = $this->redis::GET('config:' . $name);

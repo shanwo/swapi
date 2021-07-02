@@ -22,6 +22,7 @@ class PageService extends Service
         $this->templateModel = new TemplateModel();
     }
 
+    //使用hash结构
     public function lists($uid)
     {
         $lists = $this->redis::GET('page:' . $uid);

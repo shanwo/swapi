@@ -19,6 +19,7 @@ class TemplateService extends Service
         $this->templateModel = new TemplateModel();
     }
 
+    //使用hash结构
     public function lists($request)
     {
         $category = $request->input('category');
