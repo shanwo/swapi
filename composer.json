@@ -17,8 +17,7 @@
         "laravel/tinker": "^2.0",
         "predis/predis": "^1.1",
         "overtrue/socialite": "^2.0",
-        "qcloud/cos-sdk-v5": "2.*",
-        "overtrue/laravel-wechat": "^5.0"
+        "qcloud/cos-sdk-v5": "2.*"
     },
     "config": {
         "optimize-autoloader": true,
