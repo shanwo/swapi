@@ -10,9 +10,11 @@ namespace App\Http\Controllers;
 use App\Services\UserService;
 use App\Services\WechatService;
 use Illuminate\Http\Request;
+use Overtrue\Socialite\SocialiteManager;
 
 class UserController extends Controller
 {
+    protected $pluginName = 'wechat';
     protected $userService;
     protected $wechatService;
 
@@ -26,25 +28,52 @@ class UserController extends Controller
     public function signIn()
     {
         $this->validate([
-            'secret' => 'filled|string|between:64,256',
+            'type'  => 'required|alpha_num|between:2,8',
         ], [
-            'secret' => '密钥',
+            'type'  => '登录类型',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->wechatService->driver($this->request)->redirect();
-        $secret = $this->request->input('secret', '');
-        if ($secret) {
-            $auth = $this->passportDecrypt($secret, 'wechat');
-            $arr = json_decode($auth, true) ?? [];
-            foreach ($arr as $k => $v) {
-                if ($v == md5(dechex($k))) {
-                    $url = $data->getTargetUrl();
-                    parse_str(parse_url($url, PHP_URL_QUERY), $query);
-                    $this->redis::SETEX('login:wechat:' . $query['state'], 60 * 30, $k);
-                }
-            }
+        $type = $this->request->input('type');
+        $config = $this->wechatService->configInfo($type);
+        $socialite = new SocialiteManager([
+            $type => [
+                'client_id'     => $config['key'],
+                'client_secret' => $config['secret'],
+                'redirect'      => $config['callback'],
+            ],
+        ]);
+        return $socialite->driver($type)->redirect();
+    }
+
+    public function login()
+    {
+        $this->validate([
+            'code'  => 'filled|alpha_num|size:32',
+            'state' => 'filled|alpha_num|between:32,64',
+        ], [
+            'code'  => '编码',
+            'state' => '状态',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $watermark = null;
+        $state = $this->request->input('state', 0);
+        if ($state) {
+            $watermark['ip'] = $this->request->ip();
+            $watermark['time'] = time();
+            $watermark['uid'] = $this->redis::get('login:wechat:' . $state);
+            $this->redis::del('login:wechat:' . $state);
+        } else {
+            $this->msg = '绑定成功';
+        }
+        $user = $this->wechatService->driver($this->request)->stateless()->user();
+        $data = $this->wechatService->binding($watermark, $user);
+        if (!empty($data['uid'])) {
+            $token = $this->userService->token($data['uid'], 'web');
+            return redirect('https://wzxaini9.cn/user/login/thirdPartyLogin?token=' . $token, 301);
         }
         return $data;
     }

@@ -65,6 +65,6 @@ Route::prefix('home')->group(function () {
 //用户
 Route::prefix('user')->group(function () {
     Route::get('info', 'UserController@info');
-    Route::post('signIn', 'UserController@signIn');
+    Route::get('signIn', 'UserController@signIn');
     Route::post('edit', 'UserController@edit');
 });
