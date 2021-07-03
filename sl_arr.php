@@ -75,7 +75,7 @@ class Arr
         }
 
         foreach (explode('.', $key) as $segment) {
-          $array = $array[$segment];
+            $array = $array[$segment];
         }
 
         return $array;
