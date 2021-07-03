@@ -59,13 +59,12 @@ Route::prefix('page')->group(function () {
 //首页
 Route::prefix('home')->group(function () {
     Route::get('hot', 'HomeController@hot');
-    Route::get('recommend', 'HomeController@recommend');
+    Route::get('recent', 'HomeController@recent');
+    Route::get('info', 'HomeController@info');
 });
 //用户
 Route::prefix('user')->group(function () {
-    Route::get('lists', 'UserController@lists');
     Route::get('info', 'UserController@info');
-    Route::post('add', 'UserController@add');
+    Route::post('signIn', 'UserController@signIn');
     Route::post('edit', 'UserController@edit');
-    Route::post('status', 'UserController@status');
 });

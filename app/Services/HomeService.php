@@ -25,37 +25,61 @@ class HomeService extends Service
         $page = $request->input('page', $this->page);
         $lists = $this->redis::GET('hot:' . $page);
         if (empty($lists)) {
+            $where[] = ['browse', '>', 0];
+            $where[] = ['is_open', '=', 1];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->where($where)->select('id', 'name', 'signature', 'background', 'head_config')->orderBy('browse', 'DESC')->orderBy('sort', 'DESC')->get()->toArray();
+            $lists = $this->pageModel->select('id', 'name', 'signature', 'background', 'head_config')->where($where);
+            $data['total'] = $lists->count();
+            $lists = $lists->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $v['head_config'] = json_decode($v['head_config']);
             }
             $lists = json_encode($lists);
             $this->setData('hot:' . $page, $lists);
         }
+        $data['page'] = $page;
+        $data['size'] = $this->size;
         $data['lists'] = json_decode($lists, true);
         return $data;
     }
+
     //使用set结构
-    public function recommend($request)
+    public function recent($request)
     {
         $page = $request->input('page', $this->page);
-        $lists = $this->redis::GET('recommend:' . $page);
+        $lists = $this->redis::GET('recent:' . $page);
         if (empty($lists)) {
+            $where[] = ['is_open', '=', 1];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->where($where)->select('id', 'name', 'signature', 'background', 'head_config')->get()->toArray();
+            $lists = $this->pageModel->select('id', 'name', 'signature', 'background', 'head_config')->where($where);
+            $data['total'] = $lists->count();
+            $lists = $lists->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $v['head_config'] = json_decode($v['head_config']);
             }
             $lists = json_encode($lists);
-            $this->setData('recommend:' . $page, $lists);
+            $this->setData('recent:' . $page, $lists);
         }
+        $data['page'] = $page;
+        $data['size'] = $this->size;
         $data['lists'] = json_decode($lists, true);
         return $data;
     }
-    //使用string结构
-    public function info()
-    {
 
+    //使用string结构
+    public function info($request)
+    {
+        $id =  $request->input('id',0);
+        if($id){
+            $where[] = ['id', '=', $id];
+        }else{
+            $code =  $request->input('code',0);
+            $where[] = ['code', '=', $code];
+        }
+        $info = $this->pageModel->where($where)->first();
+        $info['head_config'] = json_decode($info['head_config'], true);
+        $info['center_config'] = json_decode($info['center_config'], true);
+        $info['bottom_config'] = json_decode($info['bottom_config'], true);
+        return $info;
     }
 }

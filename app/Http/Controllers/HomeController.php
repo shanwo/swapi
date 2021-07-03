@@ -35,7 +35,7 @@ class HomeController extends Controller
         return $this->returnApi($data);
     }
 
-    public function recommend()
+    public function recent()
     {
         $this->validate([
             'page' => 'filled|integer',
@@ -45,7 +45,7 @@ class HomeController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->homeService->recommend($this->request);
+        $data = $this->homeService->recent($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -53,7 +53,7 @@ class HomeController extends Controller
     public function info()
     {
         $this->validate([
-            'id' => 'filled|integer',
+            'id'   => 'filled|integer',
             'code' => 'filled|string|between:6,16',
         ], [
             'page' => 'ID',

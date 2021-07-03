@@ -32,7 +32,6 @@ class Controller extends BaseController
     protected $uid = 1;
     protected $wxapi = "https://api.weixin.qq.com/";
     private $writeUrl = [
-        'user/edit',
         'template/lists',
         'template/info',
         'page/lists',
@@ -45,7 +44,7 @@ class Controller extends BaseController
         $this->request = $request;
         $this->client = new Client();
         $this->service = new Service();
-//        if (in_array($this->request->path(), $this->writeUrl)) {
+//        if (in_array($this->request->path(), !$this->writeUrl)) {
 //            $this->validateToken();
 //        }
     }
