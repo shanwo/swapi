@@ -1,5 +1,5 @@
 component: laravel
-name: laravel-X7rbvJ4AL
+name: laravel-PplY3IKtH
 org: '1305937303'
 app: api
 stage: prod
@@ -26,5 +26,5 @@ inputs:
   isAutoCiDeploy: false
   functionConf:
     eip: true
-    timeout: 3
+    timeout: 4
     memorySize: 128
