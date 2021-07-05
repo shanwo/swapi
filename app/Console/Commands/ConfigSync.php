@@ -9,6 +9,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
+use Ramsey\Uuid\Uuid;
 
 class ConfigSync extends Command
 {
@@ -42,6 +43,12 @@ class ConfigSync extends Command
 
     public function handle()
     {
-        echo 111;
+        $result = [
+            'data'    => [],
+            'code'    => 200,
+            'msg'     => '定时任务测试'.env('APP_ENV'),
+            'uuid'    => Uuid::uuid6(),
+        ];
+        $this->redis::SETEX('console:'.date('Y-m-d h:i:s'), 600, json_encode($result));
     }
 }
