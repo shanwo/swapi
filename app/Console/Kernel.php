@@ -17,8 +17,10 @@ class Kernel extends ConsoleKernel
     ];
 
     /**
+     * 云函数不支持...需要服务器处理
      * Define the application's command schedule.
      * php artisan schedule:run
+     * * * * * * php /usr/local/var/functions/ap-beijing/lam-0ikntloj/laravel_kls3zzrartisan schedule:run >> /dev/null 2>&1
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
