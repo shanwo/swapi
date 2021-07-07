@@ -25,7 +25,7 @@ class UploadController extends Controller
         $this->validate([
             'file' => 'required|file|max:1024',
         ], [
-            'file' => '上传文件'
+            'file' => '文件'
         ]);
         if ($this->msg) {
             return $this->returnApi();
