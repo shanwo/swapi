@@ -13,12 +13,10 @@ use Illuminate\Http\Request;
 class UploadController extends Controller
 {
     protected $uploadService;
-    protected $request;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
-        $this->request = $request;
         $this->uploadService = new UploadService();
     }
 
