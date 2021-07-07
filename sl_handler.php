@@ -200,7 +200,7 @@ function handler($event, $context)
     // consoleLog("Event", $event);
 
     // init request data
-    $data = [];
+    $data = $cookies = $files = [];
     $rawBody = $event->body ?? null;
     if ($event->httpMethod === 'GET') {
         $data = !empty($event->queryString) ? $event->queryString : [];
@@ -229,7 +229,7 @@ function handler($event, $context)
     // execute laravel app request, get response
     $kernel = $app->make(Kernel::class);
 
-    $request = Request::create($path, $event->httpMethod, (array) $data, [], [], $headers, $rawBody);
+    $request = Request::create($path, $event->httpMethod, (array) $data, $cookies, $files, $headers, $rawBody);
     $request->headers = new HeaderBag($headers);
     if (!empty($files)) {
         $request->files->add($files);
