@@ -28,7 +28,7 @@ class HomeService extends Service
             $where[] = ['browse', '>', 0];
             $where[] = ['is_open', '=', 1];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->select('id', 'name', 'signature', 'background', 'head_config')->where($where);
+            $lists = $this->pageModel->select('id', 'background', 'head_config')->where($where);
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
@@ -51,7 +51,7 @@ class HomeService extends Service
         if (empty($lists)) {
             $where[] = ['is_open', '=', 1];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->select('id', 'name', 'signature', 'background', 'head_config')->where($where);
+            $lists = $this->pageModel->select('id', 'background', 'head_config')->where($where);
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
             foreach ($lists as $k => &$v) {

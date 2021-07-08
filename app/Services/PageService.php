@@ -29,7 +29,7 @@ class PageService extends Service
         if (empty($lists)) {
             $where[] = ['uid', '=', $uid];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->where($where)->select('id', 'name', 'signature', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
+            $lists = $this->pageModel->where($where)->select('id', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $v['head_config'] = json_decode($v['head_config']);
             }
@@ -60,8 +60,6 @@ class PageService extends Service
             'uid'           => $uid,
             'template_id'   => $tid,
             'background'    => $template['background'],
-            'name'          => $request->input('name'),
-            'signature'     => $request->input('signature','这个人还没写介绍呢~'),
             'head_config'   => json_encode($head,JSON_UNESCAPED_UNICODE),
             'center_config' => json_encode($center,JSON_UNESCAPED_UNICODE),
             'bottom_config' => json_encode($bottom,JSON_UNESCAPED_UNICODE),
@@ -78,10 +76,6 @@ class PageService extends Service
             'template_id'   => $tid,
             'background'    => $template['background'],
         ];
-        $name = $request->input('name','');
-        if($name) $update['head_config'] = $name;
-        $signature = $request->input('signature','');
-        if($signature) $update['signature'] = $signature;
         $head = $request->input('head_config','');
         if($head) $update['head_config'] = json_encode($head,JSON_UNESCAPED_UNICODE);
         $center = $request->input('center_config');
