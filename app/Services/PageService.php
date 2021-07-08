@@ -55,43 +55,42 @@ class PageService extends Service
         $template = $this->templateModel->whereKey($tid)->first();
         $head = $request->input('head_config');
         $center = $request->input('center_config');
-        $bottom = $request->input('bottom_config',[]);
+        $bottom = $request->input('bottom_config', []);
         $insert = [
             'uid'           => $uid,
             'template_id'   => $tid,
             'background'    => $template['background'],
-            'head_config'   => json_encode($head,JSON_UNESCAPED_UNICODE),
-            'center_config' => json_encode($center,JSON_UNESCAPED_UNICODE),
-            'bottom_config' => json_encode($bottom,JSON_UNESCAPED_UNICODE),
+            'head_config'   => json_encode($head, JSON_UNESCAPED_UNICODE),
+            'center_config' => json_encode($center, JSON_UNESCAPED_UNICODE),
+            'bottom_config' => json_encode($bottom, JSON_UNESCAPED_UNICODE),
         ];
         return $this->pageModel->insertGetId($insert);
     }
 
     public function edit($request)
     {
-        $info = $this->info($request['id']);
         $tid = $request->input('tid');
         $template = $this->templateModel->whereKey($tid)->first();
         $update = [
-            'template_id'   => $tid,
-            'background'    => $template['background'],
+            'template_id' => $tid,
+            'background'  => $template['background'],
         ];
-        $head = $request->input('head_config','');
-        if($head) $update['head_config'] = json_encode($head,JSON_UNESCAPED_UNICODE);
+        $head = $request->input('head_config', '');
+        if ($head) $update['head_config'] = json_encode($head, JSON_UNESCAPED_UNICODE);
         $center = $request->input('center_config');
-        if($center) $update['head_config'] = json_encode($center,JSON_UNESCAPED_UNICODE);
-        $bottom = $request->input('bottom_config',[]);
-        if($bottom) $update['head_config'] = json_encode($bottom,JSON_UNESCAPED_UNICODE);
+        if ($center) $update['head_config'] = json_encode($center, JSON_UNESCAPED_UNICODE);
+        $bottom = $request->input('bottom_config', []);
+        if ($bottom) $update['head_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
         return $this->pageModel->whereKey($request['id'])->update($update);
     }
 
     public function status($request)
     {
         $update = [];
-        $open = $request->input('is_open','');
-        if($open) $update['is_open'] = $open;
-        $delete = $request->input('is_delete','');
-        if($delete) $update['is_delete'] = $delete;
+        $open = $request->input('is_open', '');
+        if ($open) $update['is_open'] = $open;
+        $delete = $request->input('is_delete', '');
+        if ($delete) $update['is_delete'] = $delete;
         return $this->pageModel->whereKey($request['id'])->update($update);
     }
 }

@@ -69,11 +69,11 @@ class HomeService extends Service
     //使用string结构
     public function info($request)
     {
-        $id =  $request->input('id',0);
-        if($id){
+        $id = $request->input('id', 0);
+        if ($id) {
             $where[] = ['id', '=', $id];
-        }else{
-            $code =  $request->input('code',0);
+        } else {
+            $code = $request->input('code', 0);
             $where[] = ['code', '=', $code];
         }
         $info = $this->pageModel->where($where)->first();
