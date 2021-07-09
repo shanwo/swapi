@@ -53,35 +53,59 @@ class PageService extends Service
     {
         $tid = $request->input('tid');
         $template = $this->templateModel->whereKey($tid)->first();
-        $head = $request->input('head_config');
-        $center = $request->input('center_config');
-        $bottom = $request->input('bottom_config', []);
+        $head = json_decode($template['head_config'], true);
+        $headConfig = $request->input('head_config');
+        $head['avatar']['image'] = $headConfig['avatar'];
+        $head['nickname']['content'] = $headConfig['nickname'];
+        $head['signature']['content'] = $headConfig['signature'] ?? '这个人还没写介绍呢~';
+        $head['badge']['image'] = $headConfig['badge'] ?? '';
+        $head['pendant']['image'] = $headConfig['pendant'] ?? '';
+        $center = json_decode($template['center_config'], true);
+        $center['button'] = $request->input('center_config');
         $insert = [
             'uid'           => $uid,
             'template_id'   => $tid,
             'background'    => $template['background'],
             'head_config'   => json_encode($head, JSON_UNESCAPED_UNICODE),
             'center_config' => json_encode($center, JSON_UNESCAPED_UNICODE),
-            'bottom_config' => json_encode($bottom, JSON_UNESCAPED_UNICODE),
         ];
+        $bottomConfig = $request->input('bottom_config', []);
+        if ($bottomConfig) {
+            $bottom = json_decode($template['bottom_config'], true);
+            $bottom['icon'] = $bottomConfig;
+            $insert['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
+        }
         return $this->pageModel->insertGetId($insert);
     }
 
     public function edit($request)
     {
-        $tid = $request->input('tid');
-        $template = $this->templateModel->whereKey($tid)->first();
-        $update = [
-            'template_id' => $tid,
-            'background'  => $template['background'],
-        ];
-        $head = $request->input('head_config', '');
-        if ($head) $update['head_config'] = json_encode($head, JSON_UNESCAPED_UNICODE);
-        $center = $request->input('center_config');
-        if ($center) $update['head_config'] = json_encode($center, JSON_UNESCAPED_UNICODE);
-        $bottom = $request->input('bottom_config', []);
-        if ($bottom) $update['head_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
-        return $this->pageModel->whereKey($request['id'])->update($update);
+        $update = [];
+        $id = $request->input('id');
+        $info = $this->info($id);
+        $headConfig = $request->input('head_config', '');
+        if ($headConfig) {
+            $head = $info['head_config'];
+            $head['avatar']['image'] = $headConfig['avatar'];
+            $head['nickname']['content'] = $headConfig['nickname'];
+            $head['signature']['content'] = $headConfig['signature'] ?? '这个人还没写介绍呢~';
+            $head['badge']['image'] = $headConfig['badge'] ?? '';
+            $head['pendant']['image'] = $headConfig['pendant'] ?? '';
+            $update['head_config'] = json_encode($head, JSON_UNESCAPED_UNICODE);
+        }
+        $centerConfig = $request->input('center_config', '');
+        if ($centerConfig) {
+            $center = $info['center_config'];
+            $center['button'] = $centerConfig;
+            $update['center_config'] = json_encode($center, JSON_UNESCAPED_UNICODE);
+        }
+        $bottomConfig = $request->input('bottom_config', '');
+        if ($bottomConfig) {
+            $bottom = $info['bottom_config'];
+            $bottom['icon'] = $bottomConfig;
+            $update['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
+        }
+        return $this->pageModel->whereKey($id)->update($update);
     }
 
     public function status($request)
