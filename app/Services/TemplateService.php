@@ -23,19 +23,20 @@ class TemplateService extends Service
     public function lists($request)
     {
         $category = $request->input('category');
-        $lists = $this->redis::GET('template:'.$category);
+        $lists = $this->redis::GET('template:' . $category);
         if (empty($lists)) {
-            if($category){
+            if ($category) {
                 $where[] = ['category', '=', $category];
-            }else{
-                $where[] = ['hot', '=', 1];
+            } else {
+                $where[] = ['top', '=', 1];
             }
-            $lists = $this->templateModel->select('name','preview','type','created_at')->where($where)->get()->toJson();
-            $this->setData('template:'.$category, $lists);
+            $lists = $this->templateModel->select('id', 'name', 'preview', 'type', 'created_at')->where($where)->get()->toJson();
+            $this->setData('template:' . $category, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;
     }
+
     public function info($id)
     {
         $info = $this->templateModel->whereKey($id)->first();
