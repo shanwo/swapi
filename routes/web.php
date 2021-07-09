@@ -62,6 +62,7 @@ Route::prefix('home')->group(function () {
     Route::get('recent', 'HomeController@recent');
     Route::get('info', 'HomeController@info');
 });
+
 //用户
 Route::prefix('user')->group(function () {
     Route::get('info', 'UserController@info');
