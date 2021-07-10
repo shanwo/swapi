@@ -55,7 +55,7 @@ class AttentionController extends Controller
     public function status()
     {
         $this->validate([
-            'id'     => 'required|integer|gt:0|exists:sw_page,id',
+            'id'     => 'required|integer|gt:0|exists:sw_attention,id',
             'status' => 'required|integer|between:1,2',
         ], [
             'id'     => 'ID',
