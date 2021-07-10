@@ -3,6 +3,7 @@
  * User: Powerless
  * Date: 21/07/01
  * Blog: https://wzxaini9.cn
+ * Tips: 首页模块
  */
 
 namespace App\Http\Controllers;
