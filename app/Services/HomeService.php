@@ -37,7 +37,7 @@ class HomeService extends Service
             $lists = json_encode($lists);
             $this->setData('hot:' . $page, $lists);
         }
-        $data['page'] = $page;
+        $data['page'] = (int)$page;
         $data['size'] = $this->size;
         $data['lists'] = json_decode($lists, true);
         return $data;
@@ -60,7 +60,7 @@ class HomeService extends Service
             $lists = json_encode($lists);
             $this->setData('recent:' . $page, $lists);
         }
-        $data['page'] = $page;
+        $data['page'] = (int)$page;
         $data['size'] = $this->size;
         $data['lists'] = json_decode($lists, true);
         return $data;
