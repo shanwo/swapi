@@ -57,7 +57,7 @@ class AttentionController extends Controller
     {
         $this->validate([
             'id'     => 'required|integer|gt:0|exists:sw_attention,id',
-            'status' => 'required|integer|between:1,2',
+            'status' => 'required|integer|between:0,3',
         ], [
             'id'     => 'ID',
             'status' => '状态',
