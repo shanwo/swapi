@@ -25,12 +25,12 @@ class AttentionService extends Service
         $lists = $this->redis::GET('attention:' . $page);
         if (empty($lists)) {
             $where[] = ['s_a.status', '=', 1];
-            if ($uid) $where[] = ['s_a.uid', '=', 1];
+            if ($uid) $where[] = ['s_a.uid', '=', $uid];
             $pid = $request->input('pid', 0);
             if ($pid) $where[] = ['s_a.pid', '=', $pid];
             $lists = $this->attentionModel->from('sw_attention as s_a')
-                ->select('s_a.id', 's_p.head_config', 'swa.head_config')
-                ->leftJoin('sw_page as s_p', 's_p.id', '=', 's_a.pid')
+                ->select('s_a.id', 's_p.head_config')
+                ->leftJoin('sw_page as s_p', 's_a.pid', '=', 's_p.id')
                 ->where($where);
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('sort', 'DESC')->orderBy('s_a.created_at', 'DESC')->get()->toArray();
@@ -40,7 +40,7 @@ class AttentionService extends Service
             $lists = json_encode($lists);
             $this->setData('attention:' . $page, $lists);
         }
-        $data['page'] = $page;
+        $data['page'] = (int)$page;
         $data['size'] = $this->size;
         $data['lists'] = json_decode($lists, true);
         return $data;
@@ -59,7 +59,8 @@ class AttentionService extends Service
 
     public function status($request)
     {
+        $id = $request->input('id');
         $update['status'] = $request->input('status');
-        return $this->attentionModel->whereKey($request['id'])->update($update);
+        return $this->attentionModel->whereKey($id)->update($update);
     }
 }
