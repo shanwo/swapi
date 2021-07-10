@@ -111,10 +111,11 @@ class PageService extends Service
     public function status($request)
     {
         $update = [];
+        $id = $request->input('id');
         $open = $request->input('is_open', '');
         if ($open) $update['is_open'] = $open;
         $delete = $request->input('is_delete', '');
         if ($delete) $update['is_delete'] = $delete;
-        return $this->pageModel->whereKey($request['id'])->update($update);
+        return $this->pageModel->whereKey($id)->update($update);
     }
 }
