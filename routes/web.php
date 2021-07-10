@@ -56,6 +56,13 @@ Route::prefix('page')->group(function () {
     Route::post('status', 'PageController@status');
 });
 
+//关注
+Route::prefix('attention')->group(function () {
+    Route::get('lists', 'AttentionController@lists');
+    Route::post('add', 'AttentionController@add');
+    Route::post('status', 'AttentionController@status');
+});
+
 //首页
 Route::prefix('home')->group(function () {
     Route::get('hot', 'HomeController@hot');
