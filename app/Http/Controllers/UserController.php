@@ -28,9 +28,9 @@ class UserController extends Controller
     public function signIn()
     {
         $this->validate([
-            'type'  => 'required|alpha_num|between:2,8',
+            'type' => 'required|alpha_num|between:2,8',
         ], [
-            'type'  => '登录类型',
+            'type' => '登录类型',
         ]);
         if ($this->msg) {
             return $this->returnApi();

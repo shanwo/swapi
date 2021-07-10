@@ -42,7 +42,7 @@ class TestController extends Controller
         $db = $this->request->input('dbId', 0);
         $this->service->redis::SELECT($db);
         $number = $this->service->redis::DBSIZE();
-        list(, $data) = $this->service->redis::SCAN('*', $number);
+        [, $data] = $this->service->redis::SCAN('*', $number);
         return $this->returnApi($data);
     }
 
