@@ -24,7 +24,7 @@ class HomeController extends Controller
     public function hot()
     {
         $this->validate([
-            'page' => 'filled|integer',
+            'page' => 'required|integer|gt:0',
         ], [
             'page' => '页码',
         ]);
@@ -39,7 +39,7 @@ class HomeController extends Controller
     public function recent()
     {
         $this->validate([
-            'page' => 'filled|integer',
+            'page' => 'required|integer|gt:0',
         ], [
             'page' => '页码',
         ]);
