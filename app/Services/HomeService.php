@@ -32,7 +32,13 @@ class HomeService extends Service
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $v['head_config'] = json_decode($v['head_config']);
+                $config = json_decode($v['head_config'],true);
+                $v['avatar']= $config['avatar']['image'];
+                $v['badge']= $config['badge']['image'];
+                $v['pendant']= $config['pendant']['image'];
+                $v['nickname']= $config['nickname']['content'];
+                $v['signature']= $config['signature']['content'];
+                unset($v['head_config']);
             }
             $lists = json_encode($lists);
             $this->setData('hot:' . $page, $lists);
@@ -55,7 +61,13 @@ class HomeService extends Service
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $v['head_config'] = json_decode($v['head_config']);
+                $config = json_decode($v['head_config'],true);
+                $v['avatar']= $config['avatar']['image'];
+                $v['badge']= $config['badge']['image'];
+                $v['pendant']= $config['pendant']['image'];
+                $v['nickname']= $config['nickname']['content'];
+                $v['signature']= $config['signature']['content'];
+                unset($v['head_config']);
             }
             $lists = json_encode($lists);
             $this->setData('recent:' . $page, $lists);
