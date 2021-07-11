@@ -7,16 +7,19 @@
 
 namespace App\Services;
 
+use App\Models\UploadModel;
 use Qcloud\Cos\Client;
 
 class UploadService extends Service
 {
+    protected $uploadModel;
     private $oss;
     private $domain = 'https://cdn.shanwo.cc/';
 
     public function __construct()
     {
         parent::__construct();
+        $this->uploadModel = new UploadModel();
         $config = $this->configInfo('oss');
         $this->oss = new Client([
             'region'      => 'ap-beijing',
@@ -63,11 +66,7 @@ class UploadService extends Service
             default:
                 $type = 0;
         }
-        $path = $fileTypes[$type] . date('/Y/m/');
-        if (app('env') != 'prod') {
-            $path = app('env') . '/' . $path;
-        }
-        return $path;
+        return $fileTypes[$type];
     }
 
     /**
@@ -79,12 +78,24 @@ class UploadService extends Service
     {
         $file = $request->file('file');
         $ext = $file->getClientOriginalExtension();
-        $path = $this->type($ext) . dechex(LARAVEL_START * 10000);
-        if ($ext) {
-            $path = $path . '.' . $ext;
+        $type = $this->type($ext);
+        if (!strcmp(app('env'), 'prod')) {
+            $path = $type . date('/Y/m/');
+        } else {
+            $path = app('env') . '/' . $type . date('/Y/m/');
         }
-        $this->oss->upload('cdn-1305937303', $path, fopen($file->getRealPath(), "rb"));
+        $name = dechex(LARAVEL_START * 10000);
+        if ($ext) {
+            $name = $name . '.' . $ext;
+        }
+        $this->oss->upload('cdn-1305937303', $path . $name, fopen($file->getRealPath(), "rb"));
         $data['url'] = $this->domain . $path;
+        $insert = [
+            'url'  => $path . $name,
+            'type' => $type,
+            'name' => $name
+        ];
+        $this->uploadModel->insertGetId($insert);
         return $data;
     }
 }
