@@ -39,6 +39,10 @@ Route::prefix('area')->group(function () {
 Route::prefix('feedback')->group(function () {
     Route::post('add', 'FeedbackController@add');
 });
+//浏览记录
+Route::prefix('browse')->group(function () {
+    Route::get('lists', 'BrowseController@lists');
+});
 //模板
 Route::prefix('template')->group(function () {
     Route::get('lists', 'TemplateController@lists');
