@@ -7,16 +7,19 @@
 
 namespace App\Services;
 
+use App\Models\BrowseModel;
 use App\Models\PageModel;
 
 class HomeService extends Service
 {
     protected $pageModel;
+    protected $browseModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->pageModel = new PageModel();
+        $this->browseModel = new BrowseModel();
     }
 
     //使用zset结构
@@ -32,12 +35,12 @@ class HomeService extends Service
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $config = json_decode($v['head_config'],true);
-                $v['avatar']= $config['avatar']['image'];
-                $v['badge']= $config['badge']['image'];
-                $v['pendant']= $config['pendant']['image'];
-                $v['nickname']= $config['nickname']['content'];
-                $v['signature']= $config['signature']['content'];
+                $config = json_decode($v['head_config'], true);
+                $v['avatar'] = $config['avatar']['image'];
+                $v['badge'] = $config['badge']['image'];
+                $v['pendant'] = $config['pendant']['image'];
+                $v['nickname'] = $config['nickname']['content'];
+                $v['signature'] = $config['signature']['content'];
                 unset($v['head_config']);
             }
             $lists = json_encode($lists);
@@ -61,12 +64,12 @@ class HomeService extends Service
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $config = json_decode($v['head_config'],true);
-                $v['avatar']= $config['avatar']['image'];
-                $v['badge']= $config['badge']['image'];
-                $v['pendant']= $config['pendant']['image'];
-                $v['nickname']= $config['nickname']['content'];
-                $v['signature']= $config['signature']['content'];
+                $config = json_decode($v['head_config'], true);
+                $v['avatar'] = $config['avatar']['image'];
+                $v['badge'] = $config['badge']['image'];
+                $v['pendant'] = $config['pendant']['image'];
+                $v['nickname'] = $config['nickname']['content'];
+                $v['signature'] = $config['signature']['content'];
                 unset($v['head_config']);
             }
             $lists = json_encode($lists);
@@ -79,7 +82,7 @@ class HomeService extends Service
     }
 
     //使用string结构
-    public function info($request)
+    public function info($request, $uid)
     {
         $id = $request->input('id', 0);
         if ($id) {
@@ -92,6 +95,19 @@ class HomeService extends Service
         $info['head_config'] = json_decode($info['head_config'], true);
         $info['center_config'] = json_decode($info['center_config'], true);
         $info['bottom_config'] = json_decode($info['bottom_config'], true);
+        if ($info['user_id'] != $uid) {
+            $browse = $this->browseModel->where(['user_id' => $uid, 'page_id' => $info['id']])->first();
+            if (!$browse) {
+                $insert = [
+                    'user_id' => $uid,
+                    'page_id' => $info['id'],
+                    'click'   => 1
+                ];
+                $this->browseModel->insertGetId($insert);
+            } else {
+                $this->browseModel->whereKey($browse['id'])->increment('click');
+            }
+        }
         return $info;
     }
 }
