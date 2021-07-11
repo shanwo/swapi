@@ -53,7 +53,7 @@ class PageController extends Controller
     public function add()
     {
         $this->validate([
-            'tid'                     => 'required|integer|gt:0|exists:sw_template,id',
+            'template_id'             => 'required|integer|gt:0|exists:sw_template,id',
             'background'              => 'nullable|url|max:128',
             'head_config'             => 'required|array',
             'head_config.avatar'      => 'required|url|max:128',
@@ -70,7 +70,7 @@ class PageController extends Controller
             'bottom_config.*.type'    => 'required_with:bottom_config|max:8',
             'bottom_config.*.image'   => 'required_with:bottom_config|url|max:128',
         ], [
-            'tid'                     => '模板ID',
+            'template_id'             => '模板ID',
             'background'              => '背景图',
             'head_config'             => '顶部配置',
             'head_config.avatar'      => '头像',

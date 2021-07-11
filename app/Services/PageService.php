@@ -27,7 +27,7 @@ class PageService extends Service
     {
         $lists = $this->redis::GET('page:' . $uid);
         if (empty($lists)) {
-            $where[] = ['uid', '=', $uid];
+            $where[] = ['user_id', '=', $uid];
             $where[] = ['is_delete', '=', 0];
             $lists = $this->pageModel->where($where)->select('id', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
             foreach ($lists as $k => &$v) {
@@ -51,7 +51,7 @@ class PageService extends Service
 
     public function add($request, $uid)
     {
-        $tid = $request->input('tid');
+        $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();
         $head = json_decode($template['head_config'], true);
         $headConfig = $request->input('head_config');
@@ -63,7 +63,7 @@ class PageService extends Service
         $center = json_decode($template['center_config'], true);
         $center['button'] = $request->input('center_config');
         $insert = [
-            'uid'           => $uid,
+            'user_id'       => $uid,
             'template_id'   => $tid,
             'background'    => $template['background'],
             'head_config'   => json_encode($head, JSON_UNESCAPED_UNICODE),

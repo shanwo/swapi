@@ -24,11 +24,11 @@ class AttentionController extends Controller
     public function lists()
     {
         $this->validate([
-            'pid'  => 'filled|integer|gt:0|exists:sw_page,id',
-            'page' => 'required|integer|gt:0',
+            'page_id' => 'filled|integer|gt:0|exists:sw_page,id',
+            'page'    => 'required|integer|gt:0',
         ], [
-            'pid'  => '页面ID',
-            'page' => '页码',
+            'page_id' => '页面ID',
+            'page'    => '页码',
         ]);
         if ($this->msg) {
             return $this->returnApi();
@@ -41,9 +41,9 @@ class AttentionController extends Controller
     public function add()
     {
         $this->validate([
-            'pid' => 'required|integer|gt:0|exists:sw_page,id',
+            'page_id' => 'required|integer|gt:0|exists:sw_page,id',
         ], [
-            'pid' => '页面ID',
+            'page_id' => '页面ID',
         ]);
         if ($this->msg) {
             return $this->returnApi();

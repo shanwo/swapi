@@ -25,12 +25,12 @@ class AttentionService extends Service
         $lists = $this->redis::GET('attention:' . $page);
         if (empty($lists)) {
             $where[] = ['s_a.status', '=', 1];
-            if ($uid) $where[] = ['s_a.uid', '=', $uid];
-            $pid = $request->input('pid', 0);
-            if ($pid) $where[] = ['s_a.pid', '=', $pid];
+            if ($uid) $where[] = ['s_a.user_id', '=', $uid];
+            $pid = $request->input('page_id', 0);
+            if ($pid) $where[] = ['s_a.page_id', '=', $pid];
             $lists = $this->attentionModel->from('sw_attention as s_a')
                 ->select('s_a.id', 's_p.head_config')
-                ->leftJoin('sw_page as s_p', 's_a.pid', '=', 's_p.id')
+                ->leftJoin('sw_page as s_p', 's_a.page_id', '=', 's_p.id')
                 ->where($where);
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('sort', 'DESC')->orderBy('s_a.created_at', 'DESC')->get()->toArray();
@@ -50,9 +50,9 @@ class AttentionService extends Service
     {
         $pid = $request->input('pid');
         $insert = [
-            'uid'    => $uid,
-            'pid'    => $pid,
-            'status' => 1
+            'user_id' => $uid,
+            'page_id' => $pid,
+            'status'  => 1
         ];
         return $this->attentionModel->insertGetId($insert);
     }
