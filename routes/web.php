@@ -35,6 +35,10 @@ Route::prefix('upload')->group(function () {
 Route::prefix('area')->group(function () {
     Route::get('lists', 'AreaController@lists');
 });
+//用户反馈
+Route::prefix('feedback')->group(function () {
+    Route::post('add', 'FeedbackController@add');
+});
 //模板
 Route::prefix('template')->group(function () {
     Route::get('lists', 'TemplateController@lists');
