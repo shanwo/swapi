@@ -23,4 +23,14 @@ class UserService extends Service
     {
         return $this->userModel->whereKey($id)->first();
     }
+
+    public function add()
+    {
+
+    }
+
+    public function edit($request)
+    {
+        return $request;
+    }
 }

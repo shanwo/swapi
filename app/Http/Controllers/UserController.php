@@ -22,6 +22,8 @@ class UserController extends Controller
         $this->userService = new UserService();
     }
 
+    //type:facebook,github,google,linkedin,weibo,qq,wechat,douban,wework,outlook,douyin,taobao,feishu
+    //secret:用户ID转为16进制后进行MD5加密，使用用户ID为key，加密结果为value转为json后使用type进行字符串加密
     public function signIn()
     {
         $this->validate([
@@ -59,37 +61,6 @@ class UserController extends Controller
         return $data;
     }
 
-    public function login()
-    {
-        $this->validate([
-            'code'  => 'filled|alpha_num|size:32',
-            'state' => 'filled|alpha_num|between:32,64',
-        ], [
-            'code'  => '编码',
-            'state' => '状态',
-        ]);
-        if ($this->msg) {
-            return $this->returnApi();
-        }
-        $watermark = null;
-        $state = $this->request->input('state', 0);
-        if ($state) {
-            $watermark['ip'] = $this->request->ip();
-            $watermark['time'] = time();
-            $watermark['uid'] = $this->redis::get('login:wechat:' . $state);
-            $this->redis::del('login:wechat:' . $state);
-        } else {
-            $this->msg = '绑定成功';
-        }
-        $user = $this->wechatService->driver($this->request)->stateless()->user();
-        $data = $this->wechatService->binding($watermark, $user);
-        if (!empty($data['uid'])) {
-            $token = $this->userService->token($data['uid'], 'web');
-            return redirect('https://wzxaini9.cn/user/login/thirdPartyLogin?token=' . $token, 301);
-        }
-        return $data;
-    }
-
     public function info()
     {
         $this->validate([
@@ -102,6 +73,21 @@ class UserController extends Controller
         }
         $id = $this->request->input('id');
         $data = $this->userService->info($id);
+        $this->code = 200;
+        return $this->returnApi($data);
+    }
+
+    public function edit()
+    {
+        $this->validate([
+            'id' => 'required|integer|gt:0|exists:sw_user,id',
+        ], [
+            'id' => 'ID',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $data = $this->userService->edit($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }
