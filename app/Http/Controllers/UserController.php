@@ -9,43 +9,54 @@
 namespace App\Http\Controllers;
 
 use App\Services\UserService;
-use App\Services\WechatService;
 use Illuminate\Http\Request;
 use Overtrue\Socialite\SocialiteManager;
 
 class UserController extends Controller
 {
-    protected $pluginName = 'wechat';
     protected $userService;
-    protected $wechatService;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
         $this->userService = new UserService();
-        $this->wechatService = new WechatService();
     }
 
     public function signIn()
     {
         $this->validate([
-            'type' => 'required|alpha_num|between:2,8',
+            'type' => 'required|alpha_num|in:wechat',
+            'secret' => 'filled|string|between:64,256',
         ], [
             'type' => '登录类型',
+            'secret' => '密钥',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
         $type = $this->request->input('type');
-        $config = $this->wechatService->configInfo($type);
+        $config = $this->service->configInfo($type);
         $socialite = new SocialiteManager([
             $type => [
                 'client_id'     => $config['key'],
                 'client_secret' => $config['secret'],
                 'redirect'      => $config['callback'],
             ],
-        ]);
-        return $socialite->driver($type)->redirect();
+        ],$this->request);
+        $data = $socialite->driver($type)->redirect();
+        $secret = $this->request->input('secret', '');
+        if ($secret) {
+            $auth = $this->passportDecrypt($secret, $type);
+            $arr = json_decode($auth, true) ?? [];
+            foreach ($arr as $k => $v) {
+                if ($v == md5(dechex($k))) {
+                    $url = $data->getTargetUrl();
+                    parse_str(parse_url($url, PHP_URL_QUERY), $query);
+                    $this->service->redis::setex('login:'.$type.':' . $query['state'], 60 * 30, $k);
+                }
+            }
+        }
+        return $data;
     }
 
     public function login()
