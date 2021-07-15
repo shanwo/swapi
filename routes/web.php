@@ -84,3 +84,21 @@ Route::prefix('user')->group(function () {
     Route::get('info', 'UserController@info');
     Route::post('edit', 'UserController@edit');
 });
+
+//回调
+Route::prefix('callback')->group(function () {
+    Route::get('facebook', 'callback@facebook');
+    Route::get('github', 'callback@github');
+    Route::get('google', 'callback@google');
+    Route::get('linkedin', 'callback@linkedin');
+    Route::get('weibo', 'callback@weibo');
+    Route::get('qq', 'callback@qq');
+    Route::get('wechat', 'callback@wechat');
+    Route::get('douban', 'callback@douban');
+    Route::get('wework', 'callback@wework');
+    Route::get('outlook', 'callback@outlook');
+    Route::get('douyin', 'callback@douyin');
+    Route::get('taobao', 'callback@taobao');
+    Route::get('feishu', 'callback@feishu');
+});
+
