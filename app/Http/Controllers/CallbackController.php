@@ -7,15 +7,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CallbackService;
 use Illuminate\Http\Request;
 use Overtrue\Socialite\SocialiteManager;
 
 class CallbackController extends Controller
 {
+    protected $callbackService;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
+        $this->callbackService = new CallbackService();
 
     }
     public function facebook()
@@ -86,8 +89,19 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
+        $watermark = null;
+        $state = $this->request->input('state', 0);
+        if ($state) {
+            $watermark['ip'] = $this->request->ip();
+            $watermark['time'] = time();
+            $watermark['uid'] = $this->service->redis::get('login:wechat:' . $state);
+            $this->service->redis::del('login:wechat:' . $state);
+        } else {
+            $this->msg = '绑定成功';
+        }
         $user = $this->driver($this->request,'wechat')->stateless()->user();
-        return $this->returnApi($user);
+        $data = $this->callbackService->login($watermark, $user);
+        return $this->returnApi($data);
     }
     public function douban()
     {
