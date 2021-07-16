@@ -27,10 +27,10 @@ class UserController extends Controller
     public function signIn()
     {
         $this->validate([
-            'type' => 'required|alpha_num|in:wechat',
+            'type'   => 'required|alpha_num|in:wechat',
             'secret' => 'filled|string|between:64,256',
         ], [
-            'type' => '登录类型',
+            'type'   => '登录类型',
             'secret' => '密钥',
         ]);
         if ($this->msg) {
@@ -44,7 +44,7 @@ class UserController extends Controller
                 'client_secret' => $config['secret'],
                 'redirect'      => $config['callback'],
             ],
-        ],$this->request);
+        ], $this->request);
         $data = $socialite->driver($type)->redirect();
         $secret = $this->request->input('secret', '');
         if ($secret) {
@@ -54,7 +54,7 @@ class UserController extends Controller
                 if ($v == md5(dechex($k))) {
                     $url = $data->getTargetUrl();
                     parse_str(parse_url($url, PHP_URL_QUERY), $query);
-                    $this->service->redis::setex('login:'.$type.':' . $query['state'], 60 * 30, $k);
+                    $this->service->redis::setex('login:' . $type . ':' . $query['state'], 60 * 30, $k);
                 }
             }
         }
@@ -80,9 +80,23 @@ class UserController extends Controller
     public function edit()
     {
         $this->validate([
-            'id' => 'required|integer|gt:0|exists:sw_user,id',
+            'area_id'        => 'required|integer|gt:0|exists:cn_area,id',
+            'avatar'         => 'required|url|max:128',
+            'nickname'       => 'required|string|between:2,32',
+            'sex'            => 'nullable|integer|between:0,2',
+            'birthday'       => 'nullable|date_format:Y-m-d',
+            'contact'        => 'required|array',
+            'contact.wechat' => 'required|string|between:6,20',
+            'contact.phone'  => 'required|integer|between:13000000000,19999999999',
         ], [
-            'id' => 'ID',
+            'area_id'        => '省市区ID',
+            'avatar'         => '头像地址',
+            'nickname'       => '昵称',
+            'sex'            => '性别',
+            'birthday'       => '生日',
+            'contact'        => '联系方式',
+            'contact.wechat' => '微信号',
+            'contact.phone'  => '手机号',
         ]);
         if ($this->msg) {
             return $this->returnApi();
