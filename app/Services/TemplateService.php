@@ -27,7 +27,8 @@ class TemplateService extends Service
         $sort = $request->input('sort_id', 0);
         $data = $this->hGetCache('template', $sort, $sids);
         if (!$data) {
-            $data = $this->templateModel->select('id', 'sort_id', 'name', 'preview', 'type', 'created_at')->get()->toArray();
+            $where[] = ['is_delete', '=', 1];
+            $data = $this->templateModel->select('id', 'sort_id', 'name', 'preview', 'type', 'created_at')->where($where)->get()->toArray();
             $this->hSetCache('template', $data);
             $data = $this->hGetCache('template', $sort, $sids);
         }

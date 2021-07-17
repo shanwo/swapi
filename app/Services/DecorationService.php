@@ -27,7 +27,8 @@ class DecorationService extends Service
         $sort = $request->input('sort_id', 0);
         $data = $this->hGetCache('template', $sort, $sids);
         if (!$data) {
-            $data = $this->decorationModel->select('id', 'sort_id', 'image')->get()->toArray();
+            $where[] = ['is_delete', '=', 1];
+            $data = $this->decorationModel->select('id', 'sort_id', 'image')->where($where)->get()->toArray();
             $this->hSetCache('template', $data);
             $data = $this->hGetCache('template', $sort, $sids);
         }
