@@ -156,7 +156,7 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->pageService->status($this->request);
+        $data = $this->pageService->status($this->request, $this->uid);
         $this->code = 200;
         return $this->returnApi($data);
     }

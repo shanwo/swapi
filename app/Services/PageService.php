@@ -22,10 +22,9 @@ class PageService extends Service
         $this->templateModel = new TemplateModel();
     }
 
-    //使用hash结构
     public function lists($uid)
     {
-        $lists = $this->redis::GET('page:' . $uid);
+        $lists = $this->redis::HGETALL('page:' . $uid);
         if (empty($lists)) {
             $where[] = ['user_id', '=', $uid];
             $where[] = ['is_delete', '=', 0];
@@ -38,9 +37,9 @@ class PageService extends Service
                 $v['nickname'] = $config['nickname']['content'];
                 $v['signature'] = $config['signature']['content'];
                 unset($v['head_config']);
+                $this->redis::HSET('page:' . $uid, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
             $lists = json_encode($lists);
-            $this->setData('page:' . $uid, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;
@@ -81,6 +80,7 @@ class PageService extends Service
             $bottom['icon'] = $bottomConfig;
             $insert['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
         }
+        $this->redis::HDEL('page:' . $uid);
         return $this->pageModel->insertGetId($insert);
     }
 
@@ -111,17 +111,20 @@ class PageService extends Service
             $bottom['icon'] = $bottomConfig;
             $update['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
         }
+        $this->redis::HDEL('page:' . $info['user_id']);
         return $this->pageModel->whereKey($id)->update($update);
     }
 
-    public function status($request)
+    public function status($request, $uid)
     {
+        $where[] = ['user_id', '=', $uid];
         $update = [];
         $id = $request->input('id');
         $open = $request->input('is_open', '');
         if ($open) $update['is_open'] = $open;
         $delete = $request->input('is_delete', '');
         if ($delete) $update['is_delete'] = $delete;
-        return $this->pageModel->whereKey($id)->update($update);
+        $this->redis::HDEL('page:' . $uid);
+        return $this->pageModel->whereKey($id)->where($where)->update($update);
     }
 }
