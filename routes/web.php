@@ -20,13 +20,6 @@ Route::get('MP_verify_wOQevRdcPyMeqMJL.txt', function () {
     return 'wOQevRdcPyMeqMJL';
 });
 
-//测试接口
-Route::prefix('test')->group(function () {
-    Route::get('check', 'TestController@check');
-    Route::get('info', 'TestController@info');
-    Route::get('all', 'TestController@all');
-    Route::get('image', 'TestController@image');
-});
 //文件上传
 Route::prefix('upload')->group(function () {
     Route::post('file', 'UploadController@file');
@@ -43,16 +36,6 @@ Route::prefix('feedback')->group(function () {
 Route::prefix('browse')->group(function () {
     Route::get('lists', 'BrowseController@lists');
 });
-//模板
-Route::prefix('template')->group(function () {
-    Route::get('lists', 'TemplateController@lists');
-    Route::get('info', 'TemplateController@info');
-});
-//链接
-Route::prefix('link')->group(function () {
-    Route::get('lists', 'LinkController@lists');
-    Route::get('info', 'LinkController@info');
-});
 //装饰
 Route::prefix('decoration')->group(function () {
     Route::get('lists', 'DecorationController@lists');
@@ -60,6 +43,16 @@ Route::prefix('decoration')->group(function () {
 //教程
 Route::prefix('tutorials')->group(function () {
     Route::get('lists', 'TutorialsController@lists');
+});
+//链接
+Route::prefix('link')->group(function () {
+    Route::get('lists', 'LinkController@lists');
+    Route::get('info', 'LinkController@info');
+});
+//模板
+Route::prefix('template')->group(function () {
+    Route::get('lists', 'TemplateController@lists');
+    Route::get('info', 'TemplateController@info');
 });
 //页面
 Route::prefix('page')->group(function () {
@@ -69,28 +62,24 @@ Route::prefix('page')->group(function () {
     Route::post('edit', 'PageController@edit');
     Route::post('status', 'PageController@status');
 });
-
 //关注
 Route::prefix('attention')->group(function () {
     Route::get('lists', 'AttentionController@lists');
     Route::post('add', 'AttentionController@add');
     Route::post('status', 'AttentionController@status');
 });
-
 //首页
 Route::prefix('home')->group(function () {
     Route::get('hot', 'HomeController@hot');
     Route::get('recent', 'HomeController@recent');
     Route::get('info', 'HomeController@info');
 });
-
 //用户
 Route::prefix('user')->group(function () {
     Route::get('signIn', 'UserController@signIn');
     Route::get('info', 'UserController@info');
     Route::post('edit', 'UserController@edit');
 });
-
 //回调
 Route::prefix('callback')->group(function () {
     Route::get('facebook', 'callback@facebook');
@@ -106,5 +95,12 @@ Route::prefix('callback')->group(function () {
     Route::get('douyin', 'callback@douyin');
     Route::get('taobao', 'callback@taobao');
     Route::get('feishu', 'callback@feishu');
+});
+//测试接口
+Route::prefix('test')->group(function () {
+    Route::get('check', 'TestController@check');
+    Route::get('info', 'TestController@info');
+    Route::get('all', 'TestController@all');
+    Route::get('image', 'TestController@image');
 });
 
