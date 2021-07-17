@@ -46,7 +46,7 @@ class Service
         } else {
             foreach ($sids as $k => $v) {
                 $tmp = $this->redis::HGETALL($key . ':' . $v);
-                if ($tmp) $data = array_merge($data, $tmp);
+                if ($tmp) $data = array_merge_recursive($data, $tmp);
             }
         }
         return $data;
