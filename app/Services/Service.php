@@ -15,7 +15,7 @@ class Service
     public $redis;
     public $page = 1;
     public $size = 10;
-    protected $timeOut = 3;
+    protected $timeOut = 3600;
     protected $configModel;
 
     public function __construct()
@@ -38,12 +38,24 @@ class Service
         return $data['option_value'];
     }
 
-    protected function setData($key, $data)
+    public function hGetCache($key, $sort, $sids)
     {
-        if ($data) {
-            $this->redis::SET($key, $data);
+        $data = [];
+        if ($sort) {
+            $data = $this->redis::HGETALL($key . ':' . $sort);
         } else {
-            $this->redis::SETEX($key, $this->timeOut, $data);
+            foreach ($sids as $k => $v) {
+                $tmp = $this->redis::HGETALL($key . ':' . $v);
+                if ($tmp) $data = array_merge($data, $tmp);
+            }
+        }
+        return $data;
+    }
+
+    public function hSetCache($key, $data)
+    {
+        foreach ($data as $k => $v) {
+            $this->redis::HSET($key . ':' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
         }
     }
 }
