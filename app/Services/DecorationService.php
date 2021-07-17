@@ -22,12 +22,16 @@ class DecorationService extends Service
     //使用hash结构
     public function lists($request)
     {
-        $type = $request->input('type');
-        $lists = $this->redis::GET('decoration:' . $type);
+        $sort = $request->input('sort_id', 0);
+        $lists = $this->redis::GET('decoration:' . $sort);
         if (empty($lists)) {
-            $where[] = ['type', '=', $type];
-            $lists = $this->decorationModel->select('id', 'image', 'created_at')->where($where)->orderBy('order', 'DESC')->get()->toJson();
-            $this->setData('decoration:' . $type, $lists);
+            $where[] = ['ss.type', '=', 1];
+            if ($sort) $where[] = ['ss.id', '=', $sort];
+            $lists = $this->decorationModel->from('sw_decoration as sd')
+                ->select('sd.id', 'sd.sort_id', 'ss.name as sort_name', 'sd.image')
+                ->leftJoin('sw_sort as ss', 'sd.sort_id', '=', 'ss.id')
+                ->where($where)->orderBy('sd.order', 'DESC')->get()->toJson();
+            $this->setData('decoration:' . $sort, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;

@@ -24,9 +24,9 @@ class DecorationController extends Controller
     public function lists()
     {
         $this->validate([
-            'type' => 'required|integer|between:1,2',
+            'sort_id' => 'nullable|integer|gt:0|exists:sw_sort,id',
         ], [
-            'type' => '类型',
+            'sort_id' => '分类ID',
         ]);
         if ($this->msg) {
             return $this->returnApi();
