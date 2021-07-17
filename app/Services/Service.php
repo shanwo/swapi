@@ -24,16 +24,21 @@ class Service
         $this->configModel = new ConfigModel();
     }
 
-    //使用hash结构
     public function configInfo($name)
     {
-        $config = $this->redis::GET('config:' . $name);
-        if (!$config) {
-            $data = $this->configModel->where(['option_name' => $name])->first();
-            $data['option_value'] = json_decode($data['option_value'], true);
-            $this->setData('config:' . $name, json_encode($data, JSON_UNESCAPED_UNICODE));
-        } else {
+        $data = [];
+        $config = $this->redis::HGET('config', $name);
+        if ($config) {
             $data = json_decode($config, true);
+        } else {
+            $lists = $this->configModel->get()->toArray();
+            foreach ($lists as $k => &$v) {
+                $v['option_value'] = json_decode($v['option_value'], true);
+                $this->redis::HSET('config', $v['option_name'], json_encode($v, JSON_UNESCAPED_UNICODE));
+                if($v['option_name'] == $name){
+                    $data = $v;
+                }
+            }
         }
         return $data['option_value'];
     }
