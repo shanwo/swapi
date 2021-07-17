@@ -26,7 +26,7 @@ class LinkService extends Service
         $lists = $this->redis::GET('link:' . $type);
         if (empty($lists)) {
             $where[] = ['type', '=', $type];
-            $lists = $this->linkModel->select('id', 'name', 'image', 'url', 'created_at')->where($where)->get()->toJson();
+            $lists = $this->linkModel->select('id', 'name', 'image', 'svg', 'url', 'created_at')->where($where)->get()->toJson();
             $this->setData('link:' . $type, $lists);
         }
         $data['lists'] = json_decode($lists, true);
