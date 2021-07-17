@@ -31,12 +31,12 @@ class PageService extends Service
             $where[] = ['is_delete', '=', 0];
             $lists = $this->pageModel->where($where)->select('id', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $config = json_decode($v['head_config'],true);
-                $v['avatar']= $config['avatar']['image'];
-                $v['badge']= $config['badge']['image'];
-                $v['pendant']= $config['pendant']['image'];
-                $v['nickname']= $config['nickname']['content'];
-                $v['signature']= $config['signature']['content'];
+                $config = json_decode($v['head_config'], true);
+                $v['avatar'] = $config['avatar']['image'];
+                $v['badge'] = $config['badge']['image'];
+                $v['pendant'] = $config['pendant']['image'];
+                $v['nickname'] = $config['nickname']['content'];
+                $v['signature'] = $config['signature']['content'];
                 unset($v['head_config']);
             }
             $lists = json_encode($lists);

@@ -26,13 +26,13 @@ class BrowseService extends Service
         if (empty($lists)) {
             $where[] = ['sa.status', '=', 1];
             $pid = $request->input('page_id', 0);
-            if ($pid){
+            if ($pid) {
                 $where[] = ['sa.page_id', '=', $pid];
                 $lists = $this->browseModel->from('sw_attention as sa')
-                    ->select('sa.id', 'su.nickname','su.avatar')
+                    ->select('sa.id', 'su.nickname', 'su.avatar')
                     ->leftJoin('sw_user as su', 'sa.user_id', '=', 'su.id')
                     ->where($where);
-            } else{
+            } else {
                 $where[] = ['sa.user_id', '=', $uid];
                 $lists = $this->browseModel->from('sw_attention as sa')
                     ->select('sa.id', 'sp.head_config')
@@ -41,7 +41,7 @@ class BrowseService extends Service
             }
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('sa.created_at', 'DESC')->get()->toArray();
-            if(!$pid){
+            if (!$pid) {
                 foreach ($lists as $k => &$v) {
                     $config = json_decode($v['head_config'], true);
                     $v['avatar'] = $config['avatar']['image'];

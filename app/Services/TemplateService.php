@@ -22,12 +22,12 @@ class TemplateService extends Service
         $this->templateModel = new TemplateModel();
     }
 
-    public function lists($request,$sids=[])
+    public function lists($request, $sids = [])
     {
         $sort = $request->input('sort_id', 0);
         $lists = $this->redis::GET('template:' . $sort);
         if (empty($lists)) {
-            if($sort) $sids = [$sort];
+            if ($sort) $sids = [$sort];
             $lists = $this->templateModel->select('id', 'sort_id', 'name', 'preview', 'type', 'created_at')
                 ->whereIn('sort_id', $sids)->orderBy('created_at', 'DESC')->get()->toJson();
             $this->setData('template:' . $sort, $lists);

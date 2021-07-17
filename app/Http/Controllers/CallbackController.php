@@ -21,26 +21,32 @@ class CallbackController extends Controller
         $this->callbackService = new CallbackService();
 
     }
+
     public function facebook()
     {
 
     }
+
     public function github()
     {
 
     }
+
     public function google()
     {
 
     }
+
     public function linkedin()
     {
 
     }
+
     public function weibo()
     {
 
     }
+
     public function qq()
     {
 
@@ -99,30 +105,36 @@ class CallbackController extends Controller
         } else {
             $this->msg = '绑定成功';
         }
-        $user = $this->driver($this->request,'wechat')->stateless()->user();
+        $user = $this->driver($this->request, 'wechat')->stateless()->user();
         $data = $this->callbackService->login($watermark, $user);
         return $this->returnApi($data);
     }
+
     public function douban()
     {
 
     }
+
     public function wework()
     {
 
     }
+
     public function outlook()
     {
 
     }
+
     public function douyin()
     {
 
     }
+
     public function taobao()
     {
 
     }
+
     public function feishu()
     {
 
@@ -133,7 +145,7 @@ class CallbackController extends Controller
 
     }
 
-    private function driver($request,$name)
+    private function driver($request, $name)
     {
         $config = $this->service->configInfo($name);
         $socialite = new SocialiteManager([
@@ -142,7 +154,7 @@ class CallbackController extends Controller
                 'client_secret' => $config['secret'],
                 'redirect'      => $config['callback'],
             ],
-        ],$request);
+        ], $request);
         return $socialite->driver($name);
     }
 }

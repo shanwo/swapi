@@ -43,10 +43,10 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        'bindings'      => \Illuminate\Routing\Middleware\SubstituteBindings::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
-        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'signed'        => \Illuminate\Routing\Middleware\ValidateSignature::class,
+        'throttle'      => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'verified'      => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
 }

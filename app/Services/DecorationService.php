@@ -22,12 +22,12 @@ class DecorationService extends Service
         $this->decorationModel = new DecorationModel();
     }
 
-    public function lists($request,$sids=[])
+    public function lists($request, $sids = [])
     {
         $sort = $request->input('sort_id', 0);
         $lists = $this->redis::GET('decoration:' . $sort);
         if (empty($lists)) {
-            if($sort) $sids = [$sort];
+            if ($sort) $sids = [$sort];
             $lists = $this->decorationModel->select('id', 'sort_id', 'image')
                 ->whereIn('sort_id', $sids)->orderBy('order', 'DESC')->get()->toJson();
             $this->setData('decoration:' . $sort, $lists);

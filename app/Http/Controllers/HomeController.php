@@ -63,7 +63,7 @@ class HomeController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->homeService->info($this->request,$this->uid);
+        $data = $this->homeService->info($this->request, $this->uid);
         $this->code = 200;
         return $this->returnApi($data);
     }
