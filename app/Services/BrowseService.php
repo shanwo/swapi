@@ -19,6 +19,7 @@ class BrowseService extends Service
         $this->browseModel = new BrowseModel();
     }
 
+    //使用zset
     public function lists($request, $uid)
     {
         $page = $request->input('page', $this->page);
