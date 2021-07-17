@@ -89,7 +89,7 @@ class UserController extends Controller
             'contact.wechat' => 'required|string|between:6,20',
             'contact.phone'  => 'required|integer|between:13000000000,19999999999',
         ], [
-            'area_id'        => '省市区ID',
+            'area_id'        => '省市区',
             'avatar'         => '头像地址',
             'nickname'       => '昵称',
             'sex'            => '性别',
