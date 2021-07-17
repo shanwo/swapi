@@ -7,34 +7,32 @@
 
 namespace App\Services;
 
+use App\Models\SortModel;
 use App\Models\TemplateModel;
 
 class TemplateService extends Service
 {
+    protected $sortModel;
     protected $templateModel;
 
     public function __construct()
     {
         parent::__construct();
+        $this->sortModel = new SortModel();
         $this->templateModel = new TemplateModel();
     }
 
-    //使用hash结构
-    public function lists($request)
+    public function lists($request,$sids=[])
     {
-        $category = $request->input('category');
-        $lists = $this->redis::GET('template:' . $category);
+        $sort = $request->input('sort_id', 0);
+        $lists = $this->redis::GET('template:' . $sort);
         if (empty($lists)) {
-            if ($category) {
-                $where[] = ['category', '=', $category];
-            } else {
-                $where[] = ['top', '=', 1];
-            }
-            $lists = $this->templateModel->select('id', 'name', 'preview', 'type', 'created_at')->where($where)->get()->toJson();
-            $this->setData('template:' . $category, $lists);
+            if($sort) $sids = [$sort];
+            $lists = $this->templateModel->select('id', 'sort_id', 'name', 'preview', 'type', 'created_at')
+                ->whereIn('sort_id', $sids)->orderBy('created_at', 'DESC')->get()->toJson();
+            $this->setData('template:' . $sort, $lists);
         }
-        $data['lists'] = json_decode($lists, true);
-        return $data;
+        return json_decode($lists, true);
     }
 
     public function info($id)

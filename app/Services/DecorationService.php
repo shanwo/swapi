@@ -8,32 +8,30 @@
 namespace App\Services;
 
 use App\Models\DecorationModel;
+use App\Models\SortModel;
 
 class DecorationService extends Service
 {
+    protected $sortModel;
     protected $decorationModel;
 
     public function __construct()
     {
         parent::__construct();
+        $this->sortModel = new SortModel();
         $this->decorationModel = new DecorationModel();
     }
 
-    //使用hash结构
-    public function lists($request)
+    public function lists($request,$sids=[])
     {
         $sort = $request->input('sort_id', 0);
         $lists = $this->redis::GET('decoration:' . $sort);
         if (empty($lists)) {
-            $where[] = ['ss.type', '=', 1];
-            if ($sort) $where[] = ['ss.id', '=', $sort];
-            $lists = $this->decorationModel->from('sw_decoration as sd')
-                ->select('sd.id', 'sd.sort_id', 'ss.name as sort_name', 'sd.image')
-                ->leftJoin('sw_sort as ss', 'sd.sort_id', '=', 'ss.id')
-                ->where($where)->orderBy('sd.order', 'DESC')->get()->toJson();
+            if($sort) $sids = [$sort];
+            $lists = $this->decorationModel->select('id', 'sort_id', 'image')
+                ->whereIn('sort_id', $sids)->orderBy('order', 'DESC')->get()->toJson();
             $this->setData('decoration:' . $sort, $lists);
         }
-        $data['lists'] = json_decode($lists, true);
-        return $data;
+        return json_decode($lists, true);
     }
 }

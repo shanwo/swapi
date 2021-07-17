@@ -20,14 +20,16 @@ class LinkService extends Service
     }
 
     //使用hash结构
-    public function lists($request)
+    public function lists($request, $sids = [])
     {
-        $type = $request->input('type');
-        $lists = $this->redis::GET('link:' . $type);
+        $sort = $request->input('sort_id', 0);
+        $lists = $this->redis::GET('link:' . $sort);
         if (empty($lists)) {
-            $where[] = ['type', '=', $type];
-            $lists = $this->linkModel->select('id', 'name', 'image', 'svg', 'url', 'created_at')->where($where)->get()->toJson();
-            $this->setData('link:' . $type, $lists);
+            $where[] = ['status', '=', 1];
+            if ($sort) $sids = [$sort];
+            $lists = $this->linkModel->select('id', 'sort_id', 'name', 'image', 'svg', 'url', 'created_at')
+                ->where($where)->whereIn('sort_id', $sids)->orderBy('created_at', 'DESC')->get()->toJson();
+            $this->setData('link:' . $sort, $lists);
         }
         $data['lists'] = json_decode($lists, true);
         return $data;

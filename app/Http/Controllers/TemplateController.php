@@ -8,30 +8,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SortService;
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
 
 class TemplateController extends Controller
 {
+    protected $sortService;
     protected $templateService;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
+        $this->sortService = new SortService();
         $this->templateService = new TemplateService();
     }
 
     public function lists()
     {
         $this->validate([
-            'category' => 'nullable|integer|between:0,10',
+            'sort_id' => 'nullable|integer|gt:0|exists:sw_sort,id',
         ], [
-            'category' => '模板类型',
+            'sort_id' => '分类ID',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->templateService->lists($this->request);
+        $data['sort'] = $this->sortService->lists(3);
+        $data['lists'] = $this->templateService->lists($this->request,array_column($data['sort'], 'id'));
         $this->code = 200;
         return $this->returnApi($data);
     }
