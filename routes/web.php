@@ -57,6 +57,10 @@ Route::prefix('link')->group(function () {
 Route::prefix('decoration')->group(function () {
     Route::get('lists', 'DecorationController@lists');
 });
+//教程
+Route::prefix('tutorials')->group(function () {
+    Route::get('lists', 'TutorialsController@lists');
+});
 //页面
 Route::prefix('page')->group(function () {
     Route::get('lists', 'PageController@lists');
