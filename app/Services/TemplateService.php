@@ -24,15 +24,35 @@ class TemplateService extends Service
 
     public function lists($request, $sids = [])
     {
+        $data = [];
         $sort = $request->input('sort_id', 0);
-        $lists = $this->redis::GET('template:' . $sort);
-        if (empty($lists)) {
-            if ($sort) $sids = [$sort];
-            $lists = $this->templateModel->select('id', 'sort_id', 'name', 'preview', 'type', 'created_at')
-                ->whereIn('sort_id', $sids)->orderBy('created_at', 'DESC')->get()->toJson();
-            $this->setData('template:' . $sort, $lists);
+        if (!$sort) {
+            foreach ($sids as $k => $v) {
+                $tmp = $this->redis::HGETALL('template:' . $v);
+                $data = array_merge($data, $tmp);
+            }
+        } else {
+            $data = $this->redis::HGETALL('template:' . $sort);
         }
-        return json_decode($lists, true);
+        if (!$data) {
+            $this->setCache();
+            $data = $this->redis::HGETALL('template:' . $sort);
+        }
+        foreach ($data as $k => &$v) {
+            $v = json_decode($v, true);
+            if ($sort && !in_array($v['sort_id'], $sids)) {
+                unset($v);
+            }
+        }
+        return array_values($data);
+    }
+
+    private function setCache()
+    {
+        $data = $this->templateModel->select('id', 'sort_id', 'name', 'preview', 'type', 'created_at')->get()->toArray();
+        foreach ($data as $k => $v) {
+            $this->redis::HSET('template:' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+        }
     }
 
     public function info($id)

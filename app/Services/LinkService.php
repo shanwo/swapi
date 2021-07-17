@@ -19,20 +19,38 @@ class LinkService extends Service
         $this->linkModel = new LinkModel();
     }
 
-    //使用hash结构
     public function lists($request, $sids = [])
     {
+        $data = [];
         $sort = $request->input('sort_id', 0);
-        $lists = $this->redis::GET('link:' . $sort);
-        if (empty($lists)) {
-            $where[] = ['status', '=', 1];
-            if ($sort) $sids = [$sort];
-            $lists = $this->linkModel->select('id', 'sort_id', 'name', 'image', 'svg', 'url', 'created_at')
-                ->where($where)->whereIn('sort_id', $sids)->orderBy('created_at', 'DESC')->get()->toJson();
-            $this->setData('link:' . $sort, $lists);
+        if (!$sort) {
+            foreach ($sids as $k => $v) {
+                $tmp = $this->redis::HGETALL('link:' . $v);
+                $data = array_merge($data, $tmp);
+            }
+        } else {
+            $data = $this->redis::HGETALL('link:' . $sort);
         }
-        $data['lists'] = json_decode($lists, true);
-        return $data;
+        if (!$data) {
+            $this->setCache();
+            $data = $this->redis::HGETALL('link:' . $sort);
+        }
+        foreach ($data as $k => &$v) {
+            $v = json_decode($v, true);
+            if ($sort && !in_array($v['sort_id'], $sids)) {
+                unset($v);
+            }
+        }
+        return array_values($data);
+    }
+
+    private function setCache()
+    {
+        $where[] = ['status', '=', 1];
+        $data = $this->linkModel->select('id', 'sort_id', 'name', 'image', 'svg', 'url', 'created_at')->where($where)->get()->toArray();
+        foreach ($data as $k => $v) {
+            $this->redis::HSET('link:' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+        }
     }
 
     public function info($id)

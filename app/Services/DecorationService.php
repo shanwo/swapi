@@ -24,14 +24,34 @@ class DecorationService extends Service
 
     public function lists($request, $sids = [])
     {
+        $data = [];
         $sort = $request->input('sort_id', 0);
-        $lists = $this->redis::GET('decoration:' . $sort);
-        if (empty($lists)) {
-            if ($sort) $sids = [$sort];
-            $lists = $this->decorationModel->select('id', 'sort_id', 'image')
-                ->whereIn('sort_id', $sids)->orderBy('order', 'DESC')->get()->toJson();
-            $this->setData('decoration:' . $sort, $lists);
+        if (!$sort) {
+            foreach ($sids as $k => $v) {
+                $tmp = $this->redis::HGETALL('decoration:' . $v);
+                $data = array_merge($data, $tmp);
+            }
+        } else {
+            $data = $this->redis::HGETALL('decoration:' . $sort);
         }
-        return json_decode($lists, true);
+        if (!$data) {
+            $this->setCache();
+            $data = $this->redis::HGETALL('decoration:' . $sort);
+        }
+        foreach ($data as $k => &$v) {
+            $v = json_decode($v, true);
+            if ($sort && !in_array($v['sort_id'], $sids)) {
+                unset($v);
+            }
+        }
+        return array_values($data);
+    }
+
+    private function setCache()
+    {
+        $data = $this->decorationModel->select('id', 'sort_id', 'image')->get()->toArray();
+        foreach ($data as $k => $v) {
+            $this->redis::HSET('decoration:' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+        }
     }
 }
