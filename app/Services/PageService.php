@@ -24,8 +24,8 @@ class PageService extends Service
 
     public function lists($uid)
     {
-        $lists = $this->redis::HGETALL('page:' . $uid);
-        if (empty($lists)) {
+        $data = $this->redis::HGETALL('page:' . $uid);
+        if (empty($data)) {
             $where[] = ['user_id', '=', $uid];
             $where[] = ['is_delete', '=', 0];
             $lists = $this->pageModel->where($where)->select('id', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
@@ -39,10 +39,12 @@ class PageService extends Service
                 unset($v['head_config']);
                 $this->redis::HSET('page:' . $uid, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
-            $lists = json_encode($lists);
+            $data = $this->redis::HGETALL('page:' . $uid);
         }
-        $data['lists'] = json_decode($lists, true);
-        return $data;
+        foreach ($data as $k => &$v) {
+            $v = json_decode($v, true);
+        }
+        return ['lists' => array_values($data)];
     }
 
     public function info($id)
