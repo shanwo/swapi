@@ -48,13 +48,15 @@ Route::prefix('template')->group(function () {
     Route::get('lists', 'TemplateController@lists');
     Route::get('info', 'TemplateController@info');
 });
-
 //链接
 Route::prefix('link')->group(function () {
     Route::get('lists', 'LinkController@lists');
     Route::get('info', 'LinkController@info');
 });
-
+//装饰
+Route::prefix('decoration')->group(function () {
+    Route::get('lists', 'DecorationController@lists');
+});
 //页面
 Route::prefix('page')->group(function () {
     Route::get('lists', 'PageController@lists');
