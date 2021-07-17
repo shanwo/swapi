@@ -21,24 +21,19 @@ class SortService extends Service
 
     public function lists($type)
     {
-        $sort = $this->redis::HGETALL('sort:' . $type);
-        if (!$sort) {
-            $this->setCache();
-            $sort = $this->redis::HGETALL('sort:' . $type);
+        $data = $this->redis::HGETALL('sort:' . $type);
+        if (!$data) {
+            $data = $this->sortModel->select('id', 'name', 'type')->get()->toArray();
+            foreach ($data as $k => $v) {
+                $type = $v['type'];
+                unset($v['type']);
+                $this->redis::HSET('sort:' . $type, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+            }
+            $data = $this->redis::HGETALL('sort:' . $type);
         }
-        foreach ($sort as $k => &$v) {
+        foreach ($data as $k => &$v) {
             $v = json_decode($v, true);
         }
-        return array_values($sort);
-    }
-
-    private function setCache()
-    {
-        $data = $this->sortModel->select('id', 'name', 'type')->get()->toArray();
-        foreach ($data as $k => $v) {
-            $type = $v['type'];
-            unset($v['type']);
-            $this->redis::HSET('sort:' . $type, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
-        }
+        return array_values($data);
     }
 }
