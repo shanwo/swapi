@@ -20,29 +20,19 @@ Route::get('MP_verify_wOQevRdcPyMeqMJL.txt', function () {
     return 'wOQevRdcPyMeqMJL';
 });
 
+Route::prefix('public')->group(function () {
 //文件上传
-Route::prefix('upload')->group(function () {
-    Route::post('file', 'UploadController@file');
-});
+    Route::post('upload', 'UploadController@file');
 //地区信息
-Route::prefix('area')->group(function () {
-    Route::get('lists', 'AreaController@lists');
-});
+    Route::get('area', 'AreaController@lists');
 //用户反馈
-Route::prefix('feedback')->group(function () {
-    Route::post('add', 'FeedbackController@add');
-});
+    Route::post('feedback', 'FeedbackController@add');
 //浏览记录
-Route::prefix('browse')->group(function () {
-    Route::get('lists', 'BrowseController@lists');
-});
+    Route::get('browse', 'BrowseController@lists');
 //装饰
-Route::prefix('decoration')->group(function () {
-    Route::get('lists', 'DecorationController@lists');
-});
+    Route::get('decoration', 'DecorationController@lists');
 //教程
-Route::prefix('tutorials')->group(function () {
-    Route::get('lists', 'TutorialsController@lists');
+    Route::get('tutorials', 'TutorialsController@lists');
 });
 //链接
 Route::prefix('link')->group(function () {
