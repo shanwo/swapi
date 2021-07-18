@@ -22,12 +22,12 @@ class TutorialsService extends Service
     public function lists($request, $sids = [])
     {
         $sort = $request->input('sort_id', 0);
-        $data = $this->hGetCache('link', $sort, $sids);
+        $data = $this->hGetCache('tutorials', $sort, $sids);
         if (!$data) {
             $where[] = ['is_delete', '=', 0];
             $data = $this->tutorialsModel->select('id', 'sort_id', 'name', 'image', 'created_at')->where($where)->get()->toArray();
-            $this->hSetCache('link', $data);
-            $data = $this->hGetCache('link', $sort, $sids);
+            $this->hSetCache('tutorials', $data);
+            $data = $this->hGetCache('tutorials', $sort, $sids);
         }
         foreach ($data as $k => &$v) {
             $v = json_decode($v, true);

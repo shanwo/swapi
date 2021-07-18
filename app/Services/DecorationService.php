@@ -25,12 +25,12 @@ class DecorationService extends Service
     public function lists($request, $sids = [])
     {
         $sort = $request->input('sort_id', 0);
-        $data = $this->hGetCache('template', $sort, $sids);
+        $data = $this->hGetCache('decoration', $sort, $sids);
         if (!$data) {
             $where[] = ['is_delete', '=', 0];
             $data = $this->decorationModel->select('id', 'sort_id', 'image')->where($where)->get()->toArray();
-            $this->hSetCache('template', $data);
-            $data = $this->hGetCache('template', $sort, $sids);
+            $this->hSetCache('decoration', $data);
+            $data = $this->hGetCache('decoration', $sort, $sids);
         }
         foreach ($data as $k => &$v) {
             $v = json_decode($v, true);
