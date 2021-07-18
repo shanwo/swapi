@@ -23,11 +23,11 @@ class SortService extends Service
     {
         $data = $this->redis::HGETALL('sort:' . $type);
         if (!$data) {
-            $data = $this->sortModel->select('id', 'name', 'type')->get()->toArray();
-            foreach ($data as $k => $v) {
-                $type = $v['type'];
+            $lists = $this->sortModel->select('id', 'name', 'type')->get()->toArray();
+            foreach ($lists as $k => $v) {
+                $tmp = $v['type'];
                 unset($v['type']);
-                $this->redis::HSET('sort:' . $type, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+                $this->redis::HSET('sort:' . $tmp, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
             $data = $this->redis::HGETALL('sort:' . $type);
         }
