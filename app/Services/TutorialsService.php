@@ -24,7 +24,7 @@ class TutorialsService extends Service
         $sort = $request->input('sort_id', 0);
         $data = $this->hGetCache('link', $sort, $sids);
         if (!$data) {
-            $where[] = ['is_delete', '=', 1];
+            $where[] = ['is_delete', '=', 0];
             $data = $this->tutorialsModel->select('id', 'sort_id', 'name', 'image', 'created_at')->where($where)->get()->toArray();
             $this->hSetCache('link', $data);
             $data = $this->hGetCache('link', $sort, $sids);

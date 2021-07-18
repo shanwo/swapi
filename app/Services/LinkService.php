@@ -24,7 +24,7 @@ class LinkService extends Service
         $sort = $request->input('sort_id', 0);
         $data = $this->hGetCache('link', $sort, $sids);
         if (!$data) {
-            $where[] = ['is_delete', '=', 1];
+            $where[] = ['is_delete', '=', 0];
             $data = $this->linkModel->select('id', 'sort_id', 'name', 'image', 'svg', 'url', 'created_at')->where($where)->get()->toArray();
             $this->hSetCache('link', $data);
             $data = $this->hGetCache('link', $sort, $sids);
