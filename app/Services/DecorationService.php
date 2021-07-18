@@ -8,17 +8,14 @@
 namespace App\Services;
 
 use App\Models\DecorationModel;
-use App\Models\SortModel;
 
 class DecorationService extends Service
 {
-    protected $sortModel;
     protected $decorationModel;
 
     public function __construct()
     {
         parent::__construct();
-        $this->sortModel = new SortModel();
         $this->decorationModel = new DecorationModel();
     }
 

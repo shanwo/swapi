@@ -7,18 +7,15 @@
 
 namespace App\Services;
 
-use App\Models\SortModel;
 use App\Models\TemplateModel;
 
 class TemplateService extends Service
 {
-    protected $sortModel;
     protected $templateModel;
 
     public function __construct()
     {
         parent::__construct();
-        $this->sortModel = new SortModel();
         $this->templateModel = new TemplateModel();
     }
 
