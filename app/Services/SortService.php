@@ -28,11 +28,14 @@ class SortService extends Service
                 $tmp = $v['type'];
                 unset($v['type']);
                 $this->redis::HSET('sort:' . $tmp, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+                if ($tmp == $type) {
+                    $data[] = $v;
+                }
             }
-            $data = $this->redis::HGETALL('sort:' . $type);
-        }
-        foreach ($data as $k => &$v) {
-            $v = json_decode($v, true);
+        } else {
+            foreach ($data as $k => &$v) {
+                $v = json_decode($v, true);
+            }
         }
         return array_values($data);
     }
