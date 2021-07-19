@@ -68,7 +68,12 @@ class PageService extends Service
         $head['badge']['image'] = $headConfig['badge'] ?? '';
         $head['pendant']['image'] = $headConfig['pendant'] ?? '';
         $center = json_decode($template['center_config'], true);
-        $center['button'] = $request->input('center_config');
+        foreach ($center as $k => $v) {
+            if (is_array($v)) {
+                $center[$k] = $request->input('center_config');
+                break;
+            }
+        }
         $insert = [
             'user_id'       => $uid,
             'template_id'   => $tid,
@@ -79,7 +84,12 @@ class PageService extends Service
         $bottomConfig = $request->input('bottom_config', []);
         if ($bottomConfig) {
             $bottom = json_decode($template['bottom_config'], true);
-            $bottom['icon'] = $bottomConfig;
+            foreach ($bottom as $k => $v) {
+                if (is_array($v)) {
+                    $bottom[$k] = $bottomConfig;
+                    break;
+                }
+            }
             $insert['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
         }
         $this->redis::HDEL('page:' . $uid);
@@ -91,7 +101,7 @@ class PageService extends Service
         $update = [];
         $id = $request->input('id');
         $info = $this->info($id);
-        $headConfig = $request->input('head_config', '');
+        $headConfig = $request->input('head_config', []);
         if ($headConfig) {
             $head = $info['head_config'];
             $head['avatar']['image'] = $headConfig['avatar'];
@@ -101,16 +111,26 @@ class PageService extends Service
             $head['pendant']['image'] = $headConfig['pendant'] ?? '';
             $update['head_config'] = json_encode($head, JSON_UNESCAPED_UNICODE);
         }
-        $centerConfig = $request->input('center_config', '');
+        $centerConfig = $request->input('center_config', []);
         if ($centerConfig) {
             $center = $info['center_config'];
-            $center['button'] = $centerConfig;
+            foreach ($center as $k => $v) {
+                if (is_array($v)) {
+                    $center[$k] = $centerConfig;
+                    break;
+                }
+            }
             $update['center_config'] = json_encode($center, JSON_UNESCAPED_UNICODE);
         }
-        $bottomConfig = $request->input('bottom_config', '');
+        $bottomConfig = $request->input('bottom_config', []);
         if ($bottomConfig) {
             $bottom = $info['bottom_config'];
-            $bottom['icon'] = $bottomConfig;
+            foreach ($bottom as $k => $v) {
+                if (is_array($v)) {
+                    $bottom[$k] = $bottomConfig;
+                    break;
+                }
+            }
             $update['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
         }
         $this->redis::HDEL('page:' . $info['user_id']);
