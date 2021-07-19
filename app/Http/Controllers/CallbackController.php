@@ -55,33 +55,36 @@ class CallbackController extends Controller
     /**
      * 微信登录
      {
-    "data": {
-        "id": "ontMB57lnxMnQG9e2TEnT4AssdiY",
-        "name": "神经蛙",
-        "nickname": "神经蛙",
-        "avatar": "https://thirdwx.qlogo.cn/mmopen/vi_32/Q3auHgzwzM5QQAfBvhib5F4yiaNgeWz1PWOvOsNqkMA4ic2PsIV7k6UFrglT57rUcHm57ekI7XUT4C8XaezGaPefQ/132",
-        "email": null,
-        "original": {
-            "openid": "ontMB57lnxMnQG9e2TEnT4AssdiY",
+        "data": {
+            "id": "ontMB57lnxMnQG9e2TEnT4AssdiY",
+            "name": "神经蛙",
             "nickname": "神经蛙",
-            "sex": 0,
-            "language": "",
-            "city": "",
-            "province": "",
-            "country": "",
-            "headimgurl": "https://thirdwx.qlogo.cn/mmopen/vi_32/Q3auHgzwzM5QQAfBvhib5F4yiaNgeWz1PWOvOsNqkMA4ic2PsIV7k6UFrglT57rUcHm57ekI7XUT4C8XaezGaPefQ/132",
-            "privilege": [],
-            "unionid": "oR6W450ByXNPA5Tu96jlle6yEV3I"
+            "avatar": "https://thirdwx.qlogo.cn/mmopen/vi_32/Q3auHgzwzM5QQAfBvhib5F4yiaNgeWz1PWOvOsNqkMA4ic2PsIV7k6UFrglT57rUcHm57ekI7XUT4C8XaezGaPefQ/132",
+            "email": null,
+            "original": {
+                "openid": "ontMB57lnxMnQG9e2TEnT4AssdiY",
+                "nickname": "神经蛙",
+                "sex": 0,
+                "language": "",
+                "city": "",
+                "province": "",
+                "country": "",
+                "headimgurl": "https://thirdwx.qlogo.cn/mmopen/vi_32/Q3auHgzwzM5QQAfBvhib5F4yiaNgeWz1PWOvOsNqkMA4ic2PsIV7k6UFrglT57rUcHm57ekI7XUT4C8XaezGaPefQ/132",
+                "privilege": [],
+                "unionid": "oR6W450ByXNPA5Tu96jlle6yEV3I"
+            },
+            "token": "47_gcQLnmoH9wwTBUDiIA0RwxxvJlTPBsf1pYI06ZgZ12RFuB9URWwS7e_1kHvtCiqDGIT-u88qd3XhIfl5ZK1j1DXLOS664xq65Pd6OtTynKw",
+            "access_token": "47_gcQLnmoH9wwTBUDiIA0RwxxvJlTPBsf1pYI06ZgZ12RFuB9URWwS7e_1kHvtCiqDGIT-u88qd3XhIfl5ZK1j1DXLOS664xq65Pd6OtTynKw",
+            "refresh_token": "47_KqXsRxX68KnPwQJTH6BryjiOiLQ5stilsLCXBe5PFGqfHdHCjHizbJQSTDNfkREF7UsAHqz6nCmYsZ9o9oKvjYNYsLDamNbyBO_s8k-8Fq0",
+            "provider": "WeChat"
         },
-        "token": "47_gcQLnmoH9wwTBUDiIA0RwxxvJlTPBsf1pYI06ZgZ12RFuB9URWwS7e_1kHvtCiqDGIT-u88qd3XhIfl5ZK1j1DXLOS664xq65Pd6OtTynKw",
-        "access_token": "47_gcQLnmoH9wwTBUDiIA0RwxxvJlTPBsf1pYI06ZgZ12RFuB9URWwS7e_1kHvtCiqDGIT-u88qd3XhIfl5ZK1j1DXLOS664xq65Pd6OtTynKw",
-        "refresh_token": "47_KqXsRxX68KnPwQJTH6BryjiOiLQ5stilsLCXBe5PFGqfHdHCjHizbJQSTDNfkREF7UsAHqz6nCmYsZ9o9oKvjYNYsLDamNbyBO_s8k-8Fq0",
-        "provider": "WeChat"
-    },
-    "code": 100,
-    "msg": null,
-    "uuid": "1ebe53e3-2d01-6c84-83b2-0242cb007103"
-}
+        "code": 100,
+        "msg": null,
+        "uuid": "1ebe53e3-2d01-6c84-83b2-0242cb007103"
+    }
+     *
+    //type:facebook,github,google,linkedin,weibo,qq,wechat,douban,wework,outlook,douyin,taobao,feishu
+    //secret:用户ID转为16进制后进行MD5加密，使用用户ID为key，加密结果为value转为json后使用type进行字符串加密
      */
     public function wechat()
     {
