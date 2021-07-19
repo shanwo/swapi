@@ -43,4 +43,9 @@ class CallbackService extends Service
         }
         return $auth;
     }
+
+    public function token($uid,$type)
+    {
+        return '';
+    }
 }

@@ -110,6 +110,10 @@ class CallbackController extends Controller
         }
         $user = $this->driver($this->request, 'wechat')->stateless()->user();
         $data = $this->callbackService->login($watermark, $user);
+        $token = $this->callbackService->token($data['uid'], 'wechat');
+//        if (!empty($data['uid'])) {
+//            return redirect('https://wzxaini9.cn/user/login/thirdPartyLogin?token=' . $token, 301);
+//        }
         return $this->returnApi($data);
     }
 
