@@ -7,19 +7,19 @@
 
 namespace App\Services;
 
+use App\Models\AreaModel;
 use App\Models\UserModel;
-use App\Models\UserThirdModel;
 
 class UserService extends Service
 {
+    protected $areaModel;
     protected $userModel;
-    protected $userThirdModel;
 
     public function __construct()
     {
         parent::__construct();
+        $this->areaModel = new AreaModel();
         $this->userModel = new UserModel();
-        $this->userThirdModel = new UserThirdModel();
     }
 
     public function info($id)
@@ -27,13 +27,18 @@ class UserService extends Service
         return $this->userModel->whereKey($id)->first();
     }
 
-    public function add()
+    public function edit($request, $id)
     {
-
-    }
-
-    public function edit($request)
-    {
-        return $request;
+        $aid = $request->input('area_id');
+        $area = $this->areaModel->whereKey($aid)->first();
+        $update = [
+            'nickname'    => $request->input('nickname'),
+            'sex'         => $request->input('nickname'),
+            'avatar'      => $request->input('avatar'),
+            'area_id'     => $aid,
+            'merger_name' => $area['merger_name'],
+            'contact'     => $request->input('nickname'),
+        ];
+        return $this->userModel->whereKey($id)->update($update);
     }
 }

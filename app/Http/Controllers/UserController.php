@@ -22,8 +22,6 @@ class UserController extends Controller
         $this->userService = new UserService();
     }
 
-    //type:facebook,github,google,linkedin,weibo,qq,wechat,douban,wework,outlook,douyin,taobao,feishu
-    //secret:用户ID转为16进制后进行MD5加密，使用用户ID为key，加密结果为value转为json后使用type进行字符串加密
     public function signIn()
     {
         $this->validate([
@@ -64,14 +62,14 @@ class UserController extends Controller
     public function info()
     {
         $this->validate([
-            'id' => 'required|integer|gt:0|exists:sw_user,id',
+            'id' => 'nullable|integer|gt:0|exists:sw_user,id',
         ], [
             'id' => 'ID',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $id = $this->request->input('id');
+        $id = $this->request->input('id', $this->uid);
         $data = $this->userService->info($id);
         $this->code = 200;
         return $this->returnApi($data);
@@ -86,7 +84,7 @@ class UserController extends Controller
             'sex'            => 'nullable|integer|between:0,2',
             'birthday'       => 'nullable|date_format:Y-m-d',
             'contact'        => 'required|array',
-            'contact.wechat' => 'required|string|between:6,20',
+            'contact.wechat' => 'required|alpha_dash|between:6,20',
             'contact.phone'  => 'required|integer|between:13000000000,19999999999',
         ], [
             'area_id'        => '省市区',
@@ -101,7 +99,7 @@ class UserController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->userService->edit($this->request);
+        $data = $this->userService->edit($this->request, $this->uid);
         $this->code = 200;
         return $this->returnApi($data);
     }
