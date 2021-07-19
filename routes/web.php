@@ -33,11 +33,8 @@ Route::prefix('public')->group(function () {
     Route::get('decoration', 'DecorationController@lists');
 //教程
     Route::get('tutorials', 'TutorialsController@lists');
-});
 //链接
-Route::prefix('link')->group(function () {
-    Route::get('lists', 'LinkController@lists');
-    Route::get('info', 'LinkController@info');
+    Route::get('link', 'LinkController@lists');
 });
 //模板
 Route::prefix('template')->group(function () {

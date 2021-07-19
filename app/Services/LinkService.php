@@ -34,10 +34,4 @@ class LinkService extends Service
         }
         return array_values($data);
     }
-
-
-    public function info($id)
-    {
-        return $this->linkModel->whereKey($id)->first();
-    }
 }
