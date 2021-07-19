@@ -28,7 +28,7 @@ class PageService extends Service
         if (empty($data)) {
             $where[] = ['user_id', '=', $uid];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->where($where)->select('id', 'follow', 'is_open', 'head_config', 'created_at')->get()->toArray();
+            $lists = $this->pageModel->select('id', 'follow', 'is_open', 'head_config', 'created_at')->where($where)->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $config = json_decode($v['head_config'], true);
                 $v['avatar'] = $config['avatar']['image'];
