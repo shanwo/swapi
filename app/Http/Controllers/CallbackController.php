@@ -9,7 +9,6 @@ namespace App\Http\Controllers;
 
 use App\Services\CallbackService;
 use Illuminate\Http\Request;
-use Overtrue\Socialite\SocialiteManager;
 
 class CallbackController extends Controller
 {
