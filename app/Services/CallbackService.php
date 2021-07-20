@@ -9,17 +9,20 @@ namespace App\Services;
 
 use App\Models\UserModel;
 use App\Models\UserThirdModel;
+use App\Models\UserTokenModel;
 
 class CallbackService extends Service
 {
     protected $userModel;
     protected $userThirdModel;
+    protected $userTokenModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->userModel = new UserModel();
         $this->userThirdModel = new UserThirdModel();
+        $this->userTokenModel = new UserTokenModel();
     }
 
 
@@ -46,6 +49,23 @@ class CallbackService extends Service
 
     public function token($uid,$type)
     {
-        return '';
+        $where[] = ['user_id', '=', $uid];
+        $where[] = ['device_type', '=', $type];
+        $token = $this->userTokenModel->where($where)->first(['id', 'expire_time', 'token']);
+        $time = time();
+        $data['expire_time'] = $time + (60 * 60 * 24 * 180);
+        $data['token'] = md5(uniqid()) . md5(uniqid());
+        if ($token) {
+            if ($token['expire_time'] > $time) {
+                $data['token'] = $token['token'];
+            }
+            $this->userTokenModel->whereKey($token['id'])->update($data);
+        } else {
+            $data['user_id'] = $uid;
+            $data['device_type'] = $type;
+            $data['create_time'] = $time;
+            $this->userTokenModel->insertGetId($data);
+        }
+        return $data['token'];
     }
 }

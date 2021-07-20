@@ -22,36 +22,94 @@ class CallbackController extends Controller
 
     }
 
+    private function driver($request, $name)
+    {
+        $config = $this->service->configInfo($name);
+        $socialite = new SocialiteManager([
+            $name => [
+                'client_id'     => $config['key'],
+                'client_secret' => $config['secret'],
+                'redirect'      => $config['callback'],
+            ],
+        ], $request);
+        return $socialite->driver($name);
+    }
+
+    private function getUser($state, $name)
+    {
+        $info = [];
+        if ($state) {
+            $info['ip'] = $this->request->ip();
+            $info['time'] = time();
+            $info['uid'] = $this->service->redis::GET('login:' . $name . ':' . $state);
+            $this->service->redis::DEL('login:' . $name . ':' . $state);
+        }
+        return $info;
+    }
+
+    /**
+     * 第三方登录回调
+     */
+    public function douban()
+    {
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
+    }
+    public function douyin()
+    {
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
+    }
     public function facebook()
     {
-
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
     }
-
+    public function feishu()
+    {
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
+    }
     public function github()
     {
-
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
     }
-
     public function google()
     {
-
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
     }
-
     public function linkedin()
     {
-
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
     }
-
-    public function weibo()
+    public function outlook()
     {
-
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
     }
-
     public function qq()
     {
-
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
     }
-
+    public function taobao()
+    {
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
+    }
     /**
      * 微信登录
      {
@@ -98,70 +156,31 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $watermark = null;
+        $type = 'wechat';
         $state = $this->request->input('state', 0);
-        if ($state) {
-            $watermark['ip'] = $this->request->ip();
-            $watermark['time'] = time();
-            $watermark['uid'] = $this->service->redis::get('login:wechat:' . $state);
-            $this->service->redis::del('login:wechat:' . $state);
-        } else {
-            $this->msg = '绑定成功';
-        }
-        $user = $this->driver($this->request, 'wechat')->stateless()->user();
-        $data = $this->callbackService->login($watermark, $user);
-        $token = $this->callbackService->token($data['uid'], 'wechat');
-//        if (!empty($data['uid'])) {
-//            return redirect('https://wzxaini9.cn/user/login/thirdPartyLogin?token=' . $token, 301);
-//        }
+        $user = $this->driver($this->request, $type)->stateless()->user();
+        $data = $this->callbackService->login($this->getUser($state,$type), $user);
+        $data['token'] = $this->callbackService->token($data['uid'], $type);
         return $this->returnApi($data);
     }
-
-    public function douban()
+    public function weibo()
     {
-
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
     }
-
     public function wework()
     {
-
+        $this->code = 400;
+        $this->msg = '暂未开通此平台登录';
+        return $this->returnApi();
     }
 
-    public function outlook()
-    {
-
-    }
-
-    public function douyin()
-    {
-
-    }
-
-    public function taobao()
-    {
-
-    }
-
-    public function feishu()
-    {
-
-    }
-
+    /**
+     * 支付回调
+     */
     public function pay()
     {
 
-    }
-
-    private function driver($request, $name)
-    {
-        $config = $this->service->configInfo($name);
-        $socialite = new SocialiteManager([
-            $name => [
-                'client_id'     => $config['key'],
-                'client_secret' => $config['secret'],
-                'redirect'      => $config['callback'],
-            ],
-        ], $request);
-        return $socialite->driver($name);
     }
 }

@@ -69,19 +69,19 @@ Route::prefix('user')->group(function () {
 });
 //回调
 Route::prefix('callback')->group(function () {
-    Route::get('facebook', 'callback@facebook');
-    Route::get('github', 'callback@github');
-    Route::get('google', 'callback@google');
-    Route::get('linkedin', 'callback@linkedin');
-    Route::get('weibo', 'callback@weibo');
-    Route::get('qq', 'callback@qq');
-    Route::get('wechat', 'callback@wechat');
-    Route::get('douban', 'callback@douban');
-    Route::get('wework', 'callback@wework');
-    Route::get('outlook', 'callback@outlook');
-    Route::get('douyin', 'callback@douyin');
-    Route::get('taobao', 'callback@taobao');
-    Route::get('feishu', 'callback@feishu');
+    Route::get('douban', 'CallbackController@douban');
+    Route::get('douyin', 'CallbackController@douyin');
+    Route::get('facebook', 'CallbackController@facebook');
+    Route::get('feishu', 'CallbackController@feishu');
+    Route::get('github', 'CallbackController@github');
+    Route::get('google', 'CallbackController@google');
+    Route::get('linkedin', 'CallbackController@linkedin');
+    Route::get('outlook', 'CallbackController@outlook');
+    Route::get('qq', 'CallbackController@qq');
+    Route::get('taobao', 'CallbackController@taobao');
+    Route::get('wechat', 'CallbackController@wechat');
+    Route::get('weibo', 'CallbackController@weibo');
+    Route::get('wework', 'CallbackController@wework');
 });
 //测试接口
 Route::prefix('test')->group(function () {
