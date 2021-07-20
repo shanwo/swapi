@@ -23,7 +23,7 @@ class BrowseService extends Service
     public function lists($request, $uid)
     {
         $page = $request->input('page', $this->page);
-        $lists = $this->redis::GET('attention:' . $page);
+        $lists = $this->redis::GET('browse:' . $page);
         if (empty($lists)) {
             $where[] = ['sa.status', '=', 1];
             $pid = $request->input('page_id', 0);
@@ -51,7 +51,7 @@ class BrowseService extends Service
                 }
             }
             $lists = json_encode($lists);
-            $this->setData('attention:' . $page, $lists);
+            $this->setData('browse:' . $page, $lists);
         }
         $data['page'] = (int)$page;
         $data['size'] = $this->size;

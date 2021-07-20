@@ -19,6 +19,7 @@ class AttentionService extends Service
         $this->attentionModel = new AttentionModel();
     }
 
+    //使用zset
     public function lists($request, $uid)
     {
         $page = $request->input('page', $this->page);

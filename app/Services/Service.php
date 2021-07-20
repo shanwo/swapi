@@ -63,4 +63,13 @@ class Service
             $this->redis::HSET($key . ':' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
         }
     }
+
+    protected function setData($key, $data)
+    {
+        if ($data) {
+            $this->redis::SET($key, $data);
+        } else {
+            $this->redis::SETEX($key, $this->timeOut, $data);
+        }
+    }
 }
