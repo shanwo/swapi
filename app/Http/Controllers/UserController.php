@@ -71,6 +71,7 @@ class UserController extends Controller
         }
         $id = $this->request->input('id', $this->uid);
         $data = $this->userService->info($id);
+//        $data['binding'] = $this->bindingSecret($id);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -102,5 +103,25 @@ class UserController extends Controller
         $data = $this->userService->edit($this->request, $this->uid);
         $this->code = 200;
         return $this->returnApi($data);
+    }
+
+    private function bindingSecret($id)
+    {
+        $secret = json_encode([$id => md5(dechex($id))]);
+        return [
+            'douban'   => $this->passportEncrypt($secret, 'douban'),
+            'douyin'   => $this->passportEncrypt($secret, 'douyin'),
+            'facebook' => $this->passportEncrypt($secret, 'facebook'),
+            'feishu'   => $this->passportEncrypt($secret, 'feishu'),
+            'github'   => $this->passportEncrypt($secret, 'github'),
+            'google'   => $this->passportEncrypt($secret, 'google'),
+            'linkedin' => $this->passportEncrypt($secret, 'linkedin'),
+            'outlook'  => $this->passportEncrypt($secret, 'outlook'),
+            'qq'       => $this->passportEncrypt($secret, 'qq'),
+            'taobao'   => $this->passportEncrypt($secret, 'taobao'),
+            'wechat'   => $this->passportEncrypt($secret, 'wechat'),
+            'weibo'    => $this->passportEncrypt($secret, 'weibo'),
+            'wework'   => $this->passportEncrypt($secret, 'wework'),
+        ];
     }
 }
