@@ -10,7 +10,6 @@ namespace App\Http\Controllers;
 
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Overtrue\Socialite\SocialiteManager;
 
 class UserController extends Controller
 {
@@ -35,15 +34,7 @@ class UserController extends Controller
             return $this->returnApi();
         }
         $type = $this->request->input('type');
-        $config = $this->service->configInfo($type);
-        $socialite = new SocialiteManager([
-            $type => [
-                'client_id'     => $config['key'],
-                'client_secret' => $config['secret'],
-                'redirect'      => $config['callback'],
-            ],
-        ], $this->request);
-        $data = $socialite->driver($type)->redirect();
+        $data = $this->driver($this->request, $type)->redirect();
         $secret = $this->request->input('secret', '');
         if ($secret) {
             $auth = $this->passportDecrypt($secret, $type);

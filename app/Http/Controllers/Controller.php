@@ -12,6 +12,7 @@ use GuzzleHttp\Client;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
+use Overtrue\Socialite\SocialiteManager;
 use Ramsey\Uuid\Uuid;
 
 class Controller extends BaseController
@@ -187,5 +188,18 @@ class Controller extends BaseController
             $tmp .= $str[$i] ^ $encrypt_key[$ctr++];
         }
         return $tmp;
+    }
+
+    protected function driver($request, $name)
+    {
+        $config = $this->service->configInfo($name);
+        $socialite = new SocialiteManager([
+            $name => [
+                'client_id'     => $config['key'],
+                'client_secret' => $config['secret'],
+                'redirect'      => $config['callback'],
+            ],
+        ], $request);
+        return $socialite->driver($name);
     }
 }
