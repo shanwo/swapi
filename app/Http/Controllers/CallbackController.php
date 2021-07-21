@@ -23,10 +23,9 @@ class CallbackController extends Controller
 
     private function getUser($state, $name)
     {
-        $info = [];
+        $info['ip'] = $this->request->ip();
+        $info['time'] = time();
         if ($state) {
-            $info['ip'] = $this->request->ip();
-            $info['time'] = time();
             $info['uid'] = $this->service->redis::GET('login:' . $name . ':' . $state);
             $this->service->redis::DEL('login:' . $name . ':' . $state);
         }
