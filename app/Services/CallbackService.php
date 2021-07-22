@@ -46,15 +46,22 @@ class CallbackService extends Service
             $this->userThirdModel->whereKey($tid)->update($update);
         } else {
             $original = $data['original'];
+            $token = md5(uniqid()) . md5(uniqid());
             if (!$uid) {
                 $insertUser = [
-                    'nickname' => htmlspecialchars($original['nickname']),
-                    'sex'      => $original['sex'],
-                    'avatar'   => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
+                    'nickname'  => htmlspecialchars($original['nickname']),
+                    'sex'       => $original['sex'],
+                    'avatar'    => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
+                    'api_token' => $token
                 ];
                 $uid = $this->userModel->insertGetId($insertUser);
                 $insertUser['id'] = $uid;
                 $this->pageService->initial($this->templateId, $insertUser);
+            } else {
+                $updateUser = [
+                    'api_token' => $token
+                ];
+                $this->userModel->whereKey($uid)->update($updateUser);
             }
             $insertThird = [
                 'user_id'  => $uid,
