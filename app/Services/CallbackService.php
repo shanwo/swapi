@@ -12,13 +12,16 @@ use App\Models\UserThirdModel;
 
 class CallbackService extends Service
 {
+    protected $templateId = 1;
     protected $userModel;
+    protected $pageService;
     protected $userThirdModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->userModel = new UserModel();
+        $this->pageService = new PageService();
         $this->userThirdModel = new UserThirdModel();
     }
 
@@ -45,11 +48,13 @@ class CallbackService extends Service
             $original = $data['original'];
             if (!$uid) {
                 $insertUser = [
-                    'nickname'  => htmlspecialchars($original['nickname']),
-                    'sex'       => $original['sex'],
-                    'avatar'    => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
+                    'nickname' => htmlspecialchars($original['nickname']),
+                    'sex'      => $original['sex'],
+                    'avatar'   => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
                 ];
                 $uid = $this->userModel->insertGetId($insertUser);
+                $insertUser['id'] = $uid;
+                $this->pageService->initial($this->templateId, $insertUser);
             }
             $insertThird = [
                 'user_id'  => $uid,

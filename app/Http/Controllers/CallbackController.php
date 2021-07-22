@@ -8,19 +8,15 @@
 namespace App\Http\Controllers;
 
 use App\Services\CallbackService;
-use App\Services\PageService;
 use Illuminate\Http\Request;
 
 class CallbackController extends Controller
 {
-    protected $templateId = 1;
-    protected $pageService;
     protected $callbackService;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
-        $this->pageService = new PageService();
         $this->callbackService = new CallbackService();
 
     }
@@ -207,9 +203,6 @@ class CallbackController extends Controller
         if($data['msg']){
             $this->msg = $data['msg'];
         }else{
-            if(!$this->uid){
-                $this->pageService->initial($this->templateId,$data);
-            }
             $this->service->redis::setex('user:'. $data['api_token'], 60 * 60 * 24 * 180, json_encode($data,JSON_UNESCAPED_UNICODE));
             $this->code = 200;
         }
