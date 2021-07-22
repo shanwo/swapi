@@ -62,6 +62,42 @@ class PageService extends Service
         return $info;
     }
 
+    public function initial($tid, $user)
+    {
+        $incLcIds = $incLbIds = [];
+        $template = $this->templateModel->whereKey($tid)->first();
+        $head = json_decode($template['head_config'], true);
+        $head['avatar']['image'] = $user['avatar'];
+        $head['nickname']['content'] = $user['nickname'];
+        $center = json_decode($template['center_config'], true);
+        foreach ($center as $k => $v) {
+            if (is_array($v)) {
+                $incLcIds = array_column($v, 'id');
+                break;
+            }
+        }
+        $bottom = json_decode($template['bottom_config'], true);
+        foreach ($bottom as $k => $v) {
+            if (is_array($v)) {
+                $incLbIds = array_column($v, 'id');
+                break;
+            }
+        }
+        $insert = [
+            'user_id'       => $user['id'],
+            'template_id'   => $tid,
+            'background'    => $template['background'],
+            'head_config'   => json_encode($head, JSON_UNESCAPED_UNICODE),
+            'center_config' => $template['center_config'],
+            'bottom_config' => $template['bottom_config']
+        ];
+        $this->redis::HDEL('page:' . $user['id']);
+        $this->linkModel->whereIn('id', $incLcIds)->increment('number');
+        $this->linkModel->whereIn('id', $incLbIds)->increment('number');
+        $this->userModel->whereKey($user['id'])->increment('pages');
+        return $this->pageModel->insertGetId($insert);
+    }
+
     public function add($request, $uid)
     {
         $incLcIds = $incLbIds = [];
