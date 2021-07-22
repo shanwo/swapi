@@ -210,13 +210,13 @@ class CallbackController extends Controller
         $user['ip'] = $this->request->ip();
         $user['time'] = time();
         $data = $this->callbackService->wechat($this->uid, $user);
-        if ($data['msg']) {
-            $this->msg = $data['msg'];
-        } else {
+        if (empty($data['msg'])) {
             $arr = [$data['id'] => md5(dechex($data['id']))];
             $this->service->redis::setex('token:' . $data['api_token'], 60 * 60 * 24 * 180, json_encode($arr));
             $this->service->redis::setex('user:' . $data['id'], 60 * 60 * 24 * 180, json_encode($data, JSON_UNESCAPED_UNICODE));
             $this->code = 200;
+        } else {
+            $this->msg = $data['msg'];
         }
         return $this->returnApi($data);
     }
