@@ -32,11 +32,22 @@ class Controller extends BaseController
     ];
     protected $uid = 1;
     private $writeUrl = [
-        'template/lists',
-        'template/info',
-        'page/lists',
-        'page/info',
-        'page/add',
+        'home/hot',
+        'home/recent',
+        'home/info',
+        'callback/douban',
+        'callback/douyin',
+        'callback/facebook',
+        'callback/feishu',
+        'callback/github',
+        'callback/google',
+        'callback/linkedin',
+        'callback/outlook',
+        'callback/qq',
+        'callback/taobao',
+        'callback/wechat',
+        'callback/weibo',
+        'callback/wework',
     ];
 
     public function __construct($request)
@@ -44,9 +55,9 @@ class Controller extends BaseController
         $this->request = $request;
         $this->client = new Client();
         $this->service = new Service();
-//        if (in_array($this->request->path(), !$this->writeUrl)) {
-//            $this->validateToken();
-//        }
+        if (!in_array($this->request->path(), $this->writeUrl)) {
+            $this->validateToken();
+        }
     }
 
     /**
@@ -91,12 +102,14 @@ class Controller extends BaseController
         $this->code = 400;
         $token = $this->request->header();
         if ($token) {
-            $auth = $this->service->redis::GET('user:' . $token);
+            $auth = $this->service->redis::GET('token:' . $token);
             if ($auth) {
                 $arr = json_decode($auth, true) ?? [];
                 foreach ($arr as $k => $v) {
                     if ($v == md5(dechex($k))) {
-                        $this->uid = $k;
+                        $json = $this->service->redis::GET('user:' . $k);
+                        $user = json_decode($json, true);
+                        $this->uid = $user['id'];
                     }
                 }
             }
