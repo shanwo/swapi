@@ -49,6 +49,10 @@ class Controller extends BaseController
         'callback/wechat',
         'callback/weibo',
         'callback/wework',
+        'test/check',
+        'test/info',
+        'test/all',
+        'test/image',
     ];
 
     public function __construct($request)
@@ -102,23 +106,21 @@ class Controller extends BaseController
     {
         $this->code = 400;
         $token = $this->request->bearerToken();
-        if ($token) {
-            $auth = $this->service->redis::GET('token:' . $token);
-            if ($auth) {
-                $arr = json_decode($auth, true) ?? [];
-                foreach ($arr as $k => $v) {
-                    if ($v == md5(dechex($k))) {
-                        $json = $this->service->redis::GET('user:' . $k);
-                        $user = json_decode($json, true);
-                        $this->uid = $user['id'];
-                    }
+        $auth = $this->service->redis::GET('token:' . $token);
+        if ($auth) {
+            $arr = json_decode($auth, true) ?? [];
+            foreach ($arr as $k => $v) {
+                if ($v == md5(dechex($k))) {
+                    $json = $this->service->redis::GET('user:' . $k);
+                    $user = json_decode($json, true);
+                    $this->uid = $user['id'];
                 }
             }
-            if (!$this->uid) {
-                $this->code = 300;
-                $this->msg = '当前账户异常，请重新登录';
-                return $this->returnApi();
-            }
+        }
+        if (!$this->uid) {
+            $this->code = 300;
+            $this->msg = '当前账户异常，请重新登录';
+            return $this->returnApi();
         }
     }
 
