@@ -43,6 +43,7 @@ class CallbackService extends Service
                 'logins_number' => $userThird['logins_number'] + 1
             ];
             $tid = $userThird['id'];
+            $uid = $userThird['user_id'];
             $this->userThirdModel->whereKey($tid)->update($update);
         } else {
             $original = $data['original'];
