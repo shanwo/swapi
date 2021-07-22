@@ -49,10 +49,10 @@ class Controller extends BaseController
         'callback/wechat',
         'callback/weibo',
         'callback/wework',
+        'test/image',
         'test/check',
         'test/info',
         'test/all',
-        'test/image',
     ];
 
     public function __construct($request)
