@@ -23,13 +23,10 @@ class CallbackController extends Controller
 
     private function getUser($state, $name)
     {
-        $info['ip'] = $this->request->ip();
-        $info['time'] = time();
         if ($state) {
-            $info['uid'] = $this->service->redis::GET('login:' . $name . ':' . $state);
+            $this->uid = $this->service->redis::GET('login:' . $name . ':' . $state);
             $this->service->redis::DEL('login:' . $name . ':' . $state);
         }
-        return $info;
     }
 
     /**
@@ -197,11 +194,12 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $type = 'wechat';
         $state = $this->request->input('state', 0);
-        $auth = $this->getUser($state,$type);
-        $user = $this->driver($this->request, $type)->stateless()->user();
-        $data = $this->callbackService->wechat($auth, $user);
+        $this->getUser($state,'wechat');
+        $user = $this->driver($this->request, 'wechat')->stateless()->user();
+        $user['ip'] = $this->request->ip();
+        $user['time'] = time();
+        $data = $this->callbackService->wechat($this->uid, $user);
         $this->code = 200;
         return $this->returnApi($data);
     }
