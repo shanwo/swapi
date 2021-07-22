@@ -48,7 +48,6 @@ class CallbackService extends Service
                     'nickname'  => htmlspecialchars($original['nickname']),
                     'sex'       => $original['sex'],
                     'avatar'    => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
-                    'api_token' => md5(uniqid()) . md5(uniqid())
                 ];
                 $uid = $this->userModel->insertGetId($insertUser);
             }
