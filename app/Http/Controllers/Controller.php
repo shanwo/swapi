@@ -31,7 +31,6 @@ class Controller extends BaseController
         400 => 'notice',
     ];
     protected $uid = 1;
-    protected $wxapi = "https://api.weixin.qq.com/";
     private $writeUrl = [
         'template/lists',
         'template/info',
@@ -92,46 +91,21 @@ class Controller extends BaseController
         $this->code = 400;
         $token = $this->request->header();
         if ($token) {
-            $this->getUserId($token);
-        }
-    }
-
-    protected function getUserId($token)
-    {
-        $auth = $this->service->redis::GET('user:' . $token);
-        if ($auth) {
-            $arr = json_decode($auth, true) ?? [];
-            foreach ($arr as $k => $v) {
-                if ($v == md5(dechex($k))) {
-                    $this->uid = $k;
+            $auth = $this->service->redis::GET('user:' . $token);
+            if ($auth) {
+                $arr = json_decode($auth, true) ?? [];
+                foreach ($arr as $k => $v) {
+                    if ($v == md5(dechex($k))) {
+                        $this->uid = $k;
+                    }
                 }
             }
+            if (!$this->uid) {
+                $this->code = 300;
+                $this->msg = '当前账户异常，请重新登录';
+                return $this->returnApi();
+            }
         }
-        if (!$this->uid) {
-            $this->code = 300;
-            $this->msg = '当前账户异常，请重新登录';
-            return $this->returnApi();
-        }
-    }
-
-    public function getSession($appId, $secret, $jsCode)
-    {
-        $array = [
-            'appid'      => $appId,
-            'secret'     => $secret,
-            'js_code'    => $jsCode,
-            'grant_type' => 'authorization_code'
-        ];
-        $param = http_build_query($array);
-        $url = $this->wxapi . 'sns/jscode2session?' . $param;
-        $form['timeout'] = 3;
-        $body = null;
-        $api = $this->client->get($url, $form);
-        if ($api->getStatusCode() == 200) {
-            $body = $api->getBody()->getContents();
-            $body = json_decode($body, true);
-        }
-        return $body;
     }
 
     /**
