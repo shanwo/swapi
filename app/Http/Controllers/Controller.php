@@ -101,7 +101,7 @@ class Controller extends BaseController
     private function validateToken()
     {
         $this->code = 400;
-        $token = $this->request->header();
+        $token = $this->request->bearerToken();
         if ($token) {
             $auth = $this->service->redis::GET('token:' . $token);
             if ($auth) {
