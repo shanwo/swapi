@@ -45,23 +45,22 @@ class CallbackService extends Service
             $original = $data['original'];
             if (!$uid) {
                 $insertUser = [
-                    'nickname'      => htmlspecialchars($original['nickname']),
-                    'sex'           => $original['sex'],
-                    'avatar'        => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
-                    'last_login_ip' => $data['ip'],
-                    'api_token'     => md5(uniqid()) . md5(uniqid())
+                    'nickname'  => htmlspecialchars($original['nickname']),
+                    'sex'       => $original['sex'],
+                    'avatar'    => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
+                    'api_token' => md5(uniqid()) . md5(uniqid())
                 ];
                 $uid = $this->userModel->insertGetId($insertUser);
             }
             $insertThird = [
-                'user_id'       => $uid,
-                'nickname'      => htmlspecialchars($original['nickname']),
-                'union_id'      => $original['unionid'],
-                'openid'        => $original['openid'],
-                'source'        => $configName,
-                'app_id'        => $config['key'],
-                'last_login_ip' => $data['ip'],
-                'original'      => json_encode($data['original'])
+                'user_id'  => $uid,
+                'nickname' => htmlspecialchars($original['nickname']),
+                'union_id' => $original['unionid'],
+                'openid'   => $original['openid'],
+                'source'   => $configName,
+                'app_id'   => $config['key'],
+                'login_ip' => $data['ip'],
+                'original' => json_encode($data['original'])
             ];
             $tid = $this->userThirdModel->insertGetId($insertThird);
         }

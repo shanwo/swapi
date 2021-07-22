@@ -200,7 +200,12 @@ class CallbackController extends Controller
         $user['ip'] = $this->request->ip();
         $user['time'] = time();
         $data = $this->callbackService->wechat($this->uid, $user);
-        $this->code = 200;
+        if($data['msg']){
+            $this->msg = $data['msg'];
+        }else{
+            $this->service->redis::setex('user:'. $data['api_token'], 60 * 60 * 24 * 180, json_encode($data,JSON_UNESCAPED_UNICODE));
+            $this->code = 200;
+        }
         return $this->returnApi($data);
     }
     public function weibo()
