@@ -114,7 +114,7 @@ class PageService extends Service
         foreach ($center as $k => $v) {
             if (is_array($v)) {
                 $center[$k] = $request->input('center_config');
-                $incLcIds = array_column($center[$k],'id');
+                $incLcIds = array_column($center[$k], 'id');
                 break;
             }
         }
@@ -131,15 +131,15 @@ class PageService extends Service
             foreach ($bottom as $k => $v) {
                 if (is_array($v)) {
                     $bottom[$k] = $bottomConfig;
-                    $incLbIds = array_column($bottom[$k],'id');
+                    $incLbIds = array_column($bottom[$k], 'id');
                     break;
                 }
             }
             $insert['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
         }
         $this->redis::HDEL('page:' . $uid);
-        $this->linkModel->whereIn('id',$incLcIds)->increment('number');
-        $this->linkModel->whereIn('id',$incLbIds)->increment('number');
+        $this->linkModel->whereIn('id', $incLcIds)->increment('number');
+        $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->userModel->whereKey($uid)->increment('pages');
         return $this->pageModel->insertGetId($insert);
     }
@@ -165,8 +165,8 @@ class PageService extends Service
             foreach ($center as $k => $v) {
                 if (is_array($v)) {
                     $center[$k] = $centerConfig;
-                    $incLcIds = array_column($center[$k],'id');
-                    $decLcIds = array_column($center[$k],'id');
+                    $incLcIds = array_column($center[$k], 'id');
+                    $decLcIds = array_column($center[$k], 'id');
                     break;
                 }
             }
@@ -178,18 +178,18 @@ class PageService extends Service
             foreach ($bottom as $k => $v) {
                 if (is_array($v)) {
                     $bottom[$k] = $bottomConfig;
-                    $incLbIds = array_column($bottom[$k],'id');
-                    $decLbIds = array_column($bottom[$k],'id');
+                    $incLbIds = array_column($bottom[$k], 'id');
+                    $decLbIds = array_column($bottom[$k], 'id');
                     break;
                 }
             }
             $update['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
         }
         $this->redis::HDEL('page:' . $info['user_id']);
-        $this->linkModel->whereIn('id',$incLcIds)->increment('number');
-        $this->linkModel->whereIn('id',$incLbIds)->increment('number');
-        $this->linkModel->whereIn('id',$decLcIds)->decrement('number');
-        $this->linkModel->whereIn('id',$decLbIds)->decrement('number');
+        $this->linkModel->whereIn('id', $incLcIds)->increment('number');
+        $this->linkModel->whereIn('id', $incLbIds)->increment('number');
+        $this->linkModel->whereIn('id', $decLcIds)->decrement('number');
+        $this->linkModel->whereIn('id', $decLbIds)->decrement('number');
         return $this->pageModel->whereKey($id)->update($update);
     }
 
@@ -201,7 +201,7 @@ class PageService extends Service
         $open = $request->input('is_open', '');
         if ($open) $update['is_open'] = $open;
         $delete = $request->input('is_delete', '');
-        if ($delete){
+        if ($delete) {
             $update['is_delete'] = $delete;
             $this->userModel->whereKey($uid)->decrement('pages');
         }
