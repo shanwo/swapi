@@ -30,7 +30,7 @@ class Controller extends BaseController
         300 => 'notice',
         400 => 'notice',
     ];
-    protected $uid = 1;
+    protected $uid = 0;
     private $writeUrl = [
         'home/hot',
         'home/recent',
