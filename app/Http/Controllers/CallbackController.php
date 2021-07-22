@@ -24,8 +24,8 @@ class CallbackController extends Controller
     private function getUser($state, $name)
     {
         if ($state) {
-            $this->uid = $this->service->redis::GET('login:' . $name . ':' . $state);
-            $this->service->redis::DEL('login:' . $name . ':' . $state);
+            $this->uid = $this->service->redis::GET('signIn:' . $name . ':' . $state);
+            $this->service->redis::DEL('signIn:' . $name . ':' . $state);
         }
     }
 
@@ -47,6 +47,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function douyin()
     {
         $this->validate([
@@ -62,6 +63,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function facebook()
     {
         $this->validate([
@@ -77,6 +79,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function feishu()
     {
         $this->validate([
@@ -92,6 +95,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function github()
     {
         $this->validate([
@@ -107,6 +111,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function google()
     {
         $this->validate([
@@ -122,6 +127,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function linkedin()
     {
         $this->validate([
@@ -137,6 +143,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function outlook()
     {
         $this->validate([
@@ -152,6 +159,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function qq()
     {
         $this->validate([
@@ -167,6 +175,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function taobao()
     {
         $this->validate([
@@ -182,6 +191,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function wechat()
     {
         $this->validate([
@@ -226,6 +236,7 @@ class CallbackController extends Controller
         $this->msg = '暂未开通此平台登录';
         return $this->returnApi();
     }
+
     public function wework()
     {
         $this->validate([
