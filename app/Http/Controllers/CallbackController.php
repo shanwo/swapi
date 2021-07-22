@@ -207,7 +207,9 @@ class CallbackController extends Controller
         if($data['msg']){
             $this->msg = $data['msg'];
         }else{
-            $this->pageService->initial($this->templateId,$data);
+            if(!$this->uid){
+                $this->pageService->initial($this->templateId,$data);
+            }
             $this->service->redis::setex('user:'. $data['api_token'], 60 * 60 * 24 * 180, json_encode($data,JSON_UNESCAPED_UNICODE));
             $this->code = 200;
         }
