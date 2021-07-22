@@ -29,7 +29,7 @@ class UserService extends Service
     {
         $info = $this->userModel->whereKey($id)->first();
         $info['contact'] = json_decode($info['contact'], true);
-        $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'last_login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
+        $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
         unset($info['api_token']);
         return $info;
     }
