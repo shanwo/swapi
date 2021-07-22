@@ -47,7 +47,7 @@ class CallbackService extends Service
                 $insertUser = [
                     'nickname'      => htmlspecialchars($original['nickname']),
                     'sex'           => $original['sex'],
-                    'avatar'        => $original['avatar'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
+                    'avatar'        => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
                     'last_login_ip' => $data['ip'],
                     'api_token'     => md5(uniqid()) . md5(uniqid())
                 ];
