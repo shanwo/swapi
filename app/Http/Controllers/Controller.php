@@ -35,6 +35,7 @@ class Controller extends BaseController
         'home/hot',
         'home/recent',
         'home/info',
+        'user/signIn',
         'callback/douban',
         'callback/douyin',
         'callback/facebook',
