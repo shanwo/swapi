@@ -39,7 +39,7 @@ class CallbackService extends Service
                 return ['msg' => '当前微信已绑定其他账号'];
             }
             $update = [
-                'last_login_ip' => $data['ip'],
+                'login_ip'      => $data['ip'],
                 'logins_number' => $userThird['logins_number'] + 1
             ];
             $tid = $userThird['id'];
@@ -77,7 +77,7 @@ class CallbackService extends Service
         }
         $info = $this->userModel->whereKey($uid)->first();
         $info['contact'] = json_decode($info['contact'], true);
-        $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'last_login_ip', 'created_at')->where(['user_id' => $tid])->get()->toArray();
+        $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'login_ip', 'created_at')->where(['user_id' => $tid])->get()->toArray();
         return $info;
     }
 }
