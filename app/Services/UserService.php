@@ -13,7 +13,6 @@ use App\Models\UserThirdModel;
 
 class UserService extends Service
 {
-    protected $templateId = 1;
     protected $areaModel;
     protected $userModel;
     protected $userThirdModel;
@@ -88,8 +87,7 @@ class UserService extends Service
                 ];
                 $uid = $this->userModel->insertGetId($insertUser);
                 $insertUser['id'] = $uid;
-                $pageService = new PageService();
-                $pageService->initial($this->templateId, $insertUser);
+                PageService::initial(env('USER_TEMPLATE', 1), $insertUser);
             } else {
                 $updateUser = [
                     'api_token' => $token
