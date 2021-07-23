@@ -84,7 +84,7 @@ Route::prefix('callback')->group(function () {
     Route::get('weibo', 'CallbackController@weibo');
     Route::get('wework', 'CallbackController@wework');
     //公众号
-    Route::get('official', 'CallbackController@official');
+    Route::any('official', 'CallbackController@official');
     //支付
     Route::get('payment', 'CallbackController@payment');
 });
