@@ -62,6 +62,7 @@ class UserController extends Controller
         }
         $id = $this->request->input('id', $this->uid);
         $data = $this->userService->info($id);
+        unset($data['api_token']);
 //        $data['binding'] = $this->bindSecret($id);
         $this->code = 200;
         return $this->returnApi($data);

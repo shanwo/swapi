@@ -7,17 +7,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\CallbackService;
+use App\Services\UserService;
+use EasyWeChat\Factory;
 use Illuminate\Http\Request;
 
 class CallbackController extends Controller
 {
-    protected $callbackService;
+    protected $userService;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
-        $this->callbackService = new CallbackService();
+        $this->userService = new UserService();
 
     }
 
@@ -209,7 +210,7 @@ class CallbackController extends Controller
         $user = $this->driver($this->request, 'wechat')->stateless()->user();
         $user['ip'] = $this->request->ip();
         $user['time'] = time();
-        $data = $this->callbackService->wechat($this->uid, $user);
+        $data = $this->userService->wechat($this->uid, $user);
         if (empty($data['msg'])) {
             $arr = [$data['id'] => md5(dechex($data['id']))];
             $this->service->redis::setex('token:' . $data['api_token'], 60 * 60 * 24 * 180, json_encode($arr));
@@ -253,16 +254,47 @@ class CallbackController extends Controller
         return $this->returnApi();
     }
 
-    public function official()
+    public function officialBind()
     {
         $this->validate([
+            'echostr'   => 'required|alpha_num|between:16,32',
+            'nonce'     => 'required|alpha_num|between:8,16',
+            'signature' => 'required|alpha_num|between:32,64',
+            'timestamp' => 'required|alpha_num|between:8,16',
         ], [
+            'echostr'   => '随机字符串',
+            'nonce'     => '随机数',
+            'signature' => '加密签名',
+            'timestamp' => '时间戳',
         ]);
         if ($this->msg) {
             return $this->returnApi();
         }
-        $this->msg = '暂未开通';
-        return $this->returnApi($this->request);
+        $echoStr = $this->request->input('echostr');
+        $signature = $this->request->input('signature');
+        $timestamp = $this->request->input('timestamp');
+        $nonce = $this->request->input('nonce');
+        $tmpArr = ['rRmxsWtzpNeePu85mDNGtHODlkSt32lD', $timestamp, $nonce];
+        sort($tmpArr, SORT_STRING);
+        $tmpStr = implode($tmpArr);
+        $tmpStr = sha1($tmpStr);
+        # 打印返回结果
+        if ($tmpStr == $signature) {
+            return response($echoStr);
+        } else {
+            return response();
+        }
+    }
+
+    public function official()
+    {
+        $config = config('wechat.official_account.default');
+        $app = Factory::officialAccount($config);
+        $app->server->push(function ($message) {
+            return "欢迎关注 闪我！";
+        });
+        $response = $app->server->serve();
+        return $response->send();
     }
 
     /**
