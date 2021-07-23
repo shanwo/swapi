@@ -62,7 +62,7 @@ class UserController extends Controller
         }
         $id = $this->request->input('id', $this->uid);
         $data = $this->userService->info($id);
-//        $data['binding'] = $this->bindingSecret($id);
+//        $data['binding'] = $this->bindSecret($id);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -96,7 +96,7 @@ class UserController extends Controller
         return $this->returnApi($data);
     }
 
-    private function bindingSecret($id)
+    private function bindSecret($id)
     {
         $secret = json_encode([$id => md5(dechex($id))]);
         return [
