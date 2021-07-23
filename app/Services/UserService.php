@@ -87,7 +87,8 @@ class UserService extends Service
                 ];
                 $uid = $this->userModel->insertGetId($insertUser);
                 $insertUser['id'] = $uid;
-                PageService::initial(env('USER_TEMPLATE', 1), $insertUser);
+                $pageService = new PageService();
+                $pageService->initial(env('USER_TEMPLATE', 1), $insertUser);
             } else {
                 $updateUser = [
                     'api_token' => $token
