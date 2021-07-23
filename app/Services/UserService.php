@@ -16,7 +16,6 @@ class UserService extends Service
     protected $templateId = 1;
     protected $areaModel;
     protected $userModel;
-    protected $pageService;
     protected $userThirdModel;
 
     public function __construct()
@@ -24,7 +23,6 @@ class UserService extends Service
         parent::__construct();
         $this->areaModel = new AreaModel();
         $this->userModel = new UserModel();
-        $this->pageService = new PageService();
         $this->userThirdModel = new UserThirdModel();
     }
 
@@ -90,7 +88,8 @@ class UserService extends Service
                 ];
                 $uid = $this->userModel->insertGetId($insertUser);
                 $insertUser['id'] = $uid;
-                $this->pageService->initial($this->templateId, $insertUser);
+                $pageService = new PageService();
+                $pageService->initial($this->templateId, $insertUser);
             } else {
                 $updateUser = [
                     'api_token' => $token
