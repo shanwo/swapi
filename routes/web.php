@@ -69,6 +69,7 @@ Route::prefix('user')->group(function () {
 });
 //回调
 Route::prefix('callback')->group(function () {
+    //登录回调
     Route::get('douban', 'CallbackController@douban');
     Route::get('douyin', 'CallbackController@douyin');
     Route::get('facebook', 'CallbackController@facebook');
@@ -82,6 +83,10 @@ Route::prefix('callback')->group(function () {
     Route::get('wechat', 'CallbackController@wechat');
     Route::get('weibo', 'CallbackController@weibo');
     Route::get('wework', 'CallbackController@wework');
+    //公众号
+    Route::get('official', 'CallbackController@official');
+    //支付
+    Route::get('payment', 'CallbackController@payment');
 });
 //测试接口
 Route::prefix('test')->group(function () {

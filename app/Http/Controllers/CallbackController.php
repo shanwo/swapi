@@ -253,11 +253,30 @@ class CallbackController extends Controller
         return $this->returnApi();
     }
 
+    public function official()
+    {
+        $this->validate([
+        ], [
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $this->msg = '暂未开通';
+        return $this->returnApi($this->request);
+    }
+
     /**
      * 支付回调
      */
-    public function pay()
+    public function payment()
     {
-
+        $this->validate([
+        ], [
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $this->msg = '暂未开通';
+        return $this->returnApi();
     }
 }

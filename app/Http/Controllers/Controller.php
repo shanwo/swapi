@@ -49,6 +49,8 @@ class Controller extends BaseController
         'callback/wechat',
         'callback/weibo',
         'callback/wework',
+        'callback/official',
+        'callback/payment',
         'test/image',
         'test/check',
         'test/info',
