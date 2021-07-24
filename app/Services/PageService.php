@@ -36,7 +36,9 @@ class PageService extends Service
             $where[] = ['is_delete', '=', 0];
             $lists = $this->pageModel->select('id', 'follow', 'is_open', 'head_data', 'created_at')->where($where)->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $v['head_data'] = json_decode($v['head_data'], true);
+                $tmp = json_decode($v['head_data'], true);
+                $v = array_merge($v,$tmp);
+                unset($v['head_data']);
                 $this->redis::HSET('page:' . $uid, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
             $data = $this->redis::HGETALL('page:' . $uid);

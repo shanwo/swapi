@@ -35,7 +35,9 @@ class HomeService extends Service
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $v['head_data'] = json_decode($v['head_data'], true);
+                $tmp = json_decode($v['head_data'], true);
+                $v = array_merge($v,$tmp);
+                unset($v['head_data']);
             }
             $lists = json_encode($lists);
             $this->setData('hot:' . $page, $lists);
@@ -58,7 +60,9 @@ class HomeService extends Service
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $v['head_data'] = json_decode($v['head_data'], true);
+                $tmp = json_decode($v['head_data'], true);
+                $v = array_merge($v,$tmp);
+                unset($v['head_data']);
             }
             $lists = json_encode($lists);
             $this->setData('recent:' . $page, $lists);
