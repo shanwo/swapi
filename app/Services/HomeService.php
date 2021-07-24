@@ -31,17 +31,11 @@ class HomeService extends Service
             $where[] = ['browse', '>', 0];
             $where[] = ['is_open', '=', 1];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->select('id', 'background', 'head_config')->where($where);
+            $lists = $this->pageModel->select('id', 'background', 'head_data')->where($where);
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $config = json_decode($v['head_config'], true);
-                $v['avatar'] = $config['avatar']['image'];
-                $v['badge'] = $config['badge']['image'];
-                $v['pendant'] = $config['pendant']['image'];
-                $v['nickname'] = $config['nickname']['content'];
-                $v['signature'] = $config['signature']['content'];
-                unset($v['head_config']);
+                $v['head_data'] = json_decode($v['head_data'], true);
             }
             $lists = json_encode($lists);
             $this->setData('hot:' . $page, $lists);
@@ -60,17 +54,11 @@ class HomeService extends Service
         if (empty($lists)) {
             $where[] = ['is_open', '=', 1];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->select('id', 'background', 'head_config')->where($where);
+            $lists = $this->pageModel->select('id', 'background', 'head_data')->where($where);
             $data['total'] = $lists->count();
             $lists = $lists->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $config = json_decode($v['head_config'], true);
-                $v['avatar'] = $config['avatar']['image'];
-                $v['badge'] = $config['badge']['image'];
-                $v['pendant'] = $config['pendant']['image'];
-                $v['nickname'] = $config['nickname']['content'];
-                $v['signature'] = $config['signature']['content'];
-                unset($v['head_config']);
+                $v['head_data'] = json_decode($v['head_data'], true);
             }
             $lists = json_encode($lists);
             $this->setData('recent:' . $page, $lists);
@@ -92,9 +80,12 @@ class HomeService extends Service
             $where[] = ['code', '=', $code];
         }
         $info = $this->pageModel->where($where)->first();
-        $info['head_config'] = json_decode($info['head_config'], true);
-        $info['center_config'] = json_decode($info['center_config'], true);
-        $info['bottom_config'] = json_decode($info['bottom_config'], true);
+        $info['head_schema'] = json_decode($info['head_schema'], true);
+        $info['head_data'] = json_decode($info['head_data'], true);
+        $info['center_schema'] = json_decode($info['center_schema'], true);
+        $info['center_data'] = json_decode($info['center_data'], true);
+        $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
+        $info['bottom_data'] = json_decode($info['bottom_data'], true);
         if ($info['user_id'] != $uid) {
             $browse = $this->browseModel->where(['user_id' => $uid, 'page_id' => $info['id']])->first();
             if (!$browse) {

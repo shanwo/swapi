@@ -38,9 +38,12 @@ class TemplateService extends Service
     public function info($id)
     {
         $info = $this->templateModel->whereKey($id)->first();
-        $info['head_config'] = json_decode($info['head_config'], true);
-        $info['center_config'] = json_decode($info['center_config'], true);
-        $info['bottom_config'] = json_decode($info['bottom_config'], true);
+        $info['head_schema'] = json_decode($info['head_schema'], true);
+        $info['head_data'] = json_decode($info['head_data'], true);
+        $info['center_schema'] = json_decode($info['center_schema'], true);
+        $info['center_data'] = json_decode($info['center_data'], true);
+        $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
+        $info['bottom_data'] = json_decode($info['bottom_data'], true);
         return $info;
     }
 }

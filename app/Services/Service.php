@@ -35,7 +35,7 @@ class Service
             foreach ($lists as $k => &$v) {
                 $v['option_value'] = json_decode($v['option_value'], true);
                 $this->redis::HSET('config', $v['option_name'], json_encode($v, JSON_UNESCAPED_UNICODE));
-                if($v['option_name'] == $name){
+                if ($v['option_name'] == $name) {
                     $data = $v;
                 }
             }

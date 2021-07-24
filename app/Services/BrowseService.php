@@ -36,7 +36,7 @@ class BrowseService extends Service
             } else {
                 $where[] = ['sa.user_id', '=', $uid];
                 $lists = $this->browseModel->from('sw_attention as sa')
-                    ->select('sa.id', 'sp.head_config')
+                    ->select('sa.id', 'sp.head_data')
                     ->leftJoin('sw_page as sp', 'sa.page_id', '=', 'sp.id')
                     ->where($where);
             }
@@ -44,10 +44,7 @@ class BrowseService extends Service
             $lists = $lists->orderBy('sa.created_at', 'DESC')->get()->toArray();
             if (!$pid) {
                 foreach ($lists as $k => &$v) {
-                    $config = json_decode($v['head_config'], true);
-                    $v['avatar'] = $config['avatar']['image'];
-                    $v['nickname'] = $config['nickname']['content'];
-                    unset($v['head_config']);
+                    $v['head_data'] = json_decode($v['head_data'], true);
                 }
             }
             $lists = json_encode($lists);

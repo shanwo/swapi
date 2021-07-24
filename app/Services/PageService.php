@@ -34,15 +34,9 @@ class PageService extends Service
         if (empty($data)) {
             $where[] = ['user_id', '=', $uid];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->select('id', 'follow', 'is_open', 'head_config', 'created_at')->where($where)->get()->toArray();
+            $lists = $this->pageModel->select('id', 'follow', 'is_open', 'head_data', 'created_at')->where($where)->get()->toArray();
             foreach ($lists as $k => &$v) {
-                $config = json_decode($v['head_config'], true);
-                $v['avatar'] = $config['avatar']['image'];
-                $v['badge'] = $config['badge']['image'];
-                $v['pendant'] = $config['pendant']['image'];
-                $v['nickname'] = $config['nickname']['content'];
-                $v['signature'] = $config['signature']['content'];
-                unset($v['head_config']);
+                $v['head_data'] = json_decode($v['head_data'], true);
                 $this->redis::HSET('page:' . $uid, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
             $data = $this->redis::HGETALL('page:' . $uid);
@@ -56,40 +50,36 @@ class PageService extends Service
     public function info($id)
     {
         $info = $this->pageModel->whereKey($id)->first();
-        $info['head_config'] = json_decode($info['head_config'], true);
-        $info['center_config'] = json_decode($info['center_config'], true);
-        $info['bottom_config'] = json_decode($info['bottom_config'], true);
+        $info['head_schema'] = json_decode($info['head_schema'], true);
+        $info['head_data'] = json_decode($info['head_data'], true);
+        $info['center_schema'] = json_decode($info['center_schema'], true);
+        $info['center_data'] = json_decode($info['center_data'], true);
+        $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
+        $info['bottom_data'] = json_decode($info['bottom_data'], true);
         return $info;
     }
 
     public function initial($tid, $user)
     {
-        $incLcIds = $incLbIds = [];
         $template = $this->templateModel->whereKey($tid)->first();
-        $head = json_decode($template['head_config'], true);
-        $head['avatar']['image'] = $user['avatar'];
-        $head['nickname']['content'] = $user['nickname'];
-        $center = json_decode($template['center_config'], true);
-        foreach ($center as $k => $v) {
-            if (is_array($v)) {
-                $incLcIds = array_column($v, 'id');
-                break;
-            }
-        }
-        $bottom = json_decode($template['bottom_config'], true);
-        foreach ($bottom as $k => $v) {
-            if (is_array($v)) {
-                $incLbIds = array_column($v, 'id');
-                break;
-            }
-        }
+        $head = json_decode($template['head_data'], true);
+        $head['avatar'] = $user['avatar'];
+        $head['nickname'] = $user['nickname'];
+        $head['signature'] = '这个人还没写介绍呢~';
+        $center = json_decode($template['center_data'], true);
+        $incLcIds = array_column($center, 'id');
+        $bottom = json_decode($template['bottom_data'], true);
+        $incLbIds = array_column($bottom, 'id');
         $insert = [
             'user_id'       => $user['id'],
             'template_id'   => $tid,
             'background'    => $template['background'],
-            'head_config'   => json_encode($head, JSON_UNESCAPED_UNICODE),
-            'center_config' => $template['center_config'],
-            'bottom_config' => $template['bottom_config']
+            'head_schema'   => $template['head_schema'],
+            'head_data'     => json_encode($head, JSON_UNESCAPED_UNICODE),
+            'center_schema' => $template['center_schema'],
+            'center_data'   => $template['center_data'],
+            'bottom_schema' => $template['bottom_schema'],
+            'bottom_data'   => $template['bottom_data'],
         ];
         $this->redis::HDEL('page:' . $user['id']);
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
@@ -100,43 +90,30 @@ class PageService extends Service
 
     public function add($request, $uid)
     {
-        $incLcIds = $incLbIds = [];
         $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();
-        $head = json_decode($template['head_config'], true);
-        $headConfig = $request->input('head_config');
-        $head['avatar']['image'] = $headConfig['avatar'];
-        $head['nickname']['content'] = $headConfig['nickname'];
-        $head['signature']['content'] = $headConfig['signature'] ?? '这个人还没写介绍呢~';
-        $head['badge']['image'] = $headConfig['badge'] ?? '';
-        $head['pendant']['image'] = $headConfig['pendant'] ?? '';
-        $center = json_decode($template['center_config'], true);
-        foreach ($center as $k => $v) {
-            if (is_array($v)) {
-                $center[$k] = $request->input('center_config');
-                $incLcIds = array_column($center[$k], 'id');
-                break;
-            }
-        }
+        $head = json_decode($template['head_data'], true);
+        $headData = $request->input('head_data');
+        $head['avatar'] = $headData['avatar'];
+        $head['nickname'] = $headData['nickname'];
+        $head['signature'] = $headData['signature'] ?? '';
+        $head['badge'] = $headData['badge'] ?? '';
+        $head['pendant'] = $headData['pendant'] ?? '';
+        $center = $request->input('center_data');
+        $incLcIds = array_column($center, 'id');
+        $bottom = $request->input('bottom_data');
+        $incLbIds = array_column($bottom, 'id');
         $insert = [
             'user_id'       => $uid,
             'template_id'   => $tid,
             'background'    => $template['background'],
-            'head_config'   => json_encode($head, JSON_UNESCAPED_UNICODE),
-            'center_config' => json_encode($center, JSON_UNESCAPED_UNICODE),
+            'head_schema'   => $template['head_schema'],
+            'head_data'     => json_encode($head, JSON_UNESCAPED_UNICODE),
+            'center_schema' => $template['center_schema'],
+            'center_data'   => json_encode($center, JSON_UNESCAPED_UNICODE),
+            'bottom_schema' => $template['bottom_schema'],
+            'bottom_data'   => json_encode($bottom, JSON_UNESCAPED_UNICODE),
         ];
-        $bottomConfig = $request->input('bottom_config', []);
-        if ($bottomConfig) {
-            $bottom = json_decode($template['bottom_config'], true);
-            foreach ($bottom as $k => $v) {
-                if (is_array($v)) {
-                    $bottom[$k] = $bottomConfig;
-                    $incLbIds = array_column($bottom[$k], 'id');
-                    break;
-                }
-            }
-            $insert['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
-        }
         $this->redis::HDEL('page:' . $uid);
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
@@ -149,41 +126,26 @@ class PageService extends Service
         $update = $incLcIds = $incLbIds = $decLcIds = $decLbIds = [];
         $id = $request->input('id');
         $info = $this->info($id);
-        $headConfig = $request->input('head_config', []);
-        if ($headConfig) {
-            $head = $info['head_config'];
-            $head['avatar']['image'] = $headConfig['avatar'];
-            $head['nickname']['content'] = $headConfig['nickname'];
-            $head['signature']['content'] = $headConfig['signature'] ?? '这个人还没写介绍呢~';
-            $head['badge']['image'] = $headConfig['badge'] ?? '';
-            $head['pendant']['image'] = $headConfig['pendant'] ?? '';
-            $update['head_config'] = json_encode($head, JSON_UNESCAPED_UNICODE);
+        $headData = $request->input('head_data', []);
+        if ($headData) {
+            $head['avatar'] = $headData['avatar'];
+            $head['nickname'] = $headData['nickname'];
+            $head['signature'] = $headData['signature'] ?? '';
+            $head['badge'] = $headData['badge'] ?? '';
+            $head['pendant'] = $headData['pendant'] ?? '';
+            $update['head_data'] = json_encode($head, JSON_UNESCAPED_UNICODE);
         }
-        $centerConfig = $request->input('center_config', []);
-        if ($centerConfig) {
-            $center = $info['center_config'];
-            foreach ($center as $k => $v) {
-                if (is_array($v)) {
-                    $center[$k] = $centerConfig;
-                    $incLcIds = array_column($center[$k], 'id');
-                    $decLcIds = array_column($center[$k], 'id');
-                    break;
-                }
-            }
-            $update['center_config'] = json_encode($center, JSON_UNESCAPED_UNICODE);
+        $centerData = $request->input('center_data', []);
+        if ($centerData) {
+            $incLcIds = array_column($centerData, 'id');
+            $decLcIds = array_column($info['center_data'], 'id');
+            $update['center_data'] = json_encode($centerData, JSON_UNESCAPED_UNICODE);
         }
-        $bottomConfig = $request->input('bottom_config', []);
-        if ($bottomConfig) {
-            $bottom = $info['bottom_config'];
-            foreach ($bottom as $k => $v) {
-                if (is_array($v)) {
-                    $bottom[$k] = $bottomConfig;
-                    $incLbIds = array_column($bottom[$k], 'id');
-                    $decLbIds = array_column($bottom[$k], 'id');
-                    break;
-                }
-            }
-            $update['bottom_config'] = json_encode($bottom, JSON_UNESCAPED_UNICODE);
+        $bottomData = $request->input('bottom_data', []);
+        if ($bottomData) {
+            $incLbIds = array_column($bottomData, 'id');
+            $decLbIds = array_column($info['bottom_data'], 'id');
+            $update['bottom_data'] = json_encode($bottomData, JSON_UNESCAPED_UNICODE);
         }
         $this->redis::HDEL('page:' . $info['user_id']);
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
