@@ -8,15 +8,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\PageService;
 use App\Services\Service;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
+    protected $pageService;
+    protected $userService;
+
     public function __construct(Request $request)
     {
         parent::__construct($request);
         $this->service = new Service();
+        $this->userService = new UserService();
+        $this->pageService = new PageService();
+    }
+
+    public function initial()
+    {
+        $this->validate([
+            'id' => 'required|integer|gt:0|exists:sw_user,id',
+        ], [
+            'id' => 'ID',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $id = $this->request->input('id');
+        $user = $this->userService->info($id);
+        $data = $this->pageService->initial(1,$user);
+        $this->code = 200;
+        return $this->returnApi($data);
     }
 
     public function check()
