@@ -173,7 +173,11 @@ function getHeadersContentType($headers) {
 
 function handler($event, $context)
 {
-    require __DIR__ . '/vendor/autoload.php';
+    if (substr(php_uname(), 0, 7) == 'Windows') {
+        require __DIR__.'/../opt/vendor/autoload.php';
+    } else {
+        require '/opt/vendor/autoload.php';
+    }
 
     $isBase64Encoded = $event->isBase64Encoded;
 
