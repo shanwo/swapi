@@ -91,6 +91,7 @@ Route::prefix('callback')->group(function () {
 });
 //测试接口
 Route::prefix('test')->group(function () {
+    Route::get('initial', 'TestController@initial');
     Route::get('check', 'TestController@check');
     Route::get('info', 'TestController@info');
     Route::get('all', 'TestController@all');
