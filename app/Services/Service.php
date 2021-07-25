@@ -14,7 +14,7 @@ class Service
 {
     public $redis;
     public $page = 1;
-    public $size = 10;
+    public $size = 5;
     protected $timeOut = 6;
     protected $configModel;
 

@@ -33,7 +33,7 @@ class HomeService extends Service
             $where[] = ['is_delete', '=', 0];
             $lists = $this->pageModel->select('id', 'background', 'head_data')->where($where);
             $data['total'] = $lists->count();
-            $lists = $lists->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
+            $lists = $lists->forPage($page, $this->size)->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $tmp = json_decode($v['head_data'], true);
                 $v = array_merge($v,$tmp);
@@ -58,7 +58,7 @@ class HomeService extends Service
             $where[] = ['is_delete', '=', 0];
             $lists = $this->pageModel->select('id', 'background', 'head_data')->where($where);
             $data['total'] = $lists->count();
-            $lists = $lists->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
+            $lists = $lists->forPage($page, $this->size)->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $tmp = json_decode($v['head_data'], true);
                 $v = array_merge($v,$tmp);

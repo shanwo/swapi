@@ -41,7 +41,7 @@ class AttentionService extends Service
                     ->where($where);
             }
             $data['total'] = $lists->count();
-            $lists = $lists->orderBy('sa.created_at', 'DESC')->get()->toArray();
+            $lists = $lists->forPage($page, $this->size)->orderBy('sa.created_at', 'DESC')->get()->toArray();
             if (!$pid) {
                 foreach ($lists as $k => &$v) {
                     $v['head_data'] = json_decode($v['head_data'], true);
