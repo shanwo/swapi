@@ -10,6 +10,7 @@ namespace App\Services;
 use App\Models\AreaModel;
 use App\Models\UserModel;
 use App\Models\UserThirdModel;
+use Illuminate\Support\Facades\Crypt;
 
 class UserService extends Service
 {
@@ -77,7 +78,7 @@ class UserService extends Service
             $uid = $userThird['user_id'];
         } else {
             $original = $data['original'];
-            $token = md5(uniqid()) . md5(uniqid());
+            $token = Crypt::encryptString($data['id']);
             if (!$uid) {
                 $insertUser = [
                     'nickname'  => htmlspecialchars($original['nickname']),
