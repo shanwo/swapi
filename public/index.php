@@ -22,7 +22,7 @@ define('LARAVEL_START', microtime(true));
 */
 
 if (substr(php_uname(), 0, 7) == 'Windows') {
-    require __DIR__.'/../vendor/autoload.php';
+    require __DIR__.'/../../opt/vendor/autoload.php';
 } else {
     require '/opt/vendor/autoload.php';
 }
