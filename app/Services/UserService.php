@@ -59,10 +59,15 @@ class UserService extends Service
 
     public function wechat($uid, $data)
     {
+        $original = $data['original'];
         $configName = 'wechat';
         $config = $this->configInfo($configName);
         $where[] = ['source', '=', $configName];
-        $where[] = ['openid', '=', $data['id']];
+        if($original['unionid']){
+            $where[] = ['unionid', '=', $original['unionid']];
+        }else{
+            $where[] = ['openid', '=', $original['openid']];
+        }
         $where[] = ['app_id', '=', $config['key']];
         $where[] = ['status', '=', 1];
         $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id', 'logins_number']);
@@ -77,8 +82,7 @@ class UserService extends Service
             $this->userThirdModel->whereKey($userThird['id'])->update($update);
             $uid = $userThird['user_id'];
         } else {
-            $original = $data['original'];
-            $token = Crypt::encryptString($data['id']);
+            $token = Crypt::encryptString($original['openid']);
             if (!$uid) {
                 $insertUser = [
                     'nickname'  => htmlspecialchars($original['nickname']),
@@ -104,7 +108,7 @@ class UserService extends Service
                 'source'   => $configName,
                 'app_id'   => $config['key'],
                 'login_ip' => $data['ip'],
-                'original' => json_encode($data['original'])
+                'original' => json_encode($original)
             ];
             $this->userThirdModel->insertGetId($insertThird);
         }
