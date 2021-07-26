@@ -1,4 +1,9 @@
 <?php
+/**
+ * User: Powerless
+ * Date: 21/03/16
+ * Blog: https://wzxaini9.cn
+ */
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
@@ -200,6 +205,17 @@ function handler($event, $context)
     // init headers
     $headers = $event->headers ?? [];
     $headers = json_decode(json_encode($headers), true);
+    $headers['HTTP_HOST'] = $headers['host'];
+    $headers['REMOTE_ADDR'] = $event->requestContext->sourceIp;
+    if(!empty($headers['accept'])){
+        $headers['HTTP_ACCEPT'] = $headers['accept'];
+    }
+    if(!empty($headers['accept-language'])){
+        $headers['HTTP_ACCEPT_LANGUAGE'] = $headers['accept-language'];
+    }
+    if(!empty($headers['user-agent'])){
+        $headers['HTTP_USER_AGENT'] = $headers['user-agent'];
+    }
 
     // consoleLog("Event", $event);
 
