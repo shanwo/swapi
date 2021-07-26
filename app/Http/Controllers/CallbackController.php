@@ -158,8 +158,9 @@ class CallbackController extends Controller
             return $this->returnApi();
         }
         $state = $this->request->input('state', 0);
-        $this->getUser($state, 'official');
-        $user = $this->driver($this->request, 'official')->stateless()->user();
+        $this->userService->configName = 'official';
+        $this->getUser($state, $this->userService->configName);
+        $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
         $user['ip'] = $this->request->ip();
         $data = $this->userService->wechat($this->uid, $user);
         if (empty($data['msg'])) {
@@ -234,8 +235,9 @@ class CallbackController extends Controller
             return $this->returnApi();
         }
         $state = $this->request->input('state', 0);
-        $this->getUser($state, 'wechat');
-        $user = $this->driver($this->request, 'wechat')->stateless()->user();
+        $this->userService->configName = 'wechat';
+        $this->getUser($state, $this->userService->configName);
+        $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
         $user['ip'] = $this->request->ip();
         $data = $this->userService->wechat($this->uid, $user);
         if (empty($data['msg'])) {
