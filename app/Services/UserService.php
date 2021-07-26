@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 
 class UserService extends Service
 {
+    public $configName;
     protected $areaModel;
     protected $userModel;
     protected $userThirdModel;
@@ -60,14 +61,9 @@ class UserService extends Service
     public function wechat($uid, $data)
     {
         $original = $data['original'];
-        $configName = 'wechat';
-        $config = $this->configInfo($configName);
-        $where[] = ['source', '=', $configName];
-        if($original['unionid']){
-            $where[] = ['unionid', '=', $original['unionid']];
-        }else{
-            $where[] = ['openid', '=', $original['openid']];
-        }
+        $config = $this->configInfo($this->configName);
+        $where[] = ['source', '=', $this->configName];
+        $where[] = ['open_id', '=', $original['openid']];
         $where[] = ['app_id', '=', $config['key']];
         $where[] = ['status', '=', 1];
         $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id', 'logins_number']);
@@ -82,6 +78,10 @@ class UserService extends Service
             $this->userThirdModel->whereKey($userThird['id'])->update($update);
             $uid = $userThird['user_id'];
         } else {
+            if ($original['unionid']) {
+                $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $original['unionid'])->first(['id', 'user_id']);
+                $uid = $userThird['user_id'];
+            }
             $token = Crypt::encryptString($original['openid']);
             if (!$uid) {
                 $insertUser = [
@@ -104,8 +104,8 @@ class UserService extends Service
                 'user_id'  => $uid,
                 'nickname' => htmlspecialchars($original['nickname']),
                 'union_id' => $original['unionid'],
-                'openid'   => $original['openid'],
-                'source'   => $configName,
+                'open_id'  => $original['openid'],
+                'source'   => $this->configName,
                 'app_id'   => $config['key'],
                 'login_ip' => $data['ip'],
                 'original' => json_encode($original)
