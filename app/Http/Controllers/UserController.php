@@ -24,7 +24,7 @@ class UserController extends Controller
     public function signIn()
     {
         $this->validate([
-            'type'   => 'required|alpha_num|in:wechat',
+            'type'   => 'required|alpha_num|in:official,wechat',
             'secret' => 'filled|string|between:64,256',
         ], [
             'type'   => '登录类型',
