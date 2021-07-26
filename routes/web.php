@@ -77,6 +77,7 @@ Route::prefix('callback')->group(function () {
     Route::get('github', 'CallbackController@github');
     Route::get('google', 'CallbackController@google');
     Route::get('linkedin', 'CallbackController@linkedin');
+    Route::get('official', 'CallbackController@official');
     Route::get('outlook', 'CallbackController@outlook');
     Route::get('qq', 'CallbackController@qq');
     Route::get('taobao', 'CallbackController@taobao');
@@ -84,8 +85,8 @@ Route::prefix('callback')->group(function () {
     Route::get('weibo', 'CallbackController@weibo');
     Route::get('wework', 'CallbackController@wework');
     //公众号
-    Route::get('official', 'CallbackController@officialBind');
-    Route::post('official', 'CallbackController@official');
+    Route::get('officialServer', 'CallbackController@officialBind');
+    Route::post('officialServer', 'CallbackController@officialServer');
     //支付
     Route::get('payment', 'CallbackController@payment');
 });

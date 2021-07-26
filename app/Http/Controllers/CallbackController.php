@@ -145,6 +145,35 @@ class CallbackController extends Controller
         return $this->returnApi();
     }
 
+    public function official()
+    {
+        $this->validate([
+            'code'  => 'required|alpha_num|size:32',
+            'state' => 'filled|alpha_num|between:32,64',
+        ], [
+            'code'  => '编码',
+            'state' => '状态',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $state = $this->request->input('state', 0);
+        $this->getUser($state, 'official');
+        $user = $this->driver($this->request, 'official')->stateless()->user();
+        $user['ip'] = $this->request->ip();
+        $user['time'] = time();
+        $data = $this->userService->wechat($this->uid, $user);
+        if (empty($data['msg'])) {
+            $arr = [$data['id'] => md5(dechex($data['id']))];
+            $this->service->redis::setex('token:' . $data['api_token'], 60 * 60 * 24 * 180, json_encode($arr));
+            $this->service->redis::setex('user:' . $data['id'], 60 * 60 * 24 * 180, json_encode($data, JSON_UNESCAPED_UNICODE));
+            $this->code = 200;
+        } else {
+            $this->msg = $data['msg'];
+        }
+        return $this->returnApi($data);
+    }
+
     public function outlook()
     {
         $this->validate([
@@ -286,7 +315,7 @@ class CallbackController extends Controller
         }
     }
 
-    public function official()
+    public function officialServer()
     {
         $config = config('wechat.official_account.default');
         $app = Factory::officialAccount($config);
