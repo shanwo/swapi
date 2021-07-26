@@ -161,7 +161,6 @@ class CallbackController extends Controller
         $this->getUser($state, 'official');
         $user = $this->driver($this->request, 'official')->stateless()->user();
         $user['ip'] = $this->request->ip();
-        $user['time'] = time();
         $data = $this->userService->wechat($this->uid, $user);
         if (empty($data['msg'])) {
             $arr = [$data['id'] => md5(dechex($data['id']))];
@@ -238,7 +237,6 @@ class CallbackController extends Controller
         $this->getUser($state, 'wechat');
         $user = $this->driver($this->request, 'wechat')->stateless()->user();
         $user['ip'] = $this->request->ip();
-        $user['time'] = time();
         $data = $this->userService->wechat($this->uid, $user);
         if (empty($data['msg'])) {
             $arr = [$data['id'] => md5(dechex($data['id']))];
