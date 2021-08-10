@@ -67,6 +67,11 @@ Route::prefix('user')->group(function () {
     Route::get('info', 'UserController@info');
     Route::post('edit', 'UserController@edit');
 });
+//用户
+Route::prefix('pay')->group(function () {
+    Route::get('lists', 'PayController@lists');
+    Route::post('pay', 'PayController@pay');
+});
 //回调
 Route::prefix('callback')->group(function () {
     //登录回调
