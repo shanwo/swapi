@@ -11,6 +11,7 @@ use App\Services\Service;
 use GuzzleHttp\Client;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Overtrue\Socialite\SocialiteManager;
 use Ramsey\Uuid\Uuid;
@@ -31,41 +32,12 @@ class Controller extends BaseController
         400 => 'notice',
     ];
     protected $uid = 0;
-    private $writeUrl = [
-        'home/hot',
-        'home/recent',
-        'home/info',
-        'user/signIn',
-        'callback/douban',
-        'callback/douyin',
-        'callback/facebook',
-        'callback/feishu',
-        'callback/github',
-        'callback/google',
-        'callback/linkedin',
-        'callback/official',
-        'callback/outlook',
-        'callback/qq',
-        'callback/taobao',
-        'callback/wechat',
-        'callback/weibo',
-        'callback/wework',
-        'callback/officialServer',
-        'callback/payment',
-        'test/image',
-        'test/check',
-        'test/info',
-        'test/all',
-    ];
 
     public function __construct($request)
     {
         $this->request = $request;
         $this->client = new Client();
         $this->service = new Service();
-        if (!in_array($this->request->path(), $this->writeUrl)) {
-            $this->validateToken();
-        }
     }
 
     /**
@@ -76,9 +48,10 @@ class Controller extends BaseController
      */
     public function validate(array $rules, array $customAttributes = [], array $messages = [])
     {
+        $this->uid = Auth::id();
+        $this->code = 400;
         $validator = $this->getValidationFactory()->make($this->request->all(), $rules, $messages, $customAttributes);
         if ($validator->fails()) {
-            $this->code = 400;
             $errors = $validator->errors()->all();
             $this->msg = current($errors);
         }
@@ -102,29 +75,6 @@ class Controller extends BaseController
         \Illuminate\Support\Facades\DB::disconnect('mysql');
         unset($result['request']);
         return response()->json($result);
-    }
-
-
-    private function validateToken()
-    {
-        $this->code = 400;
-        $token = $this->request->bearerToken();
-        $auth = $this->service->redis::GET('token:' . $token);
-        if ($auth) {
-            $arr = json_decode($auth, true) ?? [];
-            foreach ($arr as $k => $v) {
-                if ($v == md5(dechex($k))) {
-                    $json = $this->service->redis::GET('user:' . $k);
-                    $user = json_decode($json, true);
-                    $this->uid = $user['id'];
-                }
-            }
-        }
-        if (!$this->uid) {
-            $this->code = 300;
-            $this->msg = '当前账户异常，请重新登录';
-            return $this->returnApi();
-        }
     }
 
     /**
