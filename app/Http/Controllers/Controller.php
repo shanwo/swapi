@@ -31,13 +31,14 @@ class Controller extends BaseController
         300 => 'notice',
         400 => 'notice',
     ];
-    protected $uid = 0;
+    protected $user;
 
     public function __construct($request)
     {
         $this->request = $request;
         $this->client = new Client();
         $this->service = new Service();
+        $this->user = Auth::user();
     }
 
     /**
@@ -48,7 +49,6 @@ class Controller extends BaseController
      */
     public function validate(array $rules, array $customAttributes = [], array $messages = [])
     {
-        $this->uid = Auth::id();
         $this->code = 400;
         $validator = $this->getValidationFactory()->make($this->request->all(), $rules, $messages, $customAttributes);
         if ($validator->fails()) {

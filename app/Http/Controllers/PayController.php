@@ -29,9 +29,8 @@ class PayController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $id = Auth::user();
-        dump($id);die;
-        $data = $this->payService->lists($this->uid);
+        dump($this->user['id']);die;
+        $data = $this->payService->lists($this->user['id']);
         $this->code = 200;
         return $this->returnApi($data);
     }

@@ -31,7 +31,7 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->pageService->lists($this->uid);
+        $data = $this->pageService->lists($this->user['id']);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -96,7 +96,7 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->pageService->add($this->request, $this->uid);
+        $data = $this->pageService->add($this->request, $this->user['id']);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -164,7 +164,7 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->pageService->status($this->request, $this->uid);
+        $data = $this->pageService->status($this->request, $this->user['id']);
         $this->code = 200;
         return $this->returnApi($data);
     }

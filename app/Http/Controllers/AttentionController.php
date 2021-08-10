@@ -33,7 +33,7 @@ class AttentionController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->attentionService->lists($this->request, $this->uid);
+        $data = $this->attentionService->lists($this->request, $this->user['id']);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -48,7 +48,7 @@ class AttentionController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->attentionService->add($this->request, $this->uid);
+        $data = $this->attentionService->add($this->request, $this->user['id']);
         $this->code = 200;
         return $this->returnApi($data);
     }

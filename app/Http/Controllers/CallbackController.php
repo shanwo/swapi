@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 class CallbackController extends Controller
 {
     protected $userService;
+    protected $uid = 0;
 
     public function __construct(Request $request)
     {
