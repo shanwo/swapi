@@ -20,8 +20,9 @@ class BrowseService extends Service
     }
 
     //使用zset
-    public function lists($request, $uid)
+    public function lists($request)
     {
+        $uid = $request->user()->id ?? 0;
         $page = $request->input('page', $this->page);
         $lists = $this->redis::GET('browse:' . $page);
         if (empty($lists)) {

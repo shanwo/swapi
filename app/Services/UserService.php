@@ -35,8 +35,9 @@ class UserService extends Service
         return $info;
     }
 
-    public function edit($request, $id)
+    public function edit($request)
     {
+        $uid = $request->user()->id ?? 0;
         $aid = $request->input('area_id');
         $area = $this->areaModel->whereKey($aid)->first();
         $contact = $request->input('contact');
@@ -55,7 +56,7 @@ class UserService extends Service
         if ($birthday) {
             $update['birthday'] = $birthday;
         }
-        return $this->userModel->whereKey($id)->update($update);
+        return $this->userModel->whereKey($uid)->update($update);
     }
 
     public function wechat($uid, $data)

@@ -60,12 +60,13 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
-            'model' => \App\Models\UserModel::class,
+            'driver' => 'redis',
+            'model'  => \App\Models\UserModel::class,
         ],
 
 //         'users' => [
-//             'driver' => 'database',
+//             'driver' => 'eloquent',
+//             'model' => \App\Models\UserModel::class,
 //         ],
     ],
 

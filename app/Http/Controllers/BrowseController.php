@@ -33,7 +33,7 @@ class BrowseController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->browseService->lists($this->request, $this->user['id']);
+        $data = $this->browseService->lists($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }

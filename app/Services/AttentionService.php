@@ -20,8 +20,9 @@ class AttentionService extends Service
     }
 
     //使用zset
-    public function lists($request, $uid)
+    public function lists($request)
     {
+        $uid = $request->user()->id ?? 0;
         $page = $request->input('page', $this->page);
         $lists = $this->redis::GET('attention:' . $page);
         if (empty($lists)) {
@@ -56,9 +57,10 @@ class AttentionService extends Service
         return $data;
     }
 
-    public function add($request, $uid)
+    public function add($request)
     {
         $pid = $request->input('pid');
+        $uid = $request->user()->id ?? 0;
         $insert = [
             'user_id' => $uid,
             'page_id' => $pid,

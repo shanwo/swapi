@@ -11,7 +11,6 @@ use App\Services\Service;
 use GuzzleHttp\Client;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Overtrue\Socialite\SocialiteManager;
 use Ramsey\Uuid\Uuid;
@@ -31,14 +30,12 @@ class Controller extends BaseController
         300 => 'notice',
         400 => 'notice',
     ];
-    protected $user;
 
     public function __construct($request)
     {
         $this->request = $request;
         $this->client = new Client();
         $this->service = new Service();
-        $this->user = Auth::user();
     }
 
     /**

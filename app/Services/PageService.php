@@ -28,8 +28,9 @@ class PageService extends Service
         $this->templateModel = new TemplateModel();
     }
 
-    public function lists($uid)
+    public function lists($request)
     {
+        $uid = $request->user()->id ?? 0;
         $data = $this->redis::HGETALL('page:' . $uid);
         if (empty($data)) {
             $where[] = ['user_id', '=', $uid];
@@ -90,8 +91,9 @@ class PageService extends Service
         return $this->pageModel->insertGetId($insert);
     }
 
-    public function add($request, $uid)
+    public function add($request)
     {
+        $uid = $request->user()->id ?? 0;
         $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();
         $head = json_decode($template['head_data'], true);
@@ -157,8 +159,9 @@ class PageService extends Service
         return $this->pageModel->whereKey($id)->update($update);
     }
 
-    public function status($request, $uid)
+    public function status($request)
     {
+        $uid = $request->user()->id ?? 0;
         $where[] = ['user_id', '=', $uid];
         $update = [];
         $id = $request->input('id');

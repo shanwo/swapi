@@ -74,7 +74,7 @@ class HomeService extends Service
     }
 
     //使用string结构
-    public function info($request, $uid)
+    public function info($request)
     {
         $id = $request->input('id', 0);
         if ($id) {
@@ -90,6 +90,7 @@ class HomeService extends Service
         $info['center_data'] = json_decode($info['center_data'], true);
         $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
         $info['bottom_data'] = json_decode($info['bottom_data'], true);
+        $uid = $request->user()->id ?? 0;
         if ($info['user_id'] != $uid) {
             $browse = $this->browseModel->where(['user_id' => $uid, 'page_id' => $info['id']])->first();
             if (!$browse) {

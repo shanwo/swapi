@@ -60,7 +60,7 @@ class UserController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $id = $this->request->input('id', $this->user['id']);
+        $id = $this->request->input('id',$this->request->user()->id ?? 0);
         $data = $this->userService->info($id);
         unset($data['api_token']);
 //        $data['binding'] = $this->bindSecret($id);
@@ -92,7 +92,7 @@ class UserController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->userService->edit($this->request, $this->user['id']);
+        $data = $this->userService->edit($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }

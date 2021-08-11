@@ -33,7 +33,7 @@ class FeedbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->feedbackService->add($this->request, $this->user['id']);
+        $data = $this->feedbackService->add($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }

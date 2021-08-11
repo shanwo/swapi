@@ -19,8 +19,9 @@ class FeedbackService extends Service
         $this->feedbackModel = new FeedbackModel();
     }
 
-    public function add($request, $uid)
+    public function add($request)
     {
+        $uid = $request->user()->id ?? 0;
         $contacts = $request->input('contacts', '');
         $content = $request->input('content');
         $insert = [
