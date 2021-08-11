@@ -36,7 +36,7 @@ class VerifyCsrfToken extends Middleware
                 ];
                 return response()->json($result);
             }
-            return parent::handle($request, $next);
+            return $next($request);
         }
     }
 }
