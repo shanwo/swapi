@@ -27,14 +27,14 @@ class Service
     public function configInfo($name)
     {
         $data = [];
-        $config = $this->redis::HGET('config', $name);
+        $config = $this->redis::GET('config:' . $name);
         if ($config) {
             $data = json_decode($config, true);
         } else {
             $lists = $this->configModel->get()->toArray();
             foreach ($lists as $k => $v) {
                 $v['option_value'] = json_decode($v['option_value'], true);
-                $this->redis::HSET('config', $v['option_name'], json_encode($v, JSON_UNESCAPED_UNICODE));
+                $this->redis::SET('config:' . $v['option_name'], json_encode($v, JSON_UNESCAPED_UNICODE));
                 if ($v['option_name'] == $name) {
                     $data = $v;
                 }
