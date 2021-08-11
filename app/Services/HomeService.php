@@ -26,12 +26,14 @@ class HomeService extends Service
     public function hot($request)
     {
         $page = $request->input('page', $this->page);
-        $lists = $this->redis::GET('hot:' . $page);
-        if (empty($lists)) {
+        $data = $this->redis::GET('hot:' . $page);
+        if (empty($data)) {
             $where[] = ['browse', '>', 0];
             $where[] = ['is_open', '=', 1];
             $where[] = ['is_delete', '=', 0];
             $lists = $this->pageModel->select('id', 'background', 'head_data')->where($where);
+            $data['page'] = (int)$page;
+            $data['size'] = $this->size;
             $data['total'] = $lists->count();
             $lists = $lists->forPage($page, $this->size)->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
             foreach ($lists as $k => &$v) {
@@ -39,12 +41,11 @@ class HomeService extends Service
                 $v = array_merge($v,$tmp);
                 unset($v['head_data']);
             }
-            $lists = json_encode($lists);
-            $this->setData('hot:' . $page, $lists);
+            if (!$data['total']) $this->timeOut = 30;
+            $this->redis::SETEX('hot:' . $page, $this->timeOut, json_encode($data));
+        }else{
+            $data = json_decode($data,true);
         }
-        $data['page'] = (int)$page;
-        $data['size'] = $this->size;
-        $data['lists'] = json_decode($lists, true);
         return $data;
     }
 
@@ -52,24 +53,25 @@ class HomeService extends Service
     public function recent($request)
     {
         $page = $request->input('page', $this->page);
-        $lists = $this->redis::GET('recent:' . $page);
-        if (empty($lists)) {
+        $data = $this->redis::GET('recent:' . $page);
+        if (empty($data)) {
             $where[] = ['is_open', '=', 1];
             $where[] = ['is_delete', '=', 0];
             $lists = $this->pageModel->select('id', 'background', 'head_data')->where($where);
+            $data['page'] = (int)$page;
+            $data['size'] = $this->size;
             $data['total'] = $lists->count();
-            $lists = $lists->forPage($page, $this->size)->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
+            $data['lists'] = $lists->forPage($page, $this->size)->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
             foreach ($lists as $k => &$v) {
                 $tmp = json_decode($v['head_data'], true);
                 $v = array_merge($v,$tmp);
                 unset($v['head_data']);
             }
-            $lists = json_encode($lists);
-            $this->setData('recent:' . $page, $lists);
+            if (!$data['total']) $this->timeOut = 30;
+            $this->redis::SETEX('recent:' . $page, $this->timeOut, json_encode($data));
+        }else{
+            $data = json_decode($data,true);
         }
-        $data['page'] = (int)$page;
-        $data['size'] = $this->size;
-        $data['lists'] = json_decode($lists, true);
         return $data;
     }
 

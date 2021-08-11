@@ -24,8 +24,8 @@ class AttentionService extends Service
     {
         $uid = $request->user()->id ?? 0;
         $page = $request->input('page', $this->page);
-        $lists = $this->redis::GET('attention:' . $page);
-        if (empty($lists)) {
+        $data = $this->redis::GET('attention:' . $page);
+        if (empty($data)) {
             $where[] = ['sa.status', '=', 1];
             $pid = $request->input('page_id', 0);
             if ($pid) {
@@ -41,19 +41,20 @@ class AttentionService extends Service
                     ->leftJoin('sw_page as sp', 'sa.page_id', '=', 'sp.id')
                     ->where($where);
             }
+            $data['page'] = (int)$page;
+            $data['size'] = $this->size;
             $data['total'] = $lists->count();
-            $lists = $lists->forPage($page, $this->size)->orderBy('sa.created_at', 'DESC')->get()->toArray();
+            $data['lists'] = $lists->forPage($page, $this->size)->orderBy('sa.created_at', 'DESC')->get()->toArray();
             if (!$pid) {
                 foreach ($lists as $k => &$v) {
                     $v['head_data'] = json_decode($v['head_data'], true);
                 }
             }
-            $lists = json_encode($lists);
-            $this->setData('attention:' . $page, $lists);
+            if (!$data['total']) $this->timeOut = 30;
+            $this->redis::SETEX('attention:' . $page, $this->timeOut, json_encode($data));
+        } else {
+            $data = json_decode($data, true);
         }
-        $data['page'] = (int)$page;
-        $data['size'] = $this->size;
-        $data['lists'] = json_decode($lists, true);
         return $data;
     }
 

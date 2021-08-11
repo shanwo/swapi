@@ -15,7 +15,7 @@ class Service
     public $redis;
     public $page = 1;
     public $size = 5;
-    protected $timeOut = 6;
+    protected $timeOut = 86400 * 30;
     protected $configModel;
 
     public function __construct()
@@ -62,14 +62,5 @@ class Service
         foreach ($data as $k => $v) {
             $this->redis::HSET($key . ':' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
         }
-    }
-
-    protected function setData($key, $data)
-    {
-//        if ($data) {
-//            $this->redis::SET($key, $data);
-//        } else {
-            $this->redis::SETEX($key, $this->timeOut, $data);
-//        }
     }
 }
