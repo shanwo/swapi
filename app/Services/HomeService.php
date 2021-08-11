@@ -26,7 +26,12 @@ class HomeService extends Service
     public function hot($request)
     {
         $page = $request->input('page', $this->page);
-        $data = $this->redis::GET('hot:' . $page);
+//        $data = $this->redis::SCARD ('hot' . $page);
+//        $number = $this->redis::ZCARD('hot');
+//        dump($number);
+        $ids = $this->redis::ZREVRANGE('hot',0 ,-1);
+        $aa = array_slice($ids,($page-1)*$this->size,$this->size);
+        //使用id查询redis闪页数据
         if (empty($data)) {
             $where[] = ['browse', '>', 0];
             $where[] = ['is_open', '=', 1];
