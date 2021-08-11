@@ -9,7 +9,6 @@ namespace App\Http\Controllers;
 
 use App\Services\PayService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class PayController extends Controller
 {
@@ -29,8 +28,9 @@ class PayController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        dump($this->user['id']);die;
-        $data = $this->payService->lists($this->user['id']);
+        $data = $this->request->user();
+//        dump($this->user['id']);die;
+//        $data = $this->payService->lists($this->user['id']);
         $this->code = 200;
         return $this->returnApi($data);
     }
