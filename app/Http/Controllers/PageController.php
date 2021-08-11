@@ -24,9 +24,9 @@ class PageController extends Controller
     public function lists()
     {
         $this->validate([
-            'page' => 'required|integer|gt:0',
+//            'page' => 'required|integer|gt:0',
         ], [
-            'page' => '页码',
+//            'page' => '页码',
         ]);
         if ($this->msg) {
             return $this->returnApi();

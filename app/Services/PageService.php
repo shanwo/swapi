@@ -35,17 +35,17 @@ class PageService extends Service
         if (empty($data)) {
             $where[] = ['user_id', '=', $uid];
             $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->select('id', 'follow', 'is_open', 'head_data', 'created_at')->where($where)->get()->toArray();
-            foreach ($lists as $k => &$v) {
+            $data = $this->pageModel->select('id', 'follow', 'is_open', 'head_data', 'created_at')->where($where)->get()->toArray();
+            foreach ($data as $k => &$v) {
                 $tmp = json_decode($v['head_data'], true);
-                $v = array_merge($v,$tmp);
+                $v = array_merge($v, $tmp);
                 unset($v['head_data']);
                 $this->redis::HSET('user_page:' . $uid, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
-            $data = $this->redis::HGETALL('user_page:' . $uid);
-        }
-        foreach ($data as $k => &$v) {
-            $v = json_decode($v, true);
+        } else {
+            foreach ($data as $k => &$v) {
+                $v = json_decode($v, true);
+            }
         }
         return ['lists' => array_values($data)];
     }
@@ -84,11 +84,14 @@ class PageService extends Service
             'bottom_schema' => $template['bottom_schema'],
             'bottom_data'   => $template['bottom_data'],
         ];
-        $this->redis::HDEL('user_page:' . $user['id']);
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->userModel->whereKey($user['id'])->increment('pages');
-        return $this->pageModel->insertGetId($insert);
+        $id = $this->pageModel->insertGetId($insert);
+        $redis = [
+            'id' => $id, 'follow' => 0, 'is_open' => 0, 'head_data' => $head, 'created_at' => date('Y-m-d H:i:s')
+        ];
+        return $this->setRedis($user['id'], $redis);
     }
 
     public function add($request)
@@ -118,11 +121,14 @@ class PageService extends Service
             'bottom_schema' => $template['bottom_schema'],
             'bottom_data'   => json_encode($bottom, JSON_UNESCAPED_UNICODE),
         ];
-        $this->redis::HDEL('user_page:' . $uid);
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->userModel->whereKey($uid)->increment('pages');
-        return $this->pageModel->insertGetId($insert);
+        $id = $this->pageModel->insertGetId($insert);
+        $redis = [
+            'id' => $id, 'follow' => 0, 'is_open' => 0, 'head_data' => $head, 'created_at' => date('Y-m-d H:i:s')
+        ];
+        return $this->setRedis($uid, $redis);
     }
 
     public function edit($request)
@@ -151,12 +157,15 @@ class PageService extends Service
             $decLbIds = array_column($info['bottom_data'], 'id');
             $update['bottom_data'] = json_encode($bottomData, JSON_UNESCAPED_UNICODE);
         }
-        $this->redis::HDEL('user_page:' . $info['user_id']);
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->linkModel->whereIn('id', $decLcIds)->decrement('number');
         $this->linkModel->whereIn('id', $decLbIds)->decrement('number');
-        return $this->pageModel->whereKey($id)->update($update);
+        $this->pageModel->whereKey($id)->update($update);
+        $redis = [
+            'id' => $id, 'follow' => $info['follow'], 'is_open' => $info['is_open'], 'head_data' => $head, 'created_at' => date('Y-m-d H:i:s')
+        ];
+        return $this->setRedis($info['user_id'], $redis);
     }
 
     public function status($request)
@@ -165,14 +174,35 @@ class PageService extends Service
         $where[] = ['user_id', '=', $uid];
         $update = [];
         $id = $request->input('id');
-        $open = $request->input('is_open', '');
-        if ($open) $update['is_open'] = $open;
-        $delete = $request->input('is_delete', '');
-        if ($delete) {
-            $update['is_delete'] = $delete;
-            $this->userModel->whereKey($uid)->decrement('pages');
+        $open = $request->input('is_open');
+        if (is_numeric($open)) {
+            $update['is_open'] = $open;
+            if ($open) {
+                $this->redis::SADD('recent', $id);
+                $this->redis::ZADD('hot', 1, $id);
+            } else {
+                $this->redis::SREM('recent', $id);
+                $this->redis::ZREM('hot', $id);
+            }
         }
-        $this->redis::HDEL('user_page:' . $uid);
+        $delete = $request->input('is_delete');
+        if (is_numeric($delete)) {
+            $update['is_delete'] = $delete;
+            if ($delete) {
+                $this->redis::SADD('recent', $id);
+                $this->redis::ZADD('hot', 1, $id);
+            } else {
+                $this->redis::SREM('recent', $id);
+                $this->redis::ZREM('hot', $id);
+            }
+            $this->userModel->whereKey($uid)->decrement('pages');
+            $this->redis::HDEL('user_page:' . $uid, $id);
+        }
         return $this->pageModel->whereKey($id)->where($where)->update($update);
+    }
+
+    protected function setRedis($uid, $data)
+    {
+        $this->redis::HSET('user_page:' . $uid, $data['id'], json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 }
