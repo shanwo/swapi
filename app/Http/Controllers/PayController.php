@@ -29,7 +29,6 @@ class PayController extends Controller
             return $this->returnApi();
         }
         $data = $this->request->user();
-//        dump($this->user['id']);die;
 //        $data = $this->payService->lists($this->user['id']);
         $this->code = 200;
         return $this->returnApi($data);
