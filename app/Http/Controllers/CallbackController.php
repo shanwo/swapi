@@ -165,7 +165,7 @@ class CallbackController extends Controller
         $user['ip'] = $this->request->ip();
         $data = $this->userService->wechat($this->uid, $user);
         if (empty($data['msg'])) {
-            $this->service->redis::setex('token:' . $data['api_token'], 60 * 60 * 24 * 180, $data['id']);
+            $this->service->redis::setex('user_token:' . $data['api_token'], 60 * 60 * 24 * 180, $data['id']);
 //            $arr = [$data['id'] => md5(dechex($data['id']))];
 //            $this->service->redis::setex('token:' . $data['api_token'], 60 * 60 * 24 * 180, json_encode($arr));
 //            $this->service->redis::setex('user:' . $data['id'], 60 * 60 * 24 * 180, json_encode($data, JSON_UNESCAPED_UNICODE));
@@ -243,7 +243,7 @@ class CallbackController extends Controller
         $user['ip'] = $this->request->ip();
         $data = $this->userService->wechat($this->uid, $user);
         if (empty($data['msg'])) {
-            $this->service->redis::setex('token:' . $data['api_token'], 60 * 60 * 24 * 180, $data['id']);
+            $this->service->redis::setex('user_token:' . $data['api_token'], 60 * 60 * 24 * 180, $data['id']);
 //            $arr = [$data['id'] => md5(dechex($data['id']))];
 //            $this->service->redis::setex('token:' . $data['api_token'], 60 * 60 * 24 * 180, json_encode($arr));
 //            $this->service->redis::setex('user:' . $data['id'], 60 * 60 * 24 * 180, json_encode($data, JSON_UNESCAPED_UNICODE));

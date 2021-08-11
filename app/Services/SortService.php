@@ -21,13 +21,13 @@ class SortService extends Service
 
     public function lists($type)
     {
-        $data = $this->redis::HGETALL('sort:' . $type);
+        $data = $this->redis::HGETALL('sort_type:' . $type);
         if (!$data) {
             $lists = $this->sortModel->select('id', 'name', 'type')->get()->toArray();
             foreach ($lists as $k => $v) {
                 $tmp = $v['type'];
                 unset($v['type']);
-                $this->redis::HSET('sort:' . $tmp, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+                $this->redis::HSET('sort_type:' . $tmp, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
                 if ($tmp == $type) {
                     $data[] = $v;
                 }
