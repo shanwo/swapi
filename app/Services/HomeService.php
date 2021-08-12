@@ -90,7 +90,10 @@ class HomeService extends Service
                 }
             }
         }
-        $this->redis::ZINCRBY('hot', 1, $id);                   //TODO::需要控制频次，防刷新加数
+        if (!$this->redis::GET('click:' . $id . '-' . $request->ip())) {
+            $this->redis::ZINCRBY('hot', 1, $id);
+            $this->redis::SETEX('click:' . $id . '-' . $request->ip(), 30, date('Y-m-d H:i:s'));
+        }
         return $info;
     }
 }
