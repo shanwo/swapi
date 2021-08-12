@@ -55,7 +55,7 @@ class PageService extends Service
         $info = $this->redis::GET('info_pages:' . $id);
         if (!$info) {
             $info = $this->pageModel->whereKey($id)->first();
-            if(!$info) return false;
+            if (!$info) return false;
             $info['head_schema'] = json_decode($info['head_schema'], true);
             $info['head_data'] = json_decode($info['head_data'], true);
             $info['center_schema'] = json_decode($info['center_schema'], true);
@@ -175,8 +175,9 @@ class PageService extends Service
         if (is_numeric($open)) {
             $update['is_open'] = $open;
             if ($open) {
-                $this->redis::SADD('recent', $id);          //TODO::多久内的页面在最近更新
-                $this->redis::ZADD('hot', 1, $id);          //TODO::访问量达到多少可进热门   (browse+sort)
+                $info = $this->info($id);
+                $this->redis::SADD('recent', $id);
+                $this->redis::ZADD('hot', $info['browse'] + $info['sort'], $id);
             } else {
                 $this->redis::SREM('recent', $id);
                 $this->redis::ZREM('hot', $id);
