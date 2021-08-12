@@ -73,7 +73,7 @@ class HomeService extends Service
             $info = $this->pageService->info($id);
             if (!$info) return $info = ['msg' => '页面不存在'];
             $uid = $request->user()->id ?? 0;
-            if ($info['user_id'] != $uid) {
+            if ($info['user_id'] != $uid) {     //需每个用户自己的集合存访问记录，然后定期更新数据库
                 $browse = $this->browseModel->where(['user_id' => $uid, 'page_id' => $info['id']])->first();
                 if (!$browse) {
                     $insert = [
@@ -87,7 +87,7 @@ class HomeService extends Service
                 }
             }
         }
-        $this->redis::ZINCRBY('hot', 1, $id);
+        $this->redis::ZINCRBY('hot', 1, $id);   //需要控制频次，防刷新加数
         return $info;
     }
 }
