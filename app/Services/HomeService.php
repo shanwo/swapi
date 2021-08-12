@@ -69,8 +69,12 @@ class HomeService extends Service
                 $where[] = ['code', '=', $code];
             }
             $where[] = ['is_delete', '=', 0];
-            $info = $this->pageService->info($id);              //TODO::需防止击穿
-            if (!$info) return $info = ['msg' => '页面不存在'];
+            $info = $this->pageService->info($id);
+            if (!$info) {
+                $info = ['msg' => '页面不存在'];
+                $this->redis::SETEX('info_pages:' . $id, 60, json_encode($info, JSON_UNESCAPED_UNICODE));
+                return $info;
+            }
             $uid = $request->user()->id ?? 0;
             if ($info['user_id'] != $uid) {                     //TODO::需每个用户自己的集合存访问记录，然后定期更新数据库
                 $browse = $this->browseModel->where(['user_id' => $uid, 'page_id' => $info['id']])->first();
