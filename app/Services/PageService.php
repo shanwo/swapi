@@ -175,8 +175,8 @@ class PageService extends Service
         if (is_numeric($open)) {
             $update['is_open'] = $open;
             if ($open) {
-                $this->redis::SADD('recent', $id);
-                $this->redis::ZADD('hot', 1, $id);
+                $this->redis::SADD('recent', $id);          //TODO::多久内的页面在最近更新
+                $this->redis::ZADD('hot', 1, $id);          //TODO::访问量达到多少可进热门
             } else {
                 $this->redis::SREM('recent', $id);
                 $this->redis::ZREM('hot', $id);
