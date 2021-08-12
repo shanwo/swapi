@@ -31,7 +31,7 @@ class PageService extends Service
     public function lists($request)
     {
         $uid = $request->user()->id ?? 0;
-        $data = $this->redis::HGETALL('user_page:' . $uid);
+        $data = $this->redis::HGETALL('user_pages:' . $uid);
         if (empty($data)) {
             $where[] = ['user_id', '=', $uid];
             $where[] = ['is_delete', '=', 0];
@@ -40,7 +40,7 @@ class PageService extends Service
                 $tmp = json_decode($v['head_data'], true);
                 $v = array_merge($v, $tmp);
                 unset($v['head_data']);
-                $this->redis::HSET('user_page:' . $uid, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+                $this->redis::HSET('user_pages:' . $uid, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
         } else {
             foreach ($data as $k => &$v) {
@@ -127,7 +127,7 @@ class PageService extends Service
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->userModel->whereKey($uid)->increment('pages');
         $id = $this->pageModel->insertGetId($insert);
-        return $this->redis::HDEL('user_page:' . $uid, $id);
+        return $this->redis::HDEL('user_pages:' . $uid, $id);
     }
 
     public function edit($request)
@@ -162,7 +162,7 @@ class PageService extends Service
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->linkModel->whereIn('id', $decLcIds)->decrement('number');
         $this->linkModel->whereIn('id', $decLbIds)->decrement('number');
-        return $this->redis::HDEL('user_page:' . $info['user_id'], $id);
+        return $this->redis::HDEL('user_pages:' . $info['user_id'], $id);
     }
 
     public function status($request)
