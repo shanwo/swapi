@@ -75,24 +75,12 @@ class HomeService extends Service
                 $this->redis::SETEX('info_pages:' . $id, 60, json_encode($info, JSON_UNESCAPED_UNICODE));
                 return $info;
             }
-            $uid = $request->user()->id ?? 0;
-            if ($info['user_id'] != $uid) {                     //TODO::需每个用户自己的集合存访问记录，然后定期更新数据库
-                $browse = $this->browseModel->where(['user_id' => $uid, 'page_id' => $info['id']])->first();
-                if (!$browse) {
-                    $insert = [
-                        'user_id' => $uid,
-                        'page_id' => $info['id'],
-                        'click'   => 1
-                    ];
-                    $this->browseModel->insertGetId($insert);
-                } else {
-                    $this->browseModel->whereKey($browse['id'])->increment('click');
-                }
-            }
         }
         if (!$this->redis::GET('click:' . $id . ':' . $request->ip())) {
             $this->redis::ZINCRBY('hot', 1, $id);
             $this->redis::SETEX('click:' . $id . ':' . $request->ip(), 30, date('Y-m-d H:i:s'));
+            $uid = $request->user()->id;
+            if ($uid) $this->redis::ZINCRBY('user_browse:' . $uid, 1, $id);
         }
         return $info;
     }
