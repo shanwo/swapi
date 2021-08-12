@@ -116,7 +116,10 @@ class Controller extends BaseController
     }
 
     /**
-     *辅助函数
+     * 辅助函数
+     * @param $str
+     * @param $encrypt_key
+     * @return string
      */
     private function passportKey($str, $encrypt_key)
     {
