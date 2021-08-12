@@ -12,105 +12,82 @@ use App\Models\PageModel;
 
 class HomeService extends Service
 {
-    protected $pageModel;
+    protected $pageService;
     protected $browseModel;
 
     public function __construct()
     {
         parent::__construct();
-        $this->pageModel = new PageModel();
+        $this->pageService = new PageService();
         $this->browseModel = new BrowseModel();
     }
 
-    //使用zset结构
     public function hot($request)
     {
         $page = $request->input('page', $this->page);
-//        $data = $this->redis::SCARD ('hot' . $page);
-//        $number = $this->redis::ZCARD('hot');
-//        dump($number);
-        $ids = $this->redis::ZREVRANGE('hot',0 ,-1);
-        $aa = array_slice($ids,($page-1)*$this->size,$this->size);
-        //使用id查询redis闪页数据
-        if (empty($data)) {
-            $where[] = ['browse', '>', 0];
-            $where[] = ['is_open', '=', 1];
-            $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->select('id', 'background', 'head_data')->where($where);
-            $data['page'] = (int)$page;
-            $data['size'] = $this->size;
-            $data['total'] = $lists->count();
-            $lists = $lists->forPage($page, $this->size)->orderBy('sort', 'DESC')->orderBy('browse', 'DESC')->get()->toArray();
-            foreach ($lists as $k => &$v) {
-                $tmp = json_decode($v['head_data'], true);
-                $v = array_merge($v,$tmp);
-                unset($v['head_data']);
-            }
-            if (!$data['total']) $this->timeOut = 30;
-            $this->redis::SETEX('hot:' . $page, $this->timeOut, json_encode($data));
-        }else{
-            $data = json_decode($data,true);
+        $start = ($page - 1) * $this->size;
+        $stop = $start + $this->size - 1;
+        $ids = $this->redis::ZREVRANGE('hot', $start, $stop);
+        $data = [
+            'total' => $this->redis::ZCARD('hot'),
+            'page'  => $page,
+            'size'  => $this->size
+        ];
+        foreach ($ids as $k => $v) {
+            $page = $this->redis::GET('list_pages:' . $v);
+            if ($page) $data['lists'][] = json_decode($page, true);
         }
         return $data;
     }
 
-    //使用set结构
     public function recent($request)
     {
         $page = $request->input('page', $this->page);
-        $data = $this->redis::GET('recent:' . $page);
-        if (empty($data)) {
-            $where[] = ['is_open', '=', 1];
-            $where[] = ['is_delete', '=', 0];
-            $lists = $this->pageModel->select('id', 'background', 'head_data')->where($where);
-            $data['page'] = (int)$page;
-            $data['size'] = $this->size;
-            $data['total'] = $lists->count();
-            $data['lists'] = $lists->forPage($page, $this->size)->orderBy('updated_at', 'DESC')->orderBy('browse', 'ASC')->get()->toArray();
-            foreach ($lists as $k => &$v) {
-                $tmp = json_decode($v['head_data'], true);
-                $v = array_merge($v,$tmp);
-                unset($v['head_data']);
-            }
-            if (!$data['total']) $this->timeOut = 30;
-            $this->redis::SETEX('recent:' . $page, $this->timeOut, json_encode($data));
-        }else{
-            $data = json_decode($data,true);
+        $ids = $this->redis::SRANDMEMBER('recent', $this->size);
+        $data = [
+            'total' => $this->redis::SCARD('recent'),
+            'page'  => $page,
+            'size'  => $this->size
+        ];
+        foreach ($ids as $k => $v) {
+            $page = $this->redis::GET('list_pages:' . $v);
+            if ($page) $data['lists'][] = json_decode($page, true);
         }
         return $data;
     }
 
-    //使用string结构
+    //需防止击穿
     public function info($request)
     {
         $id = $request->input('id', 0);
-        if ($id) {
-            $where[] = ['id', '=', $id];
-        } else {
-            $code = $request->input('code', 0);
-            $where[] = ['code', '=', $code];
-        }
-        $info = $this->pageModel->where($where)->first();
-        $info['head_schema'] = json_decode($info['head_schema'], true);
-        $info['head_data'] = json_decode($info['head_data'], true);
-        $info['center_schema'] = json_decode($info['center_schema'], true);
-        $info['center_data'] = json_decode($info['center_data'], true);
-        $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
-        $info['bottom_data'] = json_decode($info['bottom_data'], true);
-        $uid = $request->user()->id ?? 0;
-        if ($info['user_id'] != $uid) {
-            $browse = $this->browseModel->where(['user_id' => $uid, 'page_id' => $info['id']])->first();
-            if (!$browse) {
-                $insert = [
-                    'user_id' => $uid,
-                    'page_id' => $info['id'],
-                    'click'   => 1
-                ];
-                $this->browseModel->insertGetId($insert);
+        $page = $this->redis::GET('info_pages:' . $id);
+        $info = json_decode($page, true) ?? [];
+        if (!$info) {
+            if ($id) {
+                $where[] = ['id', '=', $id];
             } else {
-                $this->browseModel->whereKey($browse['id'])->increment('click');
+                $code = $request->input('code', '');
+                $where[] = ['code', '=', $code];
+            }
+            $where[] = ['is_delete', '=', 0];
+            $info = $this->pageService->info($id);
+            if (!$info) return $info = ['msg' => '页面不存在'];
+            $uid = $request->user()->id ?? 0;
+            if ($info['user_id'] != $uid) {
+                $browse = $this->browseModel->where(['user_id' => $uid, 'page_id' => $info['id']])->first();
+                if (!$browse) {
+                    $insert = [
+                        'user_id' => $uid,
+                        'page_id' => $info['id'],
+                        'click'   => 1
+                    ];
+                    $this->browseModel->insertGetId($insert);
+                } else {
+                    $this->browseModel->whereKey($browse['id'])->increment('click');
+                }
             }
         }
+        $this->redis::ZINCRBY('hot', 1, $id);
         return $info;
     }
 }

@@ -155,7 +155,7 @@ class PageController extends Controller
         $this->validate([
             'id'        => 'required|integer|gt:0|exists:sw_page,id',
             'is_open'   => 'required_without:is_delete|integer|between:0,1',
-            'is_delete' => 'required_without:is_open|integer|between:0,1',
+            'is_delete' => 'required_without:is_open|integer|between:1',
         ], [
             'id'        => 'ID',
             'is_open'   => '广场',

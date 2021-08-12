@@ -54,8 +54,8 @@ class HomeController extends Controller
     public function info()
     {
         $this->validate([
-            'id'   => 'filled|integer',
-            'code' => 'filled|string|between:6,16',
+            'id'   => 'required|integer|gt:0',
+            'code' => 'required_without:id|string|between:6,16',
         ], [
             'page' => 'ID',
             'size' => '闪码',
@@ -64,6 +64,10 @@ class HomeController extends Controller
             return $this->returnApi();
         }
         $data = $this->homeService->info($this->request);
+        if(!empty($data['msg'])){
+            $this->msg = $data['msg'];
+            return $this->returnApi();
+        }
         $this->code = 200;
         return $this->returnApi($data);
     }
