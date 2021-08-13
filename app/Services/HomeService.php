@@ -13,13 +13,11 @@ use App\Models\PageModel;
 class HomeService extends Service
 {
     protected $pageService;
-    protected $browseModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->pageService = new PageService();
-        $this->browseModel = new BrowseModel();
     }
 
     public function hot($request)
@@ -80,7 +78,7 @@ class HomeService extends Service
             $this->redis::ZINCRBY('hot', 1, $id);
             $this->redis::SETEX('click:' . $id . ':' . $request->ip(), 30, date('Y-m-d H:i:s'));
             $uid = $request->user()->id;
-            if ($uid) $this->redis::ZINCRBY('user_browse:' . $uid, 1, $id);
+            if ($uid) $this->redis::ZINCRBY('user_browses:' . $uid, 1, $id);
         }
         return $info;
     }

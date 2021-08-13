@@ -38,29 +38,14 @@ class AttentionController extends Controller
         return $this->returnApi($data);
     }
 
-    public function add()
-    {
-        $this->validate([
-            'page_id' => 'required|integer|gt:0|exists:sw_page,id',
-        ], [
-            'page_id' => '页面ID',
-        ]);
-        if ($this->msg) {
-            return $this->returnApi();
-        }
-        $data = $this->attentionService->add($this->request);
-        $this->code = 200;
-        return $this->returnApi($data);
-    }
-
     public function status()
     {
         $this->validate([
-            'id'     => 'required|integer|gt:0|exists:sw_attention,id',
-            'status' => 'required|integer|between:0,3',
+            'page_id' => 'required|integer|gt:0|exists:sw_page,id',
+            'status'  => 'required|integer|between:0,3',
         ], [
-            'id'     => 'ID',
-            'status' => '状态',
+            'page_id' => '页面ID',
+            'status'  => '状态',
         ]);
         if ($this->msg) {
             return $this->returnApi();
