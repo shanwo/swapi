@@ -19,42 +19,41 @@ class BrowseService extends Service
         $this->browseModel = new BrowseModel();
     }
 
-    //使用zset
     public function lists($request)
     {
         $page = $request->input('page', $this->page);
-        $data = $this->redis::GET('browse:' . $page);
-        if (empty($data)) {
-            $where[] = ['sa.status', '=', 1];
-            $pid = $request->input('page_id', 0);
-            if ($pid) {
-                $where[] = ['sa.page_id', '=', $pid];
-                $lists = $this->browseModel->from('sw_attention as sa')
-                    ->select('sa.id', 'su.nickname', 'su.avatar')
-                    ->leftJoin('sw_user as su', 'sa.user_id', '=', 'su.id')
-                    ->where($where);
-            } else {
-                $uid = $request->user()->id ?? 0;
-                $where[] = ['sa.user_id', '=', $uid];
-                $lists = $this->browseModel->from('sw_attention as sa')
-                    ->select('sa.id', 'sp.head_data')
-                    ->leftJoin('sw_page as sp', 'sa.page_id', '=', 'sp.id')
-                    ->where($where);
-            }
-            $data['page'] = (int)$page;
-            $data['size'] = $this->size;
-            $data['total'] = $lists->count();
-            $data['lists'] = $lists->forPage($page, $this->size)->orderBy('sa.created_at', 'DESC')->get()->toArray();
-            if (!$pid) {
-                foreach ($lists as $k => &$v) {
-                    $v['head_data'] = json_decode($v['head_data'], true);
+        $start = ($page - 1) * $this->size;
+        $stop = $start + $this->size - 1;
+        $pid = $request->input('page_id', 0);
+        $lists = [];
+        if ($pid) {
+            $pages = $this->redis::LRANGE('page_browses:' . $pid, $start, $stop);
+            $total = $this->redis::LLEN('page_browses:' . $pid);
+            foreach ($pages as $k => $v) {
+                $info = $this->redis::GET('list_pages:' . $v);
+                if ($info) {
+                    $info = json_decode($info, true);
+                    $data = $info['head_data'];
+                    $lists[] = ['id' => $v, 'avatar' => $data['avatar'], 'nickname' => $data['nickname']];
                 }
             }
-            if (!$data['total']) $this->timeOut = 30;
-            $this->redis::SETEX('browse:' . $page, $this->timeOut, json_encode($data));
-        }else{
-            $data = json_decode($data,true);
+        } else {
+            $uid = $request->user()->id ?? 0;
+            $users = $this->redis::LRANGE('user_browses:' . $uid, $start, $stop);
+            $total = $this->redis::LLEN('user_browses:' . $uid);
+            foreach ($users as $k => $v) {
+                $info = $this->redis::GET('user_infos:' . $v);
+                if ($info) {
+                    $info = json_decode($info, true);
+                    $lists[] = ['id' => $info['id'], 'avatar' => $info['avatar'], 'nickname' => $info['nickname']];
+                }
+            }
         }
-        return $data;
+        return [
+            'total' => $total,
+            'page'  => $page,
+            'size'  => $this->size,
+            'lists' => $lists
+        ];
     }
 }
