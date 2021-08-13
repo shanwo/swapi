@@ -38,8 +38,8 @@ class TemplateService extends Service
     public function info($id)
     {
         $info = $this->redis::GET('template_infos:' . $id);
-        $info = json_decode($info,true);
-        if(!$info){
+        $info = json_decode($info, true);
+        if (!$info) {
             $info = $this->templateModel->whereKey($id)->first();
             $info['head_schema'] = json_decode($info['head_schema'], true);
             $info['head_data'] = json_decode($info['head_data'], true);
