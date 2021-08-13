@@ -41,6 +41,11 @@ Route::prefix('template')->group(function () {
     Route::get('lists', 'TemplateController@lists');
     Route::get('info', 'TemplateController@info');
 });
+//关注
+Route::prefix('attention')->group(function () {
+    Route::get('lists', 'AttentionController@lists');
+    Route::post('status', 'AttentionController@status');
+});
 //页面
 Route::prefix('page')->group(function () {
     Route::get('lists', 'PageController@lists');
@@ -48,12 +53,6 @@ Route::prefix('page')->group(function () {
     Route::post('add', 'PageController@add');
     Route::post('edit', 'PageController@edit');
     Route::post('status', 'PageController@status');
-});
-//关注
-Route::prefix('attention')->group(function () {
-    Route::get('lists', 'AttentionController@lists');
-    Route::post('add', 'AttentionController@add');
-    Route::post('status', 'AttentionController@status');
 });
 //首页
 Route::prefix('home')->group(function () {
