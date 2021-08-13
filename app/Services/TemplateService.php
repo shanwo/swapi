@@ -37,13 +37,18 @@ class TemplateService extends Service
 
     public function info($id)
     {
-        $info = $this->templateModel->whereKey($id)->first();
-        $info['head_schema'] = json_decode($info['head_schema'], true);
-        $info['head_data'] = json_decode($info['head_data'], true);
-        $info['center_schema'] = json_decode($info['center_schema'], true);
-        $info['center_data'] = json_decode($info['center_data'], true);
-        $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
-        $info['bottom_data'] = json_decode($info['bottom_data'], true);
+        $info = $this->redis::GET('template_infos:' . $id);
+        $info = json_decode($info,true);
+        if(!$info){
+            $info = $this->templateModel->whereKey($id)->first();
+            $info['head_schema'] = json_decode($info['head_schema'], true);
+            $info['head_data'] = json_decode($info['head_data'], true);
+            $info['center_schema'] = json_decode($info['center_schema'], true);
+            $info['center_data'] = json_decode($info['center_data'], true);
+            $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
+            $info['bottom_data'] = json_decode($info['bottom_data'], true);
+            $this->redis::SET('template_infos:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
+        }
         return $info;
     }
 }

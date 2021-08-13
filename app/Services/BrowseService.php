@@ -7,16 +7,11 @@
 
 namespace App\Services;
 
-use App\Models\BrowseModel;
-
 class BrowseService extends Service
 {
-    protected $browseModel;
-
     public function __construct()
     {
         parent::__construct();
-        $this->browseModel = new BrowseModel();
     }
 
     public function lists($request)
