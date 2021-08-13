@@ -22,6 +22,7 @@ class RedisUserProvider extends EloquentUserProvider
     {
         if (!isset($credentials['api_token'])) return ;
         $userId = Redis::GET('user_tokens:' . $credentials['api_token']);
-        if ($userId) return $this->retrieveById($userId);
+        if ($userId) return Redis::GET('user_infos:' . $userId);
+//        if ($userId) return $this->retrieveById($userId);     //从数据库读取
     }
 }
