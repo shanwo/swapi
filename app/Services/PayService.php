@@ -9,18 +9,18 @@ namespace App\Services;
 
 class PayService extends Service
 {
-    protected $pageModel;
-    protected $linkModel;
-    protected $userModel;
-    protected $templateModel;
+    protected $payLists;
+    protected $payment;
 
     public function __construct()
     {
         parent::__construct();
+        $this->payment = $this->configInfo('payment');
     }
 
     public function lists($request)
     {
+        $this->payLists = $this->configInfo('payLists');
 
     }
 
