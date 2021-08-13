@@ -29,10 +29,14 @@ class UserService extends Service
 
     public function info($id)
     {
-        $info = $this->userModel->whereKey($id)->first();
-        $info['contact'] = json_decode($info['contact'], true);
-        $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
-        $this->redis::SET('user_infos:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
+        $info = $this->redis::GET('user_infos:' . $id);
+        $info = json_decode($info, true) ?? [];
+        if(!$info){
+            $info = $this->userModel->whereKey($id)->first();
+            $info['contact'] = json_decode($info['contact'], true);
+            $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
+            $this->redis::SET('user_infos:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
+        }
         return $info;
     }
 
