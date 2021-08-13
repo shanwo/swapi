@@ -19,18 +19,18 @@ class PayService extends Service
         parent::__construct();
     }
 
-    public function lists()
+    public function lists($request)
     {
 
     }
 
-    public function send()
+    public function send($request)
     {
 
     }
 
-    public function result()
+    public function result($request)
     {
-        
+
     }
 }

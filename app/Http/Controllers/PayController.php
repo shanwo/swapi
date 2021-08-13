@@ -28,13 +28,12 @@ class PayController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->request->user();
-//        $data = $this->payService->lists($this->user['id']);
+        $data = $this->payService->lists($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }
 
-    public function pay()
+    public function send()
     {
         $this->validate([
         ], [
@@ -42,7 +41,20 @@ class PayController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->payService->pay();
+        $data = $this->payService->send($this->request);
+        $this->code = 200;
+        return $this->returnApi($data);
+    }
+
+    public function result()
+    {
+        $this->validate([
+        ], [
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
+        $data = $this->payService->result($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }
