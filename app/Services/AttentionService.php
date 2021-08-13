@@ -21,25 +21,36 @@ class AttentionService extends Service
         $start = ($page - 1) * $this->size;
         $stop = $start + $this->size - 1;
         $pid = $request->input('page_id', 0);
+        $lists = [];
         if ($pid) {
-            $users = $this->redis::LRANGE('page_attentions:' . $pid, $start, $stop);
+            $pages = $this->redis::LRANGE('page_attentions:' . $pid, $start, $stop);
+            $total = $this->redis::LLEN('page_attentions:' . $pid);
+            foreach ($pages as $k => $v) {
+                $info = $this->redis::GET('list_pages:' . $v);
+                if ($info) {
+                    $info = json_decode($info, true);
+                    $data = $info['head_data'];
+                    $lists[] = ['id' => $v, 'avatar' => $data['avatar'], 'nickname' => $data['nickname']];
+                }
+            }
         } else {
             $uid = $request->user()->id ?? 0;
             $users = $this->redis::LRANGE('user_attentions:' . $uid, $start, $stop);
-        }
-        $data = [
-            'total' => $this->redis::ZCARD('hot'),
-            'page'  => $page,
-            'size'  => $this->size
-        ];
-        foreach ($users as $k => $v) {
-            $user = $this->redis::GET('user_infos:' . $v);
-            if ($user) {
-                $user = json_decode($user, true);
-                $data['lists'][] = ['id' => $user['id'], 'avatar' => $user['avatar'], 'nickname' => $user['nickname']];
+            $total = $this->redis::LLEN('user_attentions:' . $uid);
+            foreach ($users as $k => $v) {
+                $info = $this->redis::GET('user_infos:' . $v);
+                if ($info) {
+                    $info = json_decode($info, true);
+                    $lists[] = ['id' => $info['id'], 'avatar' => $info['avatar'], 'nickname' => $info['nickname']];
+                }
             }
         }
-        return $data;
+        return [
+            'total' => $total,
+            'page'  => $page,
+            'size'  => $this->size,
+            'lists' => $lists
+        ];
     }
 
     public function status($request)
