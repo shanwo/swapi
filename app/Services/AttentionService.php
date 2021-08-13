@@ -22,7 +22,6 @@ class AttentionService extends Service
     //使用zset
     public function lists($request)
     {
-        $uid = $request->user()->id ?? 0;
         $page = $request->input('page', $this->page);
         $data = $this->redis::GET('attention:' . $page);
         if (empty($data)) {
@@ -35,6 +34,7 @@ class AttentionService extends Service
                     ->leftJoin('sw_user as su', 'sa.user_id', '=', 'su.id')
                     ->where($where);
             } else {
+                $uid = $request->user()->id ?? 0;
                 $where[] = ['sa.user_id', '=', $uid];
                 $lists = $this->attentionModel->from('sw_attention as sa')
                     ->select('sa.id', 'sp.head_data')

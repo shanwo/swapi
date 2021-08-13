@@ -189,7 +189,7 @@ class PageService extends Service
             $this->redis::SREM('recent', $id);
             $this->redis::DEL('list_pages:' . $id);
             $this->redis::DEL('info_pages:' . $id);
-            $this->redis::HDEL('user_page:' . $uid, $id);
+            $this->redis::HDEL('user_pages:' . $uid, $id);
             $this->userModel->whereKey($uid)->decrement('pages');
             $update['is_delete'] = $delete;
         }
