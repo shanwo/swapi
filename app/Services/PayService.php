@@ -24,8 +24,13 @@ class PayService extends Service
 
     }
 
-    public function pay()
+    public function send()
     {
 
+    }
+
+    public function result()
+    {
+        
     }
 }

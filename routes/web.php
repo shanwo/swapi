@@ -67,10 +67,11 @@ Route::prefix('user')->group(function () {
     Route::get('info', 'UserController@info');
     Route::post('edit', 'UserController@edit');
 });
-//用户
+//支付
 Route::prefix('pay')->group(function () {
     Route::get('lists', 'PayController@lists');
-    Route::post('pay', 'PayController@pay');
+    Route::post('send', 'PayController@send');
+    Route::post('result', 'PayController@result');
 });
 //回调
 Route::prefix('callback')->group(function () {
