@@ -32,8 +32,8 @@ class HomeService extends Service
             'size'  => $this->size
         ];
         foreach ($ids as $k => $v) {
-            $page = $this->redis::GET('list_pages:' . $v);
-            if ($page) $data['lists'][] = json_decode($page, true);
+            $info = $this->redis::GET('list_pages:' . $v);
+            if ($info) $data['lists'][] = json_decode($info, true);
         }
         return $data;
     }
@@ -48,8 +48,8 @@ class HomeService extends Service
             'size'  => $this->size
         ];
         foreach ($ids as $k => $v) {
-            $page = $this->redis::GET('list_pages:' . $v);
-            if ($page) $data['lists'][] = json_decode($page, true);
+            $info = $this->redis::GET('list_pages:' . $v);
+            if ($info) $data['lists'][] = json_decode($info, true);
         }
         return $data;
     }
