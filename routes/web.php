@@ -93,7 +93,7 @@ Route::prefix('callback')->group(function () {
     Route::get('officialServer', 'CallbackController@officialBind');
     Route::post('officialServer', 'CallbackController@officialServer');
     //支付
-    Route::get('payment', 'CallbackController@payment');
+    Route::post('payment', 'CallbackController@payment');
 });
 //测试接口
 Route::prefix('test')->group(function () {
