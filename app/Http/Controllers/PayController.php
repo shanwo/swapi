@@ -23,7 +23,9 @@ class PayController extends Controller
     public function lists()
     {
         $this->validate([
+            'channel' => 'filled|integer|gt:0',
         ], [
+            'channel' => '渠道',
         ]);
         if ($this->msg) {
             return $this->returnApi();
