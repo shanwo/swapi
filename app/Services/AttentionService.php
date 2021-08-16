@@ -59,8 +59,8 @@ class AttentionService extends Service
         $pid = $request->input('page_id');
         $status = $request->input('status');
         if ($status) {
-            $this->redis::RPUSH('user_attentions:' . $uid, $pid);
-            $this->redis::RPUSH('page_attentions:' . $pid, $uid);
+            $this->redis::LPUSH('user_attentions:' . $uid, $pid);
+            $this->redis::LPUSH('page_attentions:' . $pid, $uid);
         } else {
             $this->redis::LREM('user_attentions:' . $uid, 0, $pid);
             $this->redis::LREM('page_attentions:' . $pid, 0, $uid);
