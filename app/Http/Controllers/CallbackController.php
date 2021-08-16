@@ -322,7 +322,7 @@ class CallbackController extends Controller
 
     public function officialServer()
     {
-        $config = config('wechat.official_account.default');
+        $config = $this->service->configInfo('official');
         $app = Factory::officialAccount($config);
         $app->server->push(function ($message) {
             switch ($message['MsgType']) {

@@ -20,7 +20,7 @@ class PayController extends Controller
     {
         parent::__construct($request);
         $this->payService = new PayService();
-        $config = config('wechat.payment.default');
+        $config = $this->service->configInfo('payment');
         $this->payment = Factory::Payment($config);
     }
 
@@ -74,7 +74,7 @@ class PayController extends Controller
     public function result()
     {
         $this->validate([
-            'order_sn' => 'required|integer|gt:0',
+            'order_sn' => 'required|alpha_num|between:16,32',
         ], [
             'order_sn' => '订单编号',
         ]);
