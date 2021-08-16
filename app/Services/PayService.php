@@ -37,19 +37,17 @@ class PayService extends Service
             $data = $this->redis::HGETALL('pay_channel:' . $channel);
         }
         $lists['lists'] = [];
-        foreach ($data as $k => $v){
-            $lists['lists'][] = json_decode($v,true);
+        foreach ($data as $k => $v) {
+            $lists['lists'][] = json_decode($v, true);
         }
         return $lists;
     }
 
     public function send($request)
     {
-
-    }
-
-    public function result($request)
-    {
-
+        $id = $request->input('id');
+        $channel = $request->input('channel', 0);
+        $info = $this->redis::HGET('pay_channel:' . $channel, $id);
+        return json_decode($info,true);
     }
 }
