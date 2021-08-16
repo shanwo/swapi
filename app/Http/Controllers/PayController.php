@@ -42,7 +42,8 @@ class PayController extends Controller
     public function send()
     {
         $this->validate([
-            'id'      => 'filled|integer|gt:0',
+            'id'      => 'required|integer|gt:0',
+            'type'    => 'required|alpha_num|in:NATIVE,JSAPI',
             'channel' => 'filled|integer|gt:0',
         ], [
             'id'      => 'ID',
@@ -52,35 +53,30 @@ class PayController extends Controller
             return $this->returnApi();
         }
         $info = $this->payService->send($this->request);
-        $order_sn = $info['channel'] . time();
+        $type = $this->request->input('type');
+        $order_sn = $type . $info['channel'] . time();
         $total_fee = $info['original_price'];
         if ($info['activity_price']) $total_fee = $info['activity_price'];
-        $body = '闪我科技-'.$info['name'].'会员购买';
-        $data['native'] = $this->payment->order->unify([
-            'trade_type'       => 'NATIVE',
-            'body'             => $body,
-            'out_trade_no'     => $order_sn,
-            'total_fee'        => $total_fee,
-            'spbill_create_ip' => $this->request->ip(), // 可选，如不传该参数，SDK 将会自动获取相应 IP 地址
+        $data = $this->payment->order->unify([
+            'trade_type'   => $type,
+            'body'         => $info['name'] . ' - 会员购买',
+            'out_trade_no' => $order_sn,
+            'total_fee'    => $total_fee,
         ]);
-        $data['jsapi'] = $this->payment->order->unify([
-            'trade_type'       => 'JSAPI',
-            'body'             => $body,
-            'out_trade_no'     => $order_sn,
-            'total_fee'        => $total_fee,
-            'spbill_create_ip' => $this->request->ip(), // 可选，如不传该参数，SDK 将会自动获取相应 IP 地址
-        ]);
-        $data['scheme'] = $this->payment->scheme($order_sn);
-        $this->code = 200;
+        if (!strcmp($data['result_code'] ?? '', 'SUCCESS')) {
+            $this->code = 200;
+        } else {
+            $this->msg = $data['err_code_des'] ?? '';
+        }
         return $this->returnApi($data);
     }
 
     public function result()
     {
         $this->validate([
-            'order_sn' => 'filled|integer|gt:0',
+            'order_sn' => 'required|integer|gt:0',
         ], [
-            'order_sn' => '渠道',
+            'order_sn' => '订单编号',
         ]);
         if ($this->msg) {
             return $this->returnApi();
