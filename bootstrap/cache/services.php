@@ -26,10 +26,9 @@
     22 => 'Laravel\\Tinker\\TinkerServiceProvider',
     23 => 'Carbon\\Laravel\\ServiceProvider',
     24 => 'Overtrue\\LaravelWeChat\\ServiceProvider',
-    25 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
-    26 => 'App\\Providers\\AppServiceProvider',
-    27 => 'App\\Providers\\EventServiceProvider',
-    28 => 'App\\Providers\\RouteServiceProvider',
+    25 => 'App\\Providers\\AppServiceProvider',
+    26 => 'App\\Providers\\EventServiceProvider',
+    27 => 'App\\Providers\\RouteServiceProvider',
   ),
   'eager' => 
   array (
@@ -46,10 +45,9 @@
     10 => 'Fruitcake\\Cors\\CorsServiceProvider',
     11 => 'Carbon\\Laravel\\ServiceProvider',
     12 => 'Overtrue\\LaravelWeChat\\ServiceProvider',
-    13 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
-    14 => 'App\\Providers\\AppServiceProvider',
-    15 => 'App\\Providers\\EventServiceProvider',
-    16 => 'App\\Providers\\RouteServiceProvider',
+    13 => 'App\\Providers\\AppServiceProvider',
+    14 => 'App\\Providers\\EventServiceProvider',
+    15 => 'App\\Providers\\RouteServiceProvider',
   ),
   'deferred' => 
   array (
