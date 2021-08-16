@@ -26,7 +26,9 @@ class TutorialsService extends Service
         if (!$data) {
             $where[] = ['is_delete', '=', 0];
             $data = $this->tutorialsModel->select('id', 'sort_id', 'name', 'image')->where($where)->get()->toArray();
-            $this->hSetCache('tutorials', $data);
+            foreach ($data as $k => $v) {
+                $this->redis::HSET('tutorials:' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+            }
             $data = $this->hGetCache('tutorials', $sort, $sids);
         }
         foreach ($data as $k => &$v) {
