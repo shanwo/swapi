@@ -369,7 +369,7 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $config = config('wechat.payment.default');
+        $config = $this->service->configInfo('official');
         $payment = Factory::Payment($config);
         // 用 easywechat 封装的方法接收微信的信息, 根据 $message 的内容进行处理, 之后要告知微信服务器处理好了, 否则微信会一直请求这个 url, 发送信息
         $response = $payment->handlePaidNotify(function($message, $fail){
