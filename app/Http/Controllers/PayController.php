@@ -7,21 +7,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\OrderService;
 use App\Services\PayService;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
 
 class PayController extends Controller
 {
-    protected $orderService;
     protected $payService;
     protected $payment;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
-        $this->orderService = new OrderService();
         $this->payService = new PayService();
         $config = $this->service->configInfo('payment');
         $this->payment = Factory::Payment($config);
@@ -57,7 +54,8 @@ class PayController extends Controller
         }
         $info = $this->payService->send($this->request);
         $type = $this->request->input('type');
-        $order_sn = $type . $info['channel'] . time();
+        $user = $this->request->user();
+        $order_sn = dechex(time()) . rand(10, 99) . mb_substr(sprintf("%04d", $user['id']), -4) . rand(10, 99);
         $total_fee = $info['original_price'];
         if ($info['activity_price']) $total_fee = $info['activity_price'];
         $params = [
@@ -66,13 +64,14 @@ class PayController extends Controller
             'out_trade_no' => $order_sn,
             'total_fee'    => $total_fee,
         ];
-        if($type == 'JSAPI') {
-            $user = $this->request->user();
-            $third = array_column($user['third'] ?? [],'open_id','source');
+        if ($type == 'JSAPI') {
+            $third = array_column($user['third'] ?? [], 'open_id', 'source');
             $params['openid'] = $third['official'] ?? '';
         }
         $data = $this->payment->order->unify($params);
+        $data['order_sn'] = $order_sn;
         if (!strcmp($data['result_code'] ?? '', 'SUCCESS')) {
+            $this->service->redis::SETEX('pay_order:' . $order_sn, 3600, json_encode(['unify' => $params, 'pay' => $info], JSON_UNESCAPED_UNICODE));
             $this->code = 200;
         } else {
             $this->msg = $data['err_code_des'] ?? '';
@@ -83,7 +82,7 @@ class PayController extends Controller
     public function result()
     {
         $this->validate([
-            'order_sn' => 'required|alpha_num|between:16,32',
+            'order_sn' => 'required|alpha|size:16',
         ], [
             'order_sn' => '订单编号',
         ]);
