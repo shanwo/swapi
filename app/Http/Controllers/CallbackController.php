@@ -358,7 +358,7 @@ class CallbackController extends Controller
             }
         });
         $response = $app->server->serve();
-        return $response->send();
+        return $response;
     }
 
     /**
@@ -366,16 +366,22 @@ class CallbackController extends Controller
      */
     public function payment()
     {
-        $this->validate([
-        ], [
-        ]);
-        if ($this->msg) {
-            return $this->returnApi();
-        }
+//        $this->validate([
+//        ], [
+//        ]);
+//        if ($this->msg) {
+//            return $this->returnApi();
+//        }
         $config = $this->service->configInfo('official');
         $payment = Factory::Payment($config);
-        // 用 easywechat 封装的方法接收微信的信息, 根据 $message 的内容进行处理, 之后要告知微信服务器处理好了, 否则微信会一直请求这个 url, 发送信息
         $response = $payment->handlePaidNotify(function($message, $fail){
+            $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
+            if(!$info) return $fail('订单支付超时');
+            $info = json_decode($info,true) ?? [];
+            $res = $this->orderService->info(['order_sn'=>$message['out_trade_no']]);
+            if($res) return true;
+            $this->orderService->add($info);
+
             // 首先查看 order 表, 如果 order 表有记录, 表示已经支付过了
 //            $order = Order::where('order_sn', $message['out_trade_no'])->first();
 //            if ($order) {
@@ -459,9 +465,9 @@ class CallbackController extends Controller
 //                ]);
 //                return $fail('通信失败，请稍后再通知我');
 //            }
+            $this->service->redis::DEL('pay_order:' . $message['out_trade_no']);
             return true; // 返回处理完成
         });
-        // 这里是必须这样返回的, 会发送给微信服务器处理结果
-        return $response->send();
+        return $response;
     }
 }
