@@ -30,15 +30,16 @@ class PayService extends Service
             $where[] = ['is_delete', '=', 0];
             $data = $this->pageModel->select('id', 'name', 'original_price', 'activity_price', 'description', 'type', 'created_at')->where($where)->get()->toArray();
             foreach ($data as $k => $v) {
-                $v['original_price'] = $v['original_price'] / 100;
-                $v['activity_price'] = $v['activity_price'] / 100;
                 $this->redis::HSET('pay_channel:' . $v['channel'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
             $data = $this->redis::HGETALL('pay_channel:' . $channel);
         }
         $lists['lists'] = [];
         foreach ($data as $k => $v) {
-            $lists['lists'][] = json_decode($v, true);
+            $v = json_decode($v, true);
+            $v['original_price'] = $v['original_price'] / 100;
+            $v['activity_price'] = $v['activity_price'] / 100;
+            $lists['lists'][] = $v;
         }
         return $lists;
     }
