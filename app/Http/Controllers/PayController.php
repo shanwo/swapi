@@ -7,18 +7,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\OrderService;
 use App\Services\PayService;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
 
 class PayController extends Controller
 {
+    protected $orderService;
     protected $payService;
     protected $payment;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
+        $this->orderService = new OrderService();
         $this->payService = new PayService();
         $config = $this->service->configInfo('payment');
         $this->payment = Factory::Payment($config);
@@ -57,12 +60,18 @@ class PayController extends Controller
         $order_sn = $type . $info['channel'] . time();
         $total_fee = $info['original_price'];
         if ($info['activity_price']) $total_fee = $info['activity_price'];
-        $data = $this->payment->order->unify([
+        $params = [
             'trade_type'   => $type,
             'body'         => $info['name'] . ' - 会员购买',
             'out_trade_no' => $order_sn,
             'total_fee'    => $total_fee,
-        ]);
+        ];
+        if($type == 'JSAPI') {
+            $user = $this->request->user();
+            $third = array_column($user['third'] ?? [],'open_id','source');
+            $params['openid'] = $third['official'] ?? '';
+        }
+        $data = $this->payment->order->unify($params);
         if (!strcmp($data['result_code'] ?? '', 'SUCCESS')) {
             $this->code = 200;
         } else {
