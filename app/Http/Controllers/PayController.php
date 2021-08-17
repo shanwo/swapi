@@ -82,7 +82,7 @@ class PayController extends Controller
     public function result()
     {
         $this->validate([
-            'order_sn' => 'required|alpha|size:16',
+            'order_sn' => 'required|alpha_num|size:16',
         ], [
             'order_sn' => '订单编号',
         ]);
