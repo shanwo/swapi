@@ -34,7 +34,7 @@ class UserService extends Service
         if(!$info){
             $info = $this->userModel->whereKey($id)->first();
             $info['contact'] = json_decode($info['contact'], true);
-            $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
+            $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'open_id', 'login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
             $this->redis::SET('user_infos:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
         }
         return $info;
