@@ -24,19 +24,17 @@ class VerifyCsrfToken extends Middleware
 
     public function handle($request, Closure $next)
     {
-        if($this->inExceptArray($request)){
-            return $next($request);
-        }else{
+        if(!$this->inExceptArray($request)){
             if (Auth::guest()) {
                 $result = [
                     'data'    => (object)[],
-                    'code'    => (int)300,
+                    'code'    => 300,
                     'msg'     => '当前账户异常，请重新登录',
                     'uuid'    => Uuid::uuid6(),
                 ];
                 return response()->json($result);
             }
-            return $next($request);
         }
+        return $next($request);
     }
 }
