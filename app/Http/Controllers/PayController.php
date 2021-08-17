@@ -71,7 +71,7 @@ class PayController extends Controller
         $data = $this->payment->order->unify($params);
         $data['order_sn'] = $order_sn;
         if (!strcmp($data['result_code'] ?? '', 'SUCCESS')) {
-            $this->service->redis::SETEX('pay_order:' . $order_sn, 3600, json_encode(['unify' => $params, 'pay' => $info], JSON_UNESCAPED_UNICODE));
+            $this->service->redis::SETEX('pay_order:' . $order_sn, 3600, json_encode(['pay' => $info, 'user' => $user], JSON_UNESCAPED_UNICODE));
             $this->code = 200;
         } else {
             $this->msg = $data['err_code_des'] ?? '';
