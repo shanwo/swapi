@@ -7,19 +7,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\OrderService;
 use App\Services\UserService;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
 
 class CallbackController extends Controller
 {
-    protected $userService;
     protected $uid = 0;
+    protected $userService;
+    protected $orderService;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
         $this->userService = new UserService();
+        $this->orderService = new OrderService();
 
     }
 
@@ -459,6 +462,6 @@ class CallbackController extends Controller
             return true; // 返回处理完成
         });
         // 这里是必须这样返回的, 会发送给微信服务器处理结果
-        return $response;
+        return $response->send();
     }
 }
