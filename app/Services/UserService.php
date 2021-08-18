@@ -42,7 +42,7 @@ class UserService extends Service
 
     public function edit($request)
     {
-        $uid = $request->user()->id ?? 0;
+        $uid = $request->user()->id;
         $aid = $request->input('area_id');
         $area = $this->areaModel->whereKey($aid)->first();
         $contact = $request->input('contact');

@@ -30,7 +30,7 @@ class PageService extends Service
 
     public function lists($request)
     {
-        $uid = $request->user()->id ?? 0;
+        $uid = $request->user()->id;
         $data = $this->redis::HGETALL('user_pages:' . $uid);
         if (empty($data)) {
             $where[] = ['user_id', '=', $uid];
@@ -98,7 +98,7 @@ class PageService extends Service
 
     public function add($request)
     {
-        $uid = $request->user()->id ?? 0;
+        $uid = $request->user()->id;
         $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();
         $head = json_decode($template['head_data'], true);
@@ -167,7 +167,7 @@ class PageService extends Service
 
     public function status($request)
     {
-        $uid = $request->user()->id ?? 0;
+        $uid = $request->user()->id;
         $where[] = ['user_id', '=', $uid];
         $update = [];
         $id = $request->input('id');

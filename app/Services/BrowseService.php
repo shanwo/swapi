@@ -33,7 +33,7 @@ class BrowseService extends Service
                 }
             }
         } else {
-            $uid = $request->user()->id ?? 0;
+            $uid = $request->user()->id;
             $users = $this->redis::LRANGE('user_browses:' . $uid, $start, $stop);
             $total = $this->redis::LLEN('user_browses:' . $uid);
             foreach ($users as $k => $v) {

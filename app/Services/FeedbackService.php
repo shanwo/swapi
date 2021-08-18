@@ -21,7 +21,7 @@ class FeedbackService extends Service
 
     public function add($request)
     {
-        $uid = $request->user()->id ?? 0;
+        $uid = $request->user()->id;
         $contacts = $request->input('contacts', '');
         $content = $request->input('content');
         $insert = [

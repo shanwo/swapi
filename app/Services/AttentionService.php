@@ -34,7 +34,7 @@ class AttentionService extends Service
                 }
             }
         } else {
-            $uid = $request->user()->id ?? 0;
+            $uid = $request->user()->id;
             $users = $this->redis::LRANGE('user_attentions:' . $uid, $start, $stop);
             $total = $this->redis::LLEN('user_attentions:' . $uid);
             foreach ($users as $k => $v) {
@@ -55,7 +55,7 @@ class AttentionService extends Service
 
     public function status($request)
     {
-        $uid = $request->user()->id ?? 0;
+        $uid = $request->user()->id;
         $pid = $request->input('page_id');
         $status = $request->input('status');
         if ($status) {
