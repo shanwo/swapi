@@ -65,7 +65,7 @@ class PayController extends Controller
             'total_fee'    => $total_fee,
         ];
         if ($type == 'JSAPI') {
-            $third = array_column($user['third'] ?? [], 'open_id', 'source');
+            $third = array_column($user['third'], 'open_id', 'source');
             $params['openid'] = $third['official'] ?? '';
         }
         $data = $this->payment->order->unify($params);
