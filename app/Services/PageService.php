@@ -53,6 +53,7 @@ class PageService extends Service
     public function info($id)
     {
         $info = $this->redis::GET('info_pages:' . $id);
+        $info = json_decode($info,true);
         if (!$info) {
             $info = $this->pageModel->whereKey($id)->first();
             if (!$info) return false;
