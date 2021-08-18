@@ -12,11 +12,13 @@ use App\Models\PageModel;
 
 class HomeService extends Service
 {
+    protected $pageModel;
     protected $pageService;
 
     public function __construct()
     {
         parent::__construct();
+        $this->pageModel = new PageModel();
         $this->pageService = new PageService();
     }
 
@@ -26,6 +28,7 @@ class HomeService extends Service
         $start = ($page - 1) * $this->size;
         $stop = $start + $this->size - 1;
         $ids = $this->redis::ZREVRANGE('hot', $start, $stop);
+        if (!$start && !$ids) $this->setPage();
         $data = [
             'total' => $this->redis::ZCARD('hot'),
             'page'  => $page,
@@ -43,6 +46,7 @@ class HomeService extends Service
     {
         $page = $request->input('page', $this->page);
         $ids = $this->redis::SRANDMEMBER('recent', $this->size);
+        if (!($page - 1) && !$ids) $this->setPage();
         $data = [
             'total' => $this->redis::SCARD('recent'),
             'page'  => $page,
@@ -90,5 +94,23 @@ class HomeService extends Service
             }
         }
         return $info;
+    }
+
+    private function setPage()
+    {
+        if ($this->redis::GET('set_home')) return ;
+        $where[] = ['is_delete', '=', 0];
+        $data = $this->pageModel->select('id', 'user_id', 'browse', 'sort', 'is_open', 'head_data')->where($where)->get()->toArray();
+        foreach ($data as $k => &$v) {
+            $tmp = json_decode($v['head_data'], true);
+            $v = array_merge($v, $tmp);
+            unset($v['head_data']);
+            $this->redis::HSET('user_pages:' . $v['user_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+            if ($v['is_open']) {
+                $this->redis::SADD('recent', $v['id']);
+                $this->redis::ZADD('hot', $v['browse'] + $v['sort'], $v['id']);
+            }
+        }
+        $this->redis::SETEX('set_home', 15, date('Y-m-d H:i:s'));
     }
 }
