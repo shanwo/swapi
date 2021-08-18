@@ -71,6 +71,7 @@ Route::prefix('pay')->group(function () {
     Route::get('lists', 'PayController@lists');
     Route::post('send', 'PayController@send');
     Route::post('result', 'PayController@result');
+    Route::post('refund', 'PayController@refund');
 });
 //回调
 Route::prefix('callback')->group(function () {
