@@ -140,7 +140,7 @@ class Controller extends BaseController
         if($name == 'official'){
             $socialite = new SocialiteManager([
                 'wechat' => [
-                    'client_id'     => $config['key'],
+                    'client_id'     => $config['app_id'],
                     'client_secret' => $config['secret'],
                     'redirect'      => $config['callback'],
                 ],

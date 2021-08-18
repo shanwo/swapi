@@ -70,7 +70,11 @@ class UserService extends Service
         $config = $this->configInfo($this->configName);
         $where[] = ['source', '=', $this->configName];
         $where[] = ['open_id', '=', $original['openid']];
-        $where[] = ['app_id', '=', $config['key']];
+        if($this->configName == 'official'){
+            $where[] = ['app_id', '=', $config['app_id']];
+        }else{
+            $where[] = ['app_id', '=', $config['key']];
+        }
         $where[] = ['status', '=', 1];
         $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id', 'logins_number']);
         if ($userThird) {
