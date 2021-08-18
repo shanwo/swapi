@@ -55,7 +55,7 @@ class PayController extends Controller
         $info = $this->payService->send($this->request);
         $type = $this->request->input('type');
         $user = $this->request->user();
-        $order_sn = dechex(time()) . rand(10, 99) . mb_substr(sprintf("%04d", $user['id']), -4) . rand(10, 99);
+        $order_sn = dechex(time()) . rand(10, 99) . mb_substr(sprintf("%04d", $user->id), -4) . rand(10, 99);
         $total_fee = $info['original_price'];
         if ($info['activity_price']) $total_fee = $info['activity_price'];
         $params = [
