@@ -29,7 +29,8 @@ class HomeService extends Service
         $data = [
             'total' => $this->redis::ZCARD('hot'),
             'page'  => $page,
-            'size'  => $this->size
+            'size'  => $this->size,
+            'lists' => []
         ];
         foreach ($ids as $k => $v) {
             $info = $this->redis::GET('list_pages:' . $v);
@@ -45,7 +46,8 @@ class HomeService extends Service
         $data = [
             'total' => $this->redis::SCARD('recent'),
             'page'  => $page,
-            'size'  => $this->size
+            'size'  => $this->size,
+            'lists' => []
         ];
         foreach ($ids as $k => $v) {
             $info = $this->redis::GET('list_pages:' . $v);
