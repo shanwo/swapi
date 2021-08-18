@@ -374,8 +374,8 @@ class CallbackController extends Controller
 //        if ($this->msg) {
 //            return $this->returnApi();
 //        }
-        $this->service->redis::SET('request_log:' . time(), 600, json_encode($this->request->all(), JSON_UNESCAPED_UNICODE));
-        $config = $this->service->configInfo('official');
+        $this->service->redis::SETEX('request_log_xml:' . time(), 600, $this->request->getContent());
+        $config = $this->service->configInfo('payment');
         $payment = Factory::Payment($config);
         $response = $payment->handlePaidNotify(function($message, $fail){
             $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
