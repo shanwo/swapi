@@ -75,21 +75,25 @@ class AttentionService extends Service
 
     private function setPage($pid)
     {
+        if ($this->redis::GET('set_page_attentions')) return ;
         $where[] = ['status', '<>', 0];
         $where[] = ['page_id', '=', $pid];
         $all = $this->attentionModel->select('user_id')->where($where)->get()->toArray();
         foreach ($all as $k => $v) {
             $this->redis::LPUSH('page_attentions:' . $pid, $v['user_id']);
         }
+        $this->redis::SETEX('set_page_attentions', 15, date('Y-m-d H:i:s'));
     }
 
     private function setUser($uid)
     {
+        if ($this->redis::GET('set_user_attentions')) return ;
         $where[] = ['status', '<>', 0];
         $where[] = ['user_id', '=', $uid];
         $all = $this->attentionModel->select('page_id')->where($where)->get()->toArray();
         foreach ($all as $k => $v) {
             $this->redis::LPUSH('user_attentions:' . $uid, $v['page_id']);
         }
+        $this->redis::SETEX('set_user_attentions', 15, date('Y-m-d H:i:s'));
     }
 }
