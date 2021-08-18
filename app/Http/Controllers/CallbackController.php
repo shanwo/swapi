@@ -166,10 +166,11 @@ class CallbackController extends Controller
         $this->getUser($state, $this->userService->configName);
         $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
         $user['ip'] = $this->request->ip();
-        $data = $this->userService->wechat($this->uid, $user);
+        $uid = $this->userService->wechat($this->uid, $user);
+        $data = $this->userService->info($uid);
         if (empty($data['msg'])) {
-            $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $data['id']);
-            $this->service->redis::SET('user_infos:' . $data['id'], json_encode($data, JSON_UNESCAPED_UNICODE));
+            $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $uid);
+            $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
 //            $arr = [$data['id'] => md5(dechex($data['id']))];
 //            $this->service->redis::setex('token:' . $data['api_token'], $this->service->timeOut, json_encode($arr));
 //            $this->service->redis::setex('user:' . $data['id'], $this->service->timeOut, json_encode($data, JSON_UNESCAPED_UNICODE));
@@ -245,10 +246,11 @@ class CallbackController extends Controller
         $this->getUser($state, $this->userService->configName);
         $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
         $user['ip'] = $this->request->ip();
-        $data = $this->userService->wechat($this->uid, $user);
+        $uid = $this->userService->wechat($this->uid, $user);
+        $data = $this->userService->info($uid);
         if (empty($data['msg'])) {
-            $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $data['id']);
-            $this->service->redis::SET('user_infos:' . $data['id'], json_encode($data, JSON_UNESCAPED_UNICODE));
+            $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $uid);
+            $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
 //            $arr = [$data['id'] => md5(dechex($data['id']))];
 //            $this->service->redis::setex('token:' . $data['api_token'], $this->service->timeOut, json_encode($arr));
 //            $this->service->redis::setex('user:' . $data['id'], $this->service->timeOut, json_encode($data, JSON_UNESCAPED_UNICODE));

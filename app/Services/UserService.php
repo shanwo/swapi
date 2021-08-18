@@ -122,6 +122,6 @@ class UserService extends Service
             ];
             $this->userThirdModel->insertGetId($insertThird);
         }
-        return $this->info($uid);
+        return $uid;
     }
 }
