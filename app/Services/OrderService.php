@@ -64,6 +64,7 @@ class OrderService extends Service
             default:
                 $update['expired_at'] = date('Y-m-d H:i:s');
         }
+        $update['type'] = 2;
         return $this->userModel->whereKey($user['id'])->update($update);
     }
 }
