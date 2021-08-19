@@ -64,7 +64,9 @@ class PageService extends Service
             $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
             $this->redis::SET('info_pages:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
-            $this->redis::SET('list_pages:' . $id, json_encode($info['head_data'], JSON_UNESCAPED_UNICODE));
+            $head = $info['head_data'];
+            $head['id'] = $id;
+            $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
         }
         return $info;
     }
@@ -134,8 +136,10 @@ class PageService extends Service
             "is_open"    => 0,
             "created_at" => date('y-m-d H:i:s'),
         ];
-        $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
-        return $this->redis::HSET('user_pages:' . $uid, $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
+        $this->redis::HSET('user_pages:' . $uid, $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
+        $head['id'] = $id;
+        return $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
+
     }
 
     public function edit($request)
@@ -158,6 +162,7 @@ class PageService extends Service
                 "created_at" => $info['created_at'],
             ];
             $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
+            $head['id'] = $id;
             $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
         }
         $centerData = $request->input('center_data', []);
