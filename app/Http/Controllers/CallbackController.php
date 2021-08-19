@@ -17,6 +17,7 @@ class CallbackController extends Controller
     protected $uid = 0;
     protected $userService;
     protected $orderService;
+    protected $payment;
 
     public function __construct(Request $request)
     {
@@ -368,108 +369,30 @@ class CallbackController extends Controller
      */
     public function payment()
     {
-//        $this->validate([
-//        ], [
-//        ]);
-//        if ($this->msg) {
-//            return $this->returnApi();
-//        }
-        $this->service->redis::SETEX('request_log_xml:' . time(), 600, $this->request->getContent());
         $config = $this->service->configInfo('payment');
-        $payment = Factory::Payment($config);
-        $response = $payment->handlePaidNotify(function($message, $fail){
+        $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
+        $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
+        $this->payment = Factory::Payment($config);
+        $response = $this->payment->handlePaidNotify(function ($message, $fail) {
+            $time = time();
+            $this->service->redis::SETEX('request_payment_log:' . $time, 600, json_encode($message));
             $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
-            if(!$info) return $fail('订单支付超时');
-            $info = json_decode($info,true) ?? [];
-            $res = $this->orderService->info(['order_sn'=>$message['out_trade_no']]);
-            if($res) return true;
-            $this->orderService->add($info);
-
-            // 首先查看 order 表, 如果 order 表有记录, 表示已经支付过了
-//            $order = Order::where('order_sn', $message['out_trade_no'])->first();
-//            if ($order) {
-//                return true; // 如果已经生成订单, 表示已经处理完了, 告诉微信不用再通知了
-//            }
-//            // 查看支付日志
-//            $payLog = PayLog::where('out_trade_no', $message['out_trade_no'])->first();
-//            if (!$payLog || $payLog->paid_at) { // 如果订单不存在 或者 订单已经支付过了
-//                return true; // 告诉微信，我已经处理完了，订单没找到，别再通知我了
-//            }
-            // return_code 表示通信状态，不代表支付状态
-//            if ($message['return_code'] === 'SUCCESS') {
-//                // 用户是否支付成功
-//                if ($message['result_code'] === 'SUCCESS') {
-//                    // 更新支付时间为当前时间
-//                    $payLog->paid_at = now();
-//                    $post_id = $payLog->post_id;
-//                    // 联表查询 post 的相关信息
-//                    $post_title = $payLog->post->title;
-//                    $post_price = $payLog->post->price;
-//                    $post_original_price = $payLog->post->original_price;
-//                    $post_cover = $payLog->post->post_cover;
-//                    $post_description = $payLog->post->description;
-//                    $user_id = $payLog->post->user_id;
-//
-//                    // 创建订单记录
-//                    Order::create([
-//                        'order_sn' => $message['out_trade_no'],
-//                        'total_fee' => $message['total_fee'],
-//                        'pay_log_id' => $payLog->id,
-//                        'status' => 1,
-//                        'user_id' => $user_id,
-//                        'paid_at' => $payLog->paid_at,
-//                        'post_id' => $post_id,
-//                        'post_title' => $post_title,
-//                        'post_price' => $post_price,
-//                        'post_original_price' => $post_original_price,
-//                        'post_cover' => $post_cover,
-//                        'post_description' => $post_description,
-//                    ]);
-//
-//                    // 更新 PayLog, 这里的字段都是根据微信支付结果通知的字段设置的(https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=9_7&index=8)
-//                    PayLog::where('out_trade_no', $message['out_trade_no'])->update([
-//                        'appid' => $message['appid'],
-//                        'bank_type' => $message['bank_type'],
-//                        'total_fee' => $message['total_fee'],
-//                        'trade_type' => $message['trade_type'],
-//                        'is_subscribe' => $message['is_subscribe'],
-//                        'mch_id' => $message['mch_id'],
-//                        'nonce_str' => $message['nonce_str'],
-//                        'openid' => $message['openid'],
-//                        'sign' => $message['sign'],
-//                        'cash_fee' => $message['cash_fee'],
-//                        'fee_type' => $message['fee_type'],
-//                        'transaction_id' => $message['transaction_id'],
-//                        'time_end' => $payLog->paid_at,
-//                        'result_code' => $message['result_code'],
-//                        'return_code' => $message['return_code'],
-//                    ]);
-//                }
-//            } else {
-//                // 如果支付失败, 也更新 PayLog, 跟上面一样, 就是多了 error 信息
-//                PayLog::where('out_trade_no', $message['out_trade_no'])->update([
-//                    'appid' => $message['appid'],
-//                    'bank_type' => $message['bank_type'],
-//                    'total_fee' => $message['total_fee'],
-//                    'trade_type' => $message['trade_type'],
-//                    'is_subscribe' => $message['is_subscribe'],
-//                    'mch_id' => $message['mch_id'],
-//                    'nonce_str' => $message['nonce_str'],
-//                    'openid' => $message['openid'],
-//                    'sign' => $message['sign'],
-//                    'cash_fee' => $message['cash_fee'],
-//                    'fee_type' => $message['fee_type'],
-//                    'transaction_id' => $message['transaction_id'],
-//                    'time_end' => $payLog->paid_at,
-//                    'result_code' => $message['result_code'],
-//                    'return_code' => $message['return_code'],
-//                    'err_code' => $message['err_code'],
-//                    'err_code_des' => $message['err_code_des'],
-//                ]);
-//                return $fail('通信失败，请稍后再通知我');
-//            }
+            $info = json_decode($info, true) ?? [];
+            if (!$info) {
+                $this->payment->refund->byTransactionId($message['transaction_id'], $message['out_trade_no'], $message['total_fee'], $message['cash_fee'], ['refund_desc' => '订单支付超时',]);
+                return true;
+            }
+            $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
+            if ($res && $res['status'] == 2) return true;
+            if ($message['return_code'] === 'SUCCESS') {
+                if ($message['result_code'] === 'SUCCESS') {
+                    $this->orderService->add($message, $info);
+                }
+            } else {
+                return $fail('支付验证失败,请查看日志:' . $time);
+            }
             $this->service->redis::DEL('pay_order:' . $message['out_trade_no']);
-            return true; // 返回处理完成
+            return true;
         });
         return $response;
     }

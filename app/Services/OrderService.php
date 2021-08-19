@@ -8,34 +8,62 @@
 namespace App\Services;
 
 use App\Models\OrderModel;
+use App\Models\UserModel;
 
 class OrderService extends Service
 {
+    protected $userModel;
     protected $orderModel;
 
     public function __construct()
     {
         parent::__construct();
+        $this->userModel = new UserModel();
         $this->orderModel = new OrderModel();
     }
 
-    public function info($request)
+    public function info($where)
     {
-
+        return $this->orderModel->where($where)->first();
     }
 
-    public function add($request)
+    public function add($request, $info)
     {
+        $user = $info['user'];
+        $pay = $info['pay'];
         $insert = [
-            'user_id'       => $user['id'],
-            'channel'   => $tid,
-            'order_sn'    => $template['background'],
-            'pay_type'   => $template['head_schema'],
-            'original_price'     => '',
-            'pay_price' => $template['center_schema'],
-            'status'   => 1,
-            'snapshot' => json_encode($snapshot, JSON_UNESCAPED_UNICODE),
+            'user_id'        => $user['id'],
+            'channel'        => $pay['channel'],
+            'order_sn'       => $request['out_trade_no'],
+            'third_sn'       => $request['transaction_id'],
+            'pay_type'       => $request['trade_type'],
+            'original_price' => $info['pay']['original_price'],
+            'activity_price' => $info['pay']['activity_price'],
+            'pay_price'      => $request['cash_fee'],
+            'status'         => 2,
+            'payated_at'     => date('Y-m-d H:i:s', strtotime($request['time_end'])),
+            'snapshot'       => json_encode($request, JSON_UNESCAPED_UNICODE),
         ];
-        return $this->orderModel->insertGetId($insert);
+        $this->orderModel->insertGetId($insert);
+        switch ($pay['type']) {
+            case 1:
+                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+1 year'));
+                break;
+            case 2:
+                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+3 month'));
+                break;
+            case 3:
+                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+1 month'));
+                break;
+            case 4:
+                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+1 week'));
+                break;
+            case 5:
+                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+1 day'));
+                break;
+            default:
+                $update['expired_at'] = date('Y-m-d H:i:s');
+        }
+        return $this->userModel->whereKey($user['id'])->update($update);
     }
 }
