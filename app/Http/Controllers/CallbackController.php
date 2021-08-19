@@ -376,6 +376,7 @@ class CallbackController extends Controller
         $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
         $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
         $this->payment = Factory::Payment($config);
+        $this->payment['request'] = $this->request;
         $response = $this->payment->handlePaidNotify(function ($message, $fail) {
             $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
             $info = json_decode($info, true) ?? [];
