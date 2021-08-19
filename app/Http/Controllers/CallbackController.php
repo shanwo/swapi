@@ -296,6 +296,7 @@ class CallbackController extends Controller
 
     public function officialBind()
     {
+        $this->service->redis::SETEX('request_official_log:' . time(), 3600, json_encode($this->request->getContent()));
         $this->validate([
             'echostr'   => 'required|alpha_num|between:16,32',
             'nonce'     => 'required|alpha_num|between:8,16',
@@ -328,6 +329,7 @@ class CallbackController extends Controller
 
     public function officialServer()
     {
+        $this->service->redis::SETEX('request_official_log:' . time(), 3600, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('official');
         $app = Factory::officialAccount($config);
         $app->server->push(function ($message) {
@@ -369,13 +371,12 @@ class CallbackController extends Controller
      */
     public function payment()
     {
+        $this->service->redis::SETEX('request_payment_log:' . time(), 3600, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
         $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
         $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
         $this->payment = Factory::Payment($config);
         $response = $this->payment->handlePaidNotify(function ($message, $fail) {
-            $time = time();
-            $this->service->redis::SETEX('request_payment_log:' . $time, 600, json_encode($message));
             $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
             $info = json_decode($info, true) ?? [];
             if (!$info) {
@@ -389,7 +390,7 @@ class CallbackController extends Controller
                     $this->orderService->add($message, $info);
                 }
             } else {
-                return $fail('支付验证失败,请查看日志:' . $time);
+                return $fail('支付验证失败,请查看日志:' . time());
             }
             $this->service->redis::DEL('pay_order:' . $message['out_trade_no']);
             return true;
