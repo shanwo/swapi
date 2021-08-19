@@ -32,8 +32,8 @@ class BrowseService extends Service
             $total = $this->redis::LLEN('page_browses:' . $pid);
             foreach ($pages as $k => $v) {
                 $info = $this->redis::GET('list_pages:' . $v);
+                $info = json_decode($info, true);
                 if ($info) {
-                    $info = json_decode($info, true);
                     $data = $info['head_data'];
                     $lists[] = ['id' => $v, 'avatar' => $data['avatar'], 'nickname' => $data['nickname']];
                 }
