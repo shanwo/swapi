@@ -64,6 +64,7 @@ class PageService extends Service
             $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
             $this->redis::SET('info_pages:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
+            $this->redis::SET('list_pages:' . $id, json_encode($info['head_data'], JSON_UNESCAPED_UNICODE));
         }
         return $info;
     }
@@ -133,6 +134,7 @@ class PageService extends Service
             "is_open"    => 0,
             "created_at" => date('y-m-d H:i:s'),
         ];
+        $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
         return $this->redis::HSET('user_pages:' . $uid, $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
     }
 
@@ -156,7 +158,7 @@ class PageService extends Service
                 "created_at" => $info['created_at'],
             ];
             $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
-            if ($info['is_open']) $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
+            $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
         }
         $centerData = $request->input('center_data', []);
         if ($centerData) {
@@ -192,11 +194,9 @@ class PageService extends Service
                 $info = $this->info($id);
                 $this->redis::SADD('recent', $id);
                 $this->redis::ZADD('hot', $info['browse'] + $info['sort'], $id);
-                $this->redis::SET('list_pages:' . $id, json_encode($info['head_data'], JSON_UNESCAPED_UNICODE));
             } else {
                 $this->redis::SREM('recent', $id);
                 $this->redis::ZREM('hot', $id);
-                $this->redis::DEL('list_pages:' . $id);
             }
         }
         $delete = $request->input('is_delete');
