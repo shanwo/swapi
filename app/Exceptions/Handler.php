@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -90,6 +91,7 @@ class Handler extends ExceptionHandler
                 'data'    => $exception->getMessage(),
                 'code'    => $this->code,
                 'msg'     => $msg[$this->code],
+                'uuid'    => Uuid::uuid6(),
             ];
             Log::log($this->levels[$this->code], 'Render Data', $result);
             unset($result['request']);
