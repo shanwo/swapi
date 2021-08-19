@@ -21,6 +21,8 @@ class PayController extends Controller
         parent::__construct($request);
         $this->payService = new PayService();
         $config = $this->service->configInfo('payment');
+        $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
+        $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
         $this->payment = Factory::Payment($config);
     }
 
@@ -107,7 +109,7 @@ class PayController extends Controller
         }
         $order_sn = $this->request->input('order_sn');
         $order = $this->payment->order->queryByOutTradeNumber($order_sn);
-        $data = $this->payment->refund->byTransactionId($order['transaction_id'],$order['out_trade_no'],$order['total_fee'],$order['cash_fee'],[
+        $data = $this->payment->refund->byTransactionId($order['transaction_id'], $order['out_trade_no'], $order['total_fee'], $order['cash_fee'], [
             'refund_desc' => '测试退款',
         ]);
         $this->code = 200;
