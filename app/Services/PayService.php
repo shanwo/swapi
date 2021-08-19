@@ -28,7 +28,7 @@ class PayService extends Service
         if (!$data) {
             $where[] = ['channel', '=', $channel];
             $where[] = ['is_delete', '=', 0];
-            $data = $this->pageModel->select('id', 'name', 'original_price', 'activity_price', 'description', 'type', 'created_at')->where($where)->get()->toArray();
+            $data = $this->pageModel->select('id', 'name', 'channel', 'original_price', 'activity_price', 'description', 'type', 'created_at')->where($where)->get()->toArray();
             foreach ($data as $k => $v) {
                 $this->redis::HSET('pay_channel:' . $channel, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
@@ -49,6 +49,6 @@ class PayService extends Service
         $id = $request->input('id');
         $channel = $request->input('channel', 0);
         $info = $this->redis::HGET('pay_channel:' . $channel, $id);
-        return json_decode($info,true);
+        return json_decode($info, true);
     }
 }
