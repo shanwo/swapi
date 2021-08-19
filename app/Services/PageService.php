@@ -93,14 +93,7 @@ class PageService extends Service
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->userModel->whereKey($user['id'])->increment('pages');
-        $id = $this->pageModel->insertGetId($insert);
-        $data = [
-            "id"         => $id,
-            "follow"     => 0,
-            "is_open"    => 0,
-            "created_at" => date('y-m-d H:i:s'),
-        ];
-        return $this->redis::HSET('user_pages:' . $user['id'], $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
+        return $this->pageModel->insertGetId($insert);
     }
 
     public function add($request)
