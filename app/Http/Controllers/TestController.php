@@ -50,7 +50,7 @@ class TestController extends Controller
 
     public function info()
     {
-        exit(phpinfo());
+        phpinfo();
     }
 
     public function all()
