@@ -53,7 +53,7 @@ class PageService extends Service
     public function info($id)
     {
         $info = $this->redis::GET('info_pages:' . $id);
-        $info = json_decode($info,true);
+        $info = json_decode($info, true);
         if (!$info) {
             $info = $this->pageModel->whereKey($id)->first();
             if (!$info) return false;
@@ -64,7 +64,7 @@ class PageService extends Service
             $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
             $this->redis::SET('info_pages:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
-            $this->redis::SET('list_pages:' . $id, json_encode(['head_data' => $info['head_data'], 'head_schema' => $info['head_schema']], JSON_UNESCAPED_UNICODE));
+            $this->redis::SET('list_pages:' . $id, json_encode($info['head_data'], JSON_UNESCAPED_UNICODE));
         }
         return $info;
     }
@@ -128,7 +128,13 @@ class PageService extends Service
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->userModel->whereKey($uid)->increment('pages');
         $id = $this->pageModel->insertGetId($insert);
-        return $this->redis::HDEL('user_pages:' . $uid, $id);
+        $data = [
+            "id"         => $id,
+            "follow"     => 0,
+            "is_open"    => 0,
+            "created_at" => date('y-m-d H:i:s'),
+        ];
+        return $this->redis::HSET('user_pages:' . $uid, $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
     }
 
     public function edit($request)
@@ -144,6 +150,13 @@ class PageService extends Service
             $head['badge'] = $headData['badge'] ?? '';
             $head['pendant'] = $headData['pendant'] ?? '';
             $update['head_data'] = json_encode($head, JSON_UNESCAPED_UNICODE);
+            $data = [
+                "id"         => $id,
+                "follow"     => $info['follow'],
+                "is_open"    => $info['is_open'],
+                "created_at" => $info['created_at'],
+            ];
+            $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
         }
         $centerData = $request->input('center_data', []);
         if ($centerData) {
@@ -157,13 +170,12 @@ class PageService extends Service
             $decLbIds = array_column($info['bottom_data'], 'id');
             $update['bottom_data'] = json_encode($bottomData, JSON_UNESCAPED_UNICODE);
         }
-        $where[] = ['user_id', '=', $info['user_id']];
-        $this->pageModel->whereKey($id)->where($where)->update($update);
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->linkModel->whereIn('id', $decLcIds)->decrement('number');
         $this->linkModel->whereIn('id', $decLbIds)->decrement('number');
-        return $this->redis::HDEL('user_pages:' . $info['user_id'], $id);
+        $where[] = ['user_id', '=', $info['user_id']];
+        return $this->pageModel->whereKey($id)->where($where)->update($update);
     }
 
     public function status($request)

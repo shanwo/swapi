@@ -34,8 +34,7 @@ class BrowseService extends Service
                 $info = $this->redis::GET('list_pages:' . $v);
                 $info = json_decode($info, true);
                 if ($info) {
-                    $data = $info['head_data'];
-                    $lists[] = ['id' => $v, 'avatar' => $data['avatar'], 'nickname' => $data['nickname']];
+                    $lists[] = ['id' => $v, 'avatar' => $info['avatar'], 'nickname' => $info['nickname']];
                 }
             }
         } else {
