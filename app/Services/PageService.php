@@ -64,7 +64,6 @@ class PageService extends Service
             $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
             $this->redis::SET('info_pages:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
-            $this->redis::SET('list_pages:' . $id, json_encode($info['head_data'], JSON_UNESCAPED_UNICODE));
         }
         return $info;
     }
@@ -94,7 +93,14 @@ class PageService extends Service
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->userModel->whereKey($user['id'])->increment('pages');
-        return $this->pageModel->insertGetId($insert);
+        $id = $this->pageModel->insertGetId($insert);
+        $data = [
+            "id"         => $id,
+            "follow"     => 0,
+            "is_open"    => 0,
+            "created_at" => date('y-m-d H:i:s'),
+        ];
+        return $this->redis::HSET('user_pages:' . $user['id'], $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
     }
 
     public function add($request)
@@ -157,6 +163,7 @@ class PageService extends Service
                 "created_at" => $info['created_at'],
             ];
             $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
+            if ($info['is_open']) $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
         }
         $centerData = $request->input('center_data', []);
         if ($centerData) {
@@ -174,6 +181,7 @@ class PageService extends Service
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $this->linkModel->whereIn('id', $decLcIds)->decrement('number');
         $this->linkModel->whereIn('id', $decLbIds)->decrement('number');
+        $this->redis::DEL('info_pages:' . $id);
         $where[] = ['user_id', '=', $info['user_id']];
         return $this->pageModel->whereKey($id)->where($where)->update($update);
     }
@@ -191,9 +199,11 @@ class PageService extends Service
                 $info = $this->info($id);
                 $this->redis::SADD('recent', $id);
                 $this->redis::ZADD('hot', $info['browse'] + $info['sort'], $id);
+                $this->redis::SET('list_pages:' . $id, json_encode($info['head_data'], JSON_UNESCAPED_UNICODE));
             } else {
                 $this->redis::SREM('recent', $id);
                 $this->redis::ZREM('hot', $id);
+                $this->redis::DEL('list_pages:' . $id);
             }
         }
         $delete = $request->input('is_delete');
