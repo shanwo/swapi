@@ -96,8 +96,13 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->pageService->add($this->request);
-        $this->code = 200;
+        $data = [];
+        if($this->request->user()->type == 2) {
+            $data = $this->pageService->add($this->request);
+            $this->code = 200;
+        }else{
+            $this->msg = '此功能需开通会员使用';
+        }
         return $this->returnApi($data);
     }
 
