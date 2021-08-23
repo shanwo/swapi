@@ -65,7 +65,7 @@ class OrderService extends Service
                 $update['expired_at'] = date('Y-m-d H:i:s');
         }
         $update['type'] = 2;
-        $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user,$update), JSON_UNESCAPED_UNICODE));
-        return $this->userModel->whereKey($user['id'])->update($update);
+        $this->userModel->whereKey($user['id'])->update($update);
+        return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user,$update), JSON_UNESCAPED_UNICODE));
     }
 }
