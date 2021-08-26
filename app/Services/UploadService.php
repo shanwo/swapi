@@ -89,7 +89,7 @@ class UploadService extends Service
             $name = $name . '.' . $ext;
         }
         $this->oss->upload('cdn-1305937303', $path . $name, fopen($file->getRealPath(), "rb"));
-        $data['url'] = $this->domain . $path;
+        $data['url'] = $this->domain . $path . $name;
         $insert = [
             'url'  => $path . $name,
             'type' => $type,
