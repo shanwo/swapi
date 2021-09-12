@@ -8,16 +8,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AdService;
 use App\Services\PageService;
 use Illuminate\Http\Request;
 
 class PageController extends Controller
 {
+    protected $adService;
     protected $pageService;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
+        $this->adService = new AdService();
         $this->pageService = new PageService();
     }
 
@@ -32,6 +35,7 @@ class PageController extends Controller
             return $this->returnApi();
         }
         $data = $this->pageService->lists($this->request);
+        $data['ad'] = $this->adService->info($this->request,4);
         $this->code = 200;
         return $this->returnApi($data);
     }

@@ -7,6 +7,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AdService;
 use App\Services\PayService;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
@@ -14,11 +15,13 @@ use Illuminate\Http\Request;
 class PayController extends Controller
 {
     protected $payService;
+    protected $adService;
     protected $payment;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
+        $this->adService = new AdService();
         $this->payService = new PayService();
         $config = $this->service->configInfo('payment');
         $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
@@ -93,6 +96,7 @@ class PayController extends Controller
         }
         $order_sn = $this->request->input('order_sn');
         $data = $this->payment->order->queryByOutTradeNumber($order_sn);
+        $data['ad'] = $this->adService->info($this->request,10);
         $this->code = 200;
         return $this->returnApi($data);
     }
