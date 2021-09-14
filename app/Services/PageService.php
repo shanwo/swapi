@@ -196,9 +196,9 @@ class PageService extends Service
         if (is_numeric($open)) {
             $update['is_open'] = $open;
             if ($open) {
-                $info = $this->info($id);
-                $this->redis::SADD('recent', $id);
-                $this->redis::ZADD('hot', $info['browse'] + $info['sort'], $id);
+//                $info = $this->info($id);
+//                $this->redis::SADD('recent', $id);
+//                $this->redis::ZADD('hot', $info['browse'] + $info['sort'], $id);
             } else {
                 $this->redis::SREM('recent', $id);
                 $this->redis::ZREM('hot', $id);
