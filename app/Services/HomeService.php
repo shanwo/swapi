@@ -107,8 +107,8 @@ class HomeService extends Service
             unset($v['head_data']);
             $this->redis::HSET('user_pages:' . $v['user_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             if ($v['is_open']) {
-                $this->redis::SADD('recent', $v['id']);
-                $this->redis::ZADD('hot', $v['browse'] + $v['sort'], $v['id']);
+//                $this->redis::SADD('recent', $v['id']);
+//                $this->redis::ZADD('hot', $v['browse'] + $v['sort'], $v['id']);
             }
         }
         $this->redis::SETEX('set_home', 15, date('Y-m-d H:i:s'));
