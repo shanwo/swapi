@@ -60,7 +60,7 @@ class UserController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $id = $this->request->input('id',$this->request->user()->id ?? 0);
+        $id = $this->request->input('id', $this->request->user()->id ?? 0);
         $data = $this->userService->info($id);
         unset($data['api_token']);
 //        $data['binding'] = $this->bindSecret($id);
@@ -79,6 +79,9 @@ class UserController extends Controller
             'contact'        => 'required|array',
             'contact.wechat' => 'required|alpha_dash|between:6,20',
             'contact.phone'  => 'required|integer|between:13000000000,19999999999',
+            'contact.qq'     => 'required|integer|between:10000,9999999999',
+            'contact.weibo'  => 'required|string|between:4,32',
+            'contact.email'  => 'required|email|between:8,32',
         ], [
             'area_id'        => '省市区',
             'avatar'         => '头像地址',
