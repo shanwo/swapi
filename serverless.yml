@@ -1,30 +1,37 @@
-component: laravel
-name: laravel-PplY3IKtH
-org: '1305937303'
-app: api
-stage: prod
+component: http
+name: http-laravel-fxjmdfxzc
 inputs:
   src: ./
   region: ap-beijing
-  runtime: Php7
-  apigatewayConf:
+  faas:
+    name: '${name}'
+    framework: laravel
+    runtime: Php7
+    environments:
+      - key: APP_ENV
+        value: production
+    eip: true
+    timeout: 3
+    memorySize: 128
+    tags: []
+  apigw:
     protocols:
       - http
       - https
+    timeout: 60
     environment: release
-    serviceTimeout: 60
     customDomains:
       - domain: api.shanwo.cc
-        certificateId: mko0EtGu
-        isDefaultMapping: false
-        pathMappingSet:
+        certId: mko0EtGu
+        protocols:
+          - http
+          - https
+        pathMap:
           - path: /
             environment: release
-        protocols:
-          - https
-    autoCreateDns: true
+        isDefaultMapping: false
   isAutoCiDeploy: false
-  functionConf:
-    eip: true
-    timeout: 4
-    memorySize: 128
+  static: {}
+org: '1305937303'
+app: api
+stage: prod
