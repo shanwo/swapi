@@ -75,7 +75,7 @@ class Handler extends ExceptionHandler
         if ($exception instanceof \ReflectionException) {
             $this->code = 800;
         }
-        if ($exception instanceof \ErrorException) {
+        if ($exception instanceof \LogicException) {
             $this->code = 900;
         }
         if ($this->code) {
