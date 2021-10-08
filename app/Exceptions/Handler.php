@@ -78,6 +78,9 @@ class Handler extends ExceptionHandler
         if ($exception instanceof \LogicException) {
             $this->code = 900;
         }
+        if ($exception instanceof \ParseError) {
+            $this->code = 900;
+        }
         if ($this->code) {
             $msg = [
                 500 => '请求类型不匹配',
