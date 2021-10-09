@@ -407,15 +407,14 @@ class CallbackController extends Controller
         });
         //扫码支付通知
         // 扫码支付通知接收第三个参数 `$alert`，如果触发该函数，会返回“业务错误”到微信服务器，触发 `$fail` 则返回“通信错误”
-        $response =  $this->payment->handleScannedNotify(function ($message, $fail, $alert) use ($this->payment) {
+        $response =  $this->payment->handleScannedNotify(function ($message, $fail, $alert) use ($payment) {
             // 如：$alert('商品已售空');
             // 如业务流程正常，则要调用“统一下单”接口，并返回 prepay_id 字符串，代码如下
-            $result = $this->payment->order->unify([
+            $result = $payment->order->unify([
                 'trade_type' => 'NATIVE',
                 'product_id' => $message['product_id'],
                 // ...
             ]);
-
             return $result['prepay_id'];
         });
         return $response;
