@@ -19,4 +19,5 @@ mkdir -p /tmp/storage/framework/views
 
 # HTTP 直通函数由于是基于 docker 镜像运行，所以必须监听地址为 0.0.0.0，并且端口为 9000
 # 云端可执行文件路径 /var/lang/php7/bin/php
-/var/lang/php7/bin/php artisan serve --host 0.0.0.0 --port 9000
+#/var/lang/php7/bin/php artisan serve --host 0.0.0.0 --port 9000
+/var/lang/php7/bin/php  -c /var/runtime/php7 -S 0.0.0.0:9000 public/index.php
