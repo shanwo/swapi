@@ -25,7 +25,7 @@ class TemplateService extends Service
         $data = $this->hGetCache('template', $sort, $sids);
         if (!$data) {
             $where[] = ['is_delete', '=', 0];
-            $data = $this->templateModel->select('id', 'sort_id', 'name', 'preview', 'type', 'created_at')->where($where)->get()->toArray();
+            $data = $this->templateModel->select('id', 'sort_id', 'name', 'preview', 'type')->where($where)->get()->toArray();
             foreach ($data as $k => $v) {
                 $this->redis::HSET('template:' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }

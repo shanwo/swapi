@@ -25,7 +25,7 @@ class DecorationService extends Service
         $data = $this->hGetCache('decoration', $sort, $sids);
         if (!$data) {
             $where[] = ['is_delete', '=', 0];
-            $data = $this->decorationModel->select('id', 'sort_id', 'image')->where($where)->get()->toArray();
+            $data = $this->decorationModel->select('id', 'sort_id', 'name', 'image')->where($where)->get()->toArray();
             foreach ($data as $k => $v) {
                 $this->redis::HSET('decoration:' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
