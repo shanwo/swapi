@@ -11,6 +11,7 @@ use App\Services\OrderService;
 use App\Services\UserService;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
+use Overtrue\Socialite\AuthorizeFailedException;
 
 class CallbackController extends Controller
 {
@@ -53,19 +54,24 @@ class CallbackController extends Controller
         $state = $this->request->input('state', 0);
         $this->userService->configName = 'official';
         $this->getUser($state, $this->userService->configName);
-        $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
-        $user['ip'] = $this->request->ip();
-        $uid = $this->userService->wechat($this->uid, $user);
-        $data = $this->userService->info($uid);
-        if (empty($data['msg'])) {
-            $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $uid);
-            $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
-//            $arr = [$data['id'] => md5(dechex($data['id']))];
-//            $this->service->redis::setex('token:' . $data['api_token'], $this->service->timeOut, json_encode($arr));
-//            $this->service->redis::setex('user:' . $data['id'], $this->service->timeOut, json_encode($data, JSON_UNESCAPED_UNICODE));
-            $this->code = 200;
-        } else {
-            $this->msg = $data['msg'];
+        $data = [];
+        try {
+            $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
+            $user['ip'] = $this->request->ip();
+            $uid = $this->userService->wechat($this->uid, $user);
+            $data = $this->userService->info($uid);
+            if (empty($data['msg'])) {
+                $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $uid);
+                $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
+//                $arr = [$data['id'] => md5(dechex($data['id']))];
+//                $this->service->redis::setex('token:' . $data['api_token'], $this->service->timeOut, json_encode($arr));
+//                $this->service->redis::setex('user:' . $data['id'], $this->service->timeOut, json_encode($data, JSON_UNESCAPED_UNICODE));
+                $this->code = 200;
+            } else {
+                $this->msg = $data['msg'];
+            }
+        } catch (AuthorizeFailedException $e) {
+            $this->msg = '(' . $e->body['errcode'] . '):' . $e->body['errmsg'];
         }
         return $this->returnApi($data);
     }
@@ -85,19 +91,24 @@ class CallbackController extends Controller
         $state = $this->request->input('state', 0);
         $this->userService->configName = 'wechat';
         $this->getUser($state, $this->userService->configName);
-        $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
-        $user['ip'] = $this->request->ip();
-        $uid = $this->userService->wechat($this->uid, $user);
-        $data = $this->userService->info($uid);
-        if (empty($data['msg'])) {
-            $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $uid);
-            $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
+        $data = [];
+        try {
+            $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
+            $user['ip'] = $this->request->ip();
+            $uid = $this->userService->wechat($this->uid, $user);
+            $data = $this->userService->info($uid);
+            if (empty($data['msg'])) {
+                $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $uid);
+                $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
 //            $arr = [$data['id'] => md5(dechex($data['id']))];
 //            $this->service->redis::setex('token:' . $data['api_token'], $this->service->timeOut, json_encode($arr));
 //            $this->service->redis::setex('user:' . $data['id'], $this->service->timeOut, json_encode($data, JSON_UNESCAPED_UNICODE));
-            $this->code = 200;
-        } else {
-            $this->msg = $data['msg'];
+                $this->code = 200;
+            } else {
+                $this->msg = $data['msg'];
+            }
+        } catch (AuthorizeFailedException $e) {
+            $this->msg = '(' . $e->body['errcode'] . '):' . $e->body['errmsg'];
         }
         return $this->returnApi($data);
     }
@@ -215,7 +226,7 @@ class CallbackController extends Controller
         });
         //扫码支付通知
         // 扫码支付通知接收第三个参数 `$alert`，如果触发该函数，会返回“业务错误”到微信服务器，触发 `$fail` 则返回“通信错误”
-        $response =  $this->payment->handleScannedNotify(function ($message, $fail, $alert) use ($payment) {
+        $response = $this->payment->handleScannedNotify(function ($message, $fail, $alert) use ($payment) {
             // 如：$alert('商品已售空');
             // 如业务流程正常，则要调用“统一下单”接口，并返回 prepay_id 字符串，代码如下
             $result = $payment->order->unify([
