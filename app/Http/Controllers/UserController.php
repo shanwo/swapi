@@ -47,7 +47,8 @@ class UserController extends Controller
                 }
             }
         }
-        return $data;
+        $this->code = 200;
+        return $this->returnApi(['redirect_url'=>$data->getTargetUrl()]);
     }
 
     public function info()
