@@ -76,20 +76,8 @@ Route::prefix('pay')->group(function () {
 //回调
 Route::prefix('callback')->group(function () {
     //登录回调
-    Route::get('douban', 'CallbackController@douban');
-    Route::get('douyin', 'CallbackController@douyin');
-    Route::get('facebook', 'CallbackController@facebook');
-    Route::get('feishu', 'CallbackController@feishu');
-    Route::get('github', 'CallbackController@github');
-    Route::get('google', 'CallbackController@google');
-    Route::get('linkedin', 'CallbackController@linkedin');
     Route::get('official', 'CallbackController@official');
-    Route::get('outlook', 'CallbackController@outlook');
-    Route::get('qq', 'CallbackController@qq');
-    Route::get('taobao', 'CallbackController@taobao');
     Route::get('wechat', 'CallbackController@wechat');
-    Route::get('weibo', 'CallbackController@weibo');
-    Route::get('wework', 'CallbackController@wework');
     //公众号
     Route::get('officialServer', 'CallbackController@officialBind');
     Route::post('officialServer', 'CallbackController@officialServer');
