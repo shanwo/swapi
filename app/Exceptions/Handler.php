@@ -2,12 +2,9 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -22,6 +19,10 @@ class Handler extends ExceptionHandler
     ];
     protected $code = 0;
     protected $levels = [
+        100 => 'debug',
+        200 => 'info',
+        300 => 'notice',
+        400 => 'notice',
         500 => 'warning',
         600 => 'error',
         700 => 'critical',
@@ -63,23 +64,22 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($exception instanceof MethodNotAllowedHttpException) {
-            $this->code = 500;
-        }
-        if ($exception instanceof NotFoundHttpException) {
-            $this->code = 600;
-        }
-        if ($exception instanceof QueryException) {
-            $this->code = 700;
-        }
-        if ($exception instanceof \ReflectionException) {
-            $this->code = 800;
-        }
-        if ($exception instanceof \LogicException) {
-            $this->code = 900;
-        }
-        if ($exception instanceof \ParseError) {
-            $this->code = 900;
+        $classArray = explode(DIRECTORY_SEPARATOR, get_class($exception));
+        switch (end($classArray)) {
+            case 'MethodNotAllowedHttpException':
+                $this->code = 500;
+                break;
+            case 'NotFoundHttpException':
+                $this->code = 600;
+                break;
+            case 'QueryException':
+                $this->code = 700;
+                break;
+            case 'ReflectionException':
+                $this->code = 800;
+                break;
+            default :
+                $this->code = 900;
         }
         if ($this->code) {
             $msg = [
