@@ -35,20 +35,20 @@ class UserController extends Controller
         }
         $type = $this->request->input('type');
         $data = $this->driver($this->request, $type)->redirect();
+        $url = $data->getTargetUrl();
         $secret = $this->request->input('secret', '');
         if ($secret) {
             $auth = $this->passportDecrypt($secret, $type);
             $arr = json_decode($auth, true) ?? [];
             foreach ($arr as $k => $v) {
                 if ($v == md5(dechex($k))) {
-                    $url = $data->getTargetUrl();
                     parse_str(parse_url($url, PHP_URL_QUERY), $query);
                     $this->service->redis::setex('signIn:' . $type . ':' . $query['state'], 60 * 30, $k);
                 }
             }
         }
         $this->code = 200;
-        return $this->returnApi(['redirect_url'=>$data->getTargetUrl()]);
+        return $this->returnApi(['redirect_url'=>$url]);
     }
 
     public function info()
