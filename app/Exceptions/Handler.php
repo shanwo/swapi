@@ -65,6 +65,7 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         $classArray = explode(DIRECTORY_SEPARATOR, get_class($exception));
+        if(count($classArray) == 1) $classArray = explode('\\', reset($classArray));
         switch (end($classArray)) {
             case 'MethodNotAllowedHttpException':
                 $this->code = 500;
