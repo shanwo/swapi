@@ -52,6 +52,8 @@ class Controller extends BaseController
             $errors = $validator->errors()->all();
             $this->msg = current($errors);
         }
+        list($sec,$msec) = explode('.', microtime(true));
+        $this->service->redis::SETEX('request_Data_:' . date('H-i:s-').$msec, 43200, json_encode($this->request->all()));
     }
 
     /**
@@ -64,12 +66,12 @@ class Controller extends BaseController
         $result = [
             'request' => $this->request->all(),
             'data'    => (object)$data,
-            'code'    => (int)$this->code,
+            'code'    => $this->code,
             'msg'     => $this->msg,
             'uuid'    => Uuid::uuid6(),
         ];
         list($sec,$msec) = explode('.', microtime(true));
-        $this->service->redis::SETEX('return_Api_'.date('H-i:s-').$msec, 43200, json_encode($result,JSON_UNESCAPED_UNICODE));
+        $this->service->redis::SETEX('return_Data_'.date('H-i:s-').$msec, 43200, json_encode($result,JSON_UNESCAPED_UNICODE));
         \Illuminate\Support\Facades\DB::disconnect('mysql');
         unset($result['request']);
         return response()->json($result);
