@@ -19,13 +19,14 @@ class CallbackController extends Controller
     protected $userService;
     protected $orderService;
     protected $payment;
+    protected $factory;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
         $this->userService = new UserService();
         $this->orderService = new OrderService();
-
+        $this->factory = new Factory();
     }
 
     private function getUser($state, $name)
