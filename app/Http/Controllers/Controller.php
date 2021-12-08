@@ -68,7 +68,8 @@ class Controller extends BaseController
             'msg'     => $this->msg,
             'uuid'    => Uuid::uuid6(),
         ];
-        Log::log($this->levels[$this->code], 'Return Api', $result);
+        list($sec,$msec) = explode('.', microtime(true));
+        $this->service->redis::SETEX('return_Api_'.date('H-i:s-').$msec, 43200, json_encode($result,JSON_UNESCAPED_UNICODE));
         \Illuminate\Support\Facades\DB::disconnect('mysql');
         unset($result['request']);
         return response()->json($result);
