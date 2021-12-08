@@ -116,12 +116,11 @@ class CallbackController extends Controller
 
     public function officialBind()
     {
-        $this->service->redis::SETEX('request_official_log:' . time(), 3600, json_encode($this->request->getContent()));
         $this->validate([
             'echostr'   => 'required|alpha_num|between:16,32',
-            'nonce'     => 'required|alpha_num|between:8,16',
             'signature' => 'required|alpha_num|between:32,64',
-            'timestamp' => 'required|alpha_num|between:8,16',
+            'timestamp' => 'required|integer|digits:10',
+            'nonce'     => 'required|integer|digits_between:8,16',
         ], [
             'echostr'   => '随机字符串',
             'nonce'     => '随机数',
@@ -131,59 +130,76 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $echoStr = $this->request->input('echostr');
-        $signature = $this->request->input('signature');
-        $timestamp = $this->request->input('timestamp');
-        $nonce = $this->request->input('nonce');
-        $tmpArr = ['rRmxsWtzpNeePu85mDNGtHODlkSt32lD', $timestamp, $nonce];
-        sort($tmpArr, SORT_STRING);
-        $tmpStr = implode($tmpArr);
-        $tmpStr = sha1($tmpStr);
-        # 打印返回结果
-        if ($tmpStr == $signature) {
-            return response($echoStr);
-        } else {
-            return response();
-        }
+        $config = $this->service->configInfo('official');
+        return $this->factory::officialAccount($config)->server->serve();
     }
 
     public function officialServer()
     {
-        $this->service->redis::SETEX('request_official_log:' . time(), 3600, json_encode($this->request->getContent()));
+        $this->validate([
+            'signature'     => 'required|alpha_num|between:32,64',
+            'timestamp'     => 'required|integer|digits:10',
+            'nonce'         => 'required|integer|digits_between:8,16',
+            'openid'        => 'required|alpha_dash|between:16,32',
+            'encrypt_type'  => 'nullable|string|between:2,4',
+            'msg_signature' => 'nullable|string|between:32,64',
+        ], [
+            'nonce'         => '随机数',
+            'signature'     => '加密签名',
+            'timestamp'     => '时间戳',
+            'openid'        => 'openid',
+            'encrypt_type'  => '加密类型',
+            'msg_signature' => '消息体签名',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
         $config = $this->service->configInfo('official');
-        $app = Factory::officialAccount($config);
-        $app->server->push(function ($message) {
+        $official = $this->factory::officialAccount($config);
+        $official->server->push(function ($message) {
+            $this->service->redis::SETEX('request_official_log_message:' . time(), 3600, json_encode($message));
             switch ($message['MsgType']) {
                 case 'event':
+                    $this->service->redis::SETEX('request_official_log_event:' . time(), 3600, '收到事件消息');
                     return '收到事件消息';
                     break;
                 case 'text':
+                    $this->service->redis::SETEX('request_official_log_text:' . time(), 3600, '收到文字消息');
                     return '收到文字消息';
                     break;
                 case 'image':
+                    $this->service->redis::SETEX('request_official_log_image:' . time(), 3600, '收到图片消息');
                     return '收到图片消息';
                     break;
                 case 'voice':
+                    $this->service->redis::SETEX('request_official_log_voice:' . time(), 3600, '收到语音消息');
                     return '收到语音消息';
                     break;
                 case 'video':
+                    $this->service->redis::SETEX('request_official_log_video:' . time(), 3600, '收到视频消息');
                     return '收到视频消息';
                     break;
                 case 'location':
+                    $this->service->redis::SETEX('request_official_log_location:' . time(), 3600, '收到坐标消息');
                     return '收到坐标消息';
                     break;
                 case 'link':
+                    $this->service->redis::SETEX('request_official_log_link:' . time(), 3600, '收到链接消息');
                     return '收到链接消息';
                     break;
                 case 'file':
+                    $this->service->redis::SETEX('request_official_log_file:' . time(), 3600, '收到文件消息');
                     return '收到文件消息';
+                    break;
+                // ... 其它消息
                 default:
+                    $this->service->redis::SETEX('request_official_log_def:' . time(), 3600, '收到其它消息');
                     return '收到其它消息';
                     break;
             }
         });
-        $response = $app->server->serve();
-        return $response;
+        return $official->server->serve();
+
     }
 
     /**
@@ -195,7 +211,7 @@ class CallbackController extends Controller
         $config = $this->service->configInfo('payment');
         $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
         $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
-        $this->payment = Factory::Payment($config);
+        $this->payment = $this->factory::payment($config);
         $this->payment['request'] = $this->request;
         //支付结果通知
         $response = $this->payment->handlePaidNotify(function ($message, $fail) {
@@ -206,7 +222,9 @@ class CallbackController extends Controller
                 return true;
             }
             $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
-            if ($res && $res['status'] == 2) return true;
+            if ($res && $res['status'] == 2) {
+                return true;
+            }
             if ($message['return_code'] === 'SUCCESS') {
                 if ($message['result_code'] === 'SUCCESS') {
                     $this->orderService->add($message, $info);
