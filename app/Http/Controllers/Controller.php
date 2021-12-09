@@ -52,8 +52,6 @@ class Controller extends BaseController
             $errors = $validator->errors()->all();
             $this->msg = current($errors);
         }
-        list($sec,$msec) = explode('.', microtime(true));
-        $this->service->redis::SETEX('request_Data:' . date('H-i:s-').$msec, 43200, json_encode($this->request->all()));
     }
 
     /**
@@ -70,9 +68,8 @@ class Controller extends BaseController
             'msg'     => $this->msg,
             'uuid'    => Uuid::uuid6(),
         ];
-        list($sec,$msec) = explode('.', microtime(true));
-        $this->service->redis::SETEX('return_Data'.date('H-i:s-').$msec, 43200, json_encode($result,JSON_UNESCAPED_UNICODE));
         \Illuminate\Support\Facades\DB::disconnect('mysql');
+        $this->service->redis::SETEX('data:return:' . $result['uuid'], 43200, json_encode($result, JSON_UNESCAPED_UNICODE));
         unset($result['request']);
         return response()->json($result);
     }
@@ -99,6 +96,24 @@ class Controller extends BaseController
     }
 
     /**
+     * 辅助函数
+     * @param $str
+     * @param $encrypt_key
+     * @return string
+     */
+    private function passportKey($str, $encrypt_key)
+    {
+        $encrypt_key = md5($encrypt_key);
+        $ctr = 0;
+        $tmp = '';
+        for ($i = 0; $i < strlen($str); $i++) {
+            $ctr = $ctr == strlen($encrypt_key) ? 0 : $ctr;
+            $tmp .= $str[$i] ^ $encrypt_key[$ctr++];
+        }
+        return $tmp;
+    }
+
+    /**
      * 功能：对字符串进行解密处理
      * @param string $str
      * 需要解密的密文.
@@ -118,29 +133,11 @@ class Controller extends BaseController
         return $tmp;
     }
 
-    /**
-     * 辅助函数
-     * @param $str
-     * @param $encrypt_key
-     * @return string
-     */
-    private function passportKey($str, $encrypt_key)
-    {
-        $encrypt_key = md5($encrypt_key);
-        $ctr = 0;
-        $tmp = '';
-        for ($i = 0; $i < strlen($str); $i++) {
-            $ctr = $ctr == strlen($encrypt_key) ? 0 : $ctr;
-            $tmp .= $str[$i] ^ $encrypt_key[$ctr++];
-        }
-        return $tmp;
-    }
-
     protected function driver($request, $name)
     {
         $config = $this->service->configInfo($name);
         //公众号数据，使用微信驱动
-        if($name == 'official'){
+        if ($name == 'official') {
             $socialite = new SocialiteManager([
                 'wechat' => [
                     'client_id'     => $config['app_id'],
@@ -149,7 +146,7 @@ class Controller extends BaseController
                 ],
             ], $request);
             return $socialite->driver('wechat')->scopes(['snsapi_userinfo']);
-        }else{
+        } else {
             $socialite = new SocialiteManager([
                 $name => [
                     'client_id'     => $config['key'],
