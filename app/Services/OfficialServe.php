@@ -24,10 +24,10 @@ class OfficialServe extends Service
     {
         $data = [];
         $info = $this->userModel->getUser($user['openid']);
-        if($user['subscribe']){
-            if($info){
-                $this->userModel->editUser($info['id'],$user);
-            }else{
+        if ($user['subscribe']) {
+            if ($info) {
+                $this->userModel->editUser($info['id'], $user);
+            } else {
                 $this->userModel->addUser($user);
                 $info = $this->userModel->getUser($user['openid']);
             }
@@ -37,12 +37,12 @@ class OfficialServe extends Service
                 $data = $this->reply($message);
                 break;
             case 'unsubscribe':             //取消订阅事件
-                if($info) {
+                if ($info) {
                     $this->unsubscribe($info);
                 }
                 break;
             case 'SCAN':                    //扫描带参数二维码
-                $data = $this->scan($user['openid'],$event['EventKey']);
+                $data = $this->scan($user['openid'], $event['EventKey']);
                 break;
             case'LOCATION':                 //上报地理位置
                 break;
@@ -89,6 +89,42 @@ class OfficialServe extends Service
         return $data;
     }
 
+    private function reply($message)
+    {
+        $where[] = ['status', '=', 1];
+        if (empty($message['Content'])) {
+            $where[] = ['type', '=', 0];
+        } else {
+            $where[] = ['keyword', '=', trim($message['Content'])];
+        }
+        return $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
+    }
+
+    private function unsubscribe($info)
+    {
+        $where[] = ['uid', '=', $info['id']];
+        $where[] = ['subscribe', '=', 1];
+        $channel = $this->model->subscribeInfo($where);
+        $where[] = ['cid', '=', $channel['cid']];
+        $this->model->subscribeStatus($where, 0);
+        $this->model->incChannel($channel['cid'], 'unsubscribe');
+    }
+
+    private function scan($openid, $key)
+    {
+        $data = [];
+        $channel = $this->model->getChannel($key);
+        $this->model->incChannel($channel['id'], 'number');
+        $where[] = ['status', '=', 1];
+        $where[] = ['keyword', '=', $key];
+        $reply = $this->replyModel->reply($where);
+        if ($reply) {
+            $type = new ReplyController($this->replyModel);
+            $data = $type->replyType($reply, $openid);
+        }
+        return $data;
+    }
+
     public function textType($message)
     {
         return $this->reply($message);
@@ -124,84 +160,48 @@ class OfficialServe extends Service
         return '暂不支持文件消息处理';
     }
 
-    private function reply($message)
-    {
-        $where[] = ['status','=',1];
-        if(empty($message['Content'])){
-            $where[] = ['type','=',0];
-        }else{
-            $where[] = ['keyword','=',$message['Content']];
-        }
-        return $this->replyModel->select('id','type', 'comment')->where($where)->first();
-    }
-
     public function replyType($reply)
     {
-        $comment = json_decode($reply['comment'],true);
-        switch ($reply['type']){
+        $comment = json_decode($reply['comment'], true);
+        switch ($reply['type']) {
             case 1:                         //文本消息
-                return $reply['Content'];
+                return $comment['Content'];
             case 2:                         //图片消息
                 return new \EasyWeChat\Kernel\Messages\Image($comment['MediaId']);
             case 3:                         //语音消息
                 return new \EasyWeChat\Kernel\Messages\Voice($comment['MediaId']);
             case 4:                         //视频消息
-                return new \EasyWeChat\Kernel\Messages\Video($comment['MediaId'],[
-                    'title' => $comment['Title'],
+                return new \EasyWeChat\Kernel\Messages\Video($comment['MediaId'], [
+                    'title'       => $comment['Title'],
                     'description' => $comment['Description'],
                 ]);
             case 5:                         //音乐消息
                 return new \EasyWeChat\Kernel\Messages\Music([
-                    'title' => $comment['Title'],
-                    'description' => $comment['Description'],
-                    'url' => $comment['MusicURL'],
-                    'hq_url' => $comment['HQMusicUrl'],
+                    'title'          => $comment['Title'],
+                    'description'    => $comment['Description'],
+                    'url'            => $comment['MusicURL'],
+                    'hq_url'         => $comment['HQMusicUrl'],
                     'thumb_media_id' => $comment['ThumbMediaId'],
                 ]);
             case 6:                         //图文消息
                 return new \EasyWeChat\Kernel\Messages\NewsItem([
-                    'title' => $comment['Title'],
+                    'title'       => $comment['Title'],
                     'description' => $comment['Description'],
-                    'url' => $comment['Url'],
-                    'picurl' => $comment['PicUrl'],
+                    'url'         => $comment['Url'],
+                    'picurl'      => $comment['PicUrl'],
                 ]);
             case 7:                         //文章消息
                 return new \EasyWeChat\Kernel\Messages\Article([
-                    'title'   => $comment['Title'],
-                    'author'  => $comment['Author'],
-                    'content' => $comment['Description'],
-                    'thumb_media_id'=> $comment['thumb_media_id'],
-                    'digest'=> $comment['digest'],
-                    'source_url'=> $comment['source_url'],
-                    'show_cover'=> $comment['show_cover'],
+                    'title'          => $comment['Title'],
+                    'author'         => $comment['Author'],
+                    'content'        => $comment['Description'],
+                    'thumb_media_id' => $comment['thumb_media_id'],
+                    'digest'         => $comment['digest'],
+                    'source_url'     => $comment['source_url'],
+                    'show_cover'     => $comment['show_cover'],
                 ]);
             default:
                 return '我好像不明白...';
         }
-    }
-
-    private function unsubscribe($info)
-    {
-        $where[] = ['uid','=',$info['id']];
-        $where[] = ['subscribe','=',1];
-        $channel = $this->model->subscribeInfo($where);
-        $where[] = ['cid','=',$channel['cid']];
-        $this->model->subscribeStatus($where,0);
-        $this->model->incChannel($channel['cid'],'unsubscribe');
-    }
-
-    private function scan($openid,$key)
-    {
-        $data = [];
-        $channel = $this->model->getChannel($key);
-        $this->model->incChannel($channel['id'],'number');
-        $where[] = ['status','=',1];
-        $where[] = ['keyword','=',$key];
-        $reply = $this->replyModel->reply($where);
-        if($reply){
-            $type = new ReplyController($this->replyModel);
-            $data = $type->replyType($reply,$openid);
-        }
-        return $data;
     }
 }
