@@ -4,59 +4,14 @@ namespace App\Services;
 
 class OfficialServe extends Service
 {
-    /**
-     * 事件类型
-     * @param $data
-     * @param $user
-     *
-     * @return string
-     */
-    private function msgType($data,$user)
-    {
-        switch ($data['MsgType']) {
-            case 'event':                   //事件推送
-                $arr = $this->eventType($data,$user);
-                break;
-            case 'text':                    //文本消息
-                $arr = $this->textType($data,$user);
-                break;
-            case 'image':                   //图片消息
-                $arr = $this->imageType($data,$user);
-                break;
-            case 'voice':                   //语音消息
-                $arr = $this->voiceType($data,$user);
-                break;
-            case 'video':                   //视频消息
-                $arr = $this->videoType($data,$user);
-                break;
-            case 'shortvideo':              //小视频消息
-                $arr = $this->shortvideoType($data,$user);
-                break;
-            case 'location':                //地理位置
-                $arr = $this->locationType($data,$user);
-                break;
-            case 'link':                    //链接消息
-                $arr = $this->linkType($data,$user);
-                break;
-            default:
-                $arr = [];
-        }
-        if($arr){
-            $xml = $this->arrXml($arr);
-        }else{
-            $xml = 'success';
-        }
-        return $xml;
-    }
 
     /**
      * 事件回复
      * @param $event
-     * @param $user
      *
      * @return array|mixed
      */
-    public function eventType($Content)
+    public function eventType($message)
     {
         $data = [];
         $info = $this->userModel->getUser($user['openid']);
@@ -123,6 +78,41 @@ class OfficialServe extends Service
             default:
         }
         return $data;
+    }
+
+    public function textType($message)
+    {
+        return '暂不支持文字消息处理';
+    }
+
+    public function imageType($message)
+    {
+        return '暂不支持图片消息处理';
+    }
+
+    public function voiceType($message)
+    {
+        return '暂不支持语音消息处理';
+    }
+
+    public function videoType($message)
+    {
+        return '暂不支持视频消息处理';
+    }
+
+    public function locationType($message)
+    {
+        return '暂不支持地理位置处理';
+    }
+
+    public function linkType($message)
+    {
+        return '暂不支持链接消息处理';
+    }
+
+    public function fileType($message)
+    {
+        return '暂不支持文件消息处理';
     }
 
     private function subscribe($info,$key)

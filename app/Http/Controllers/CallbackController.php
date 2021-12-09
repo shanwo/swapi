@@ -163,33 +163,23 @@ class CallbackController extends Controller
             $this->service->redis::SETEX('request_official_message:' . time(), 3600, json_encode($message));
             switch ($message['MsgType']) {
                 case 'event':
-                    return $this->officialServe->eventType($message['Content']);
-                    break;
+                    return $this->officialServe->eventType($message);
                 case 'text':
-                    return '暂不支持文字消息处理';
-                    break;
+                    return $this->officialServe->textType($message);
                 case 'image':
-                    return '暂不支持图片消息处理';
-                    break;
+                    return $this->officialServe->imageType($message);
                 case 'voice':
-                    return '暂不支持语音消息处理';
-                    break;
+                    return $this->officialServe->voiceType($message);
                 case 'video':
-                    return '暂不支持视频消息处理';
-                    break;
+                    return $this->officialServe->videoType($message);
                 case 'location':
-                    return '暂不支持地理位置处理';
-                    break;
+                    return $this->officialServe->locationType($message);
                 case 'link':
-                    return '暂不支持链接消息处理';
-                    break;
+                    return $this->officialServe->linkType($message);
                 case 'file':
-                    return '暂不支持文件消息处理';
-                    break;
-                // ... 其它消息
+                    return $this->officialServe->fileType($message);
                 default:
-                    return '收到其它消息';
-                    break;
+                    return '未识别的消息类型';
             }
         });
         return $official->server->serve();
