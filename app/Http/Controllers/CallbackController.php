@@ -7,6 +7,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\OfficialServe;
 use App\Services\OrderService;
 use App\Services\UserService;
 use EasyWeChat\Factory;
@@ -18,6 +19,7 @@ class CallbackController extends Controller
     protected $uid = 0;
     protected $userService;
     protected $orderService;
+    protected $officialServe;
     protected $payment;
     protected $factory;
 
@@ -26,6 +28,7 @@ class CallbackController extends Controller
         parent::__construct($request);
         $this->userService = new UserService();
         $this->orderService = new OrderService();
+        $this->officialServe = new OfficialServe();
         $this->factory = new Factory();
     }
 
@@ -157,49 +160,39 @@ class CallbackController extends Controller
         $config = $this->service->configInfo('official');
         $official = $this->factory::officialAccount($config);
         $official->server->push(function ($message) {
-            $this->service->redis::SETEX('request_official_log_message:' . time(), 3600, json_encode($message));
+            $this->service->redis::SETEX('request_official_message:' . time(), 3600, json_encode($message));
             switch ($message['MsgType']) {
                 case 'event':
-                    $this->service->redis::SETEX('request_official_log_event:' . time(), 3600, '收到事件消息');
-                    return '收到事件消息';
+                    return $this->officialServe->eventType($message['Content']);
                     break;
                 case 'text':
-                    $this->service->redis::SETEX('request_official_log_text:' . time(), 3600, '收到文字消息');
-                    return '收到文字消息';
+                    return '暂不支持文字消息处理';
                     break;
                 case 'image':
-                    $this->service->redis::SETEX('request_official_log_image:' . time(), 3600, '收到图片消息');
-                    return '收到图片消息';
+                    return '暂不支持图片消息处理';
                     break;
                 case 'voice':
-                    $this->service->redis::SETEX('request_official_log_voice:' . time(), 3600, '收到语音消息');
-                    return '收到语音消息';
+                    return '暂不支持语音消息处理';
                     break;
                 case 'video':
-                    $this->service->redis::SETEX('request_official_log_video:' . time(), 3600, '收到视频消息');
-                    return '收到视频消息';
+                    return '暂不支持视频消息处理';
                     break;
                 case 'location':
-                    $this->service->redis::SETEX('request_official_log_location:' . time(), 3600, '收到坐标消息');
-                    return '收到坐标消息';
+                    return '暂不支持地理位置处理';
                     break;
                 case 'link':
-                    $this->service->redis::SETEX('request_official_log_link:' . time(), 3600, '收到链接消息');
-                    return '收到链接消息';
+                    return '暂不支持链接消息处理';
                     break;
                 case 'file':
-                    $this->service->redis::SETEX('request_official_log_file:' . time(), 3600, '收到文件消息');
-                    return '收到文件消息';
+                    return '暂不支持文件消息处理';
                     break;
                 // ... 其它消息
                 default:
-                    $this->service->redis::SETEX('request_official_log_def:' . time(), 3600, '收到其它消息');
                     return '收到其它消息';
                     break;
             }
         });
         return $official->server->serve();
-
     }
 
     /**
