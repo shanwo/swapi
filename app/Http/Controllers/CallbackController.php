@@ -165,7 +165,8 @@ class CallbackController extends Controller
                 case 'event':
                     return $this->officialServe->eventType($message);
                 case 'text':
-                    return $this->officialServe->textType($message);
+                    $text = $this->officialServe->textType($message);
+                    return $this->officialServe->replyType($text);
                 case 'image':
                     return $this->officialServe->imageType($message);
                 case 'voice':
