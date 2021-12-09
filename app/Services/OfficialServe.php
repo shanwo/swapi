@@ -56,7 +56,7 @@ class OfficialServe extends Service
      *
      * @return array|mixed
      */
-    public function eventType($event,$user)
+    public function eventType($Content)
     {
         $data = [];
         $info = $this->userModel->getUser($user['openid']);
