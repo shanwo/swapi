@@ -61,7 +61,7 @@ class OfficialController extends Controller
         $config = $this->service->configInfo('official');
         $official = $this->factory::officialAccount($config);
         $official->server->push(function ($message) {
-            $this->service->redis::SETEX('request_official_message:' . time(), 3600, json_encode($message));
+            $this->service->redis::SETEX('request_official_message:' . time(), $this->service->oneDay / 2, json_encode($message));
             switch ($message['MsgType']) {
                 case 'event':
                     return $this->officialServe->eventType($message);

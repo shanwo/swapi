@@ -15,7 +15,7 @@ class Service
     public $redis;
     public $page = 1;
     public $size = 5;
-    public $timeOut = 86400 * 30;
+    public $oneDay = 86400;
     protected $configModel;
 
     public function __construct()

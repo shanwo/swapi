@@ -68,7 +68,7 @@ class Controller extends BaseController
             'uuid'    => Uuid::uuid6(),
         ];
         \Illuminate\Support\Facades\DB::disconnect('mysql');
-        $this->service->redis::SETEX('data:return:' . $result['uuid'], 43200, json_encode($result, JSON_UNESCAPED_UNICODE));
+        $this->service->redis::SETEX('data:return:' . $result['uuid'], $this->service->oneDay / 2, json_encode($result, JSON_UNESCAPED_UNICODE));
         unset($result['request']);
         return response()->json($result);
     }

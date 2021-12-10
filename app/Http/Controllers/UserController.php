@@ -43,7 +43,7 @@ class UserController extends Controller
             foreach ($arr as $k => $v) {
                 if ($v == md5(dechex($k))) {
                     parse_str(parse_url($url, PHP_URL_QUERY), $query);
-                    $this->service->redis::setex('signIn:' . $type . ':' . $query['state'], 60 * 30, $k);
+                    $this->service->redis::setex('signIn:' . $type . ':' . $query['state'], $this->service->oneDay / (24 * 6), $k);
                 }
             }
         }

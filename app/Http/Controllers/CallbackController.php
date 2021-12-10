@@ -62,11 +62,11 @@ class CallbackController extends Controller
             $uid = $this->userService->wechat($this->uid, $user);
             $data = $this->userService->info($uid);
             if (empty($data['msg'])) {
-                $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $uid);
+                $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->oneDay * 30, $uid);
                 $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
 //                $arr = [$data['id'] => md5(dechex($data['id']))];
-//                $this->service->redis::setex('token:' . $data['api_token'], $this->service->timeOut, json_encode($arr));
-//                $this->service->redis::setex('user:' . $data['id'], $this->service->timeOut, json_encode($data, JSON_UNESCAPED_UNICODE));
+//                $this->service->redis::setex('token:' . $data['api_token'], $this->service->oneDay * 30, json_encode($arr));
+//                $this->service->redis::setex('user:' . $data['id'], $this->service->oneDay * 30, json_encode($data, JSON_UNESCAPED_UNICODE));
                 $this->code = 200;
             } else {
                 $this->msg = $data['msg'];
@@ -99,11 +99,11 @@ class CallbackController extends Controller
             $uid = $this->userService->wechat($this->uid, $user);
             $data = $this->userService->info($uid);
             if (empty($data['msg'])) {
-                $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->timeOut, $uid);
+                $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->oneDay * 30, $uid);
                 $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
 //            $arr = [$data['id'] => md5(dechex($data['id']))];
-//            $this->service->redis::setex('token:' . $data['api_token'], $this->service->timeOut, json_encode($arr));
-//            $this->service->redis::setex('user:' . $data['id'], $this->service->timeOut, json_encode($data, JSON_UNESCAPED_UNICODE));
+//            $this->service->redis::setex('token:' . $data['api_token'], $this->service->oneDay * 30, json_encode($arr));
+//            $this->service->redis::setex('user:' . $data['id'], $this->service->oneDay * 30, json_encode($data, JSON_UNESCAPED_UNICODE));
                 $this->code = 200;
             } else {
                 $this->msg = $data['msg'];
@@ -119,7 +119,7 @@ class CallbackController extends Controller
      */
     public function payment()
     {
-        $this->service->redis::SETEX('request_payment_message:' . time(), 3600, json_encode($this->request->getContent()));
+        $this->service->redis::SETEX('request_payment_message:' . time(), $this->service->oneDay / 24, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
         $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
         $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
