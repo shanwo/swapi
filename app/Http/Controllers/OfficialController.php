@@ -10,13 +10,13 @@ class OfficialController extends Controller
 {
     protected $officialServe;
     protected $official;
-    protected $factory;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
         $this->officialServe = new OfficialServe();
-        $this->factory = new Factory();
+        $config = $this->service->configInfo('official');
+        $this->official = Factory::officialAccount($config);
     }
 
     public function bind()
@@ -35,16 +35,15 @@ class OfficialController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $config = $this->service->configInfo('official');
-        return $this->factory::officialAccount($config)->server->serve();
+        return $this->official->server->serve();
     }
 
     public function server()
     {
         $this->validate([
+            'nonce'         => 'required|integer|digits_between:8,16',
             'signature'     => 'required|alpha_num|between:32,64',
             'timestamp'     => 'required|integer|digits:10',
-            'nonce'         => 'required|integer|digits_between:8,16',
             'openid'        => 'required|alpha_dash|between:16,32',
             'encrypt_type'  => 'nullable|string|between:2,4',
             'msg_signature' => 'nullable|string|between:32,64',
@@ -59,17 +58,14 @@ class OfficialController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $config = $this->service->configInfo('official');
-        $this->official = $this->factory::officialAccount($config);
-        $user = $this->official->user;
-        $this->official->server->push(function ($message) use ($user,$config) {
+        $user = $this->official->user->get($this->request->input('openid',''));
+        $user['app_id'] = $this->official->userConfig['app_id'] ?? '';
+        $user['ip'] = $this->request->ip();
+        $this->official->server->push(function ($message) use ($user) {
             $this->service->redis::SETEX('request_official_message:' . time(), $this->service->oneDay / 2, json_encode($message));
             switch ($message['MsgType']) {
                 case 'event':
-                    $original['app_id'] = $config['app_id'];
-                    $original['ip'] = $this->request->ip();
-                    $original['user'] = $user->get($message['FromUserName']);
-                    return $this->officialServe->eventType($message,$original);
+                    return $this->officialServe->eventType($message,$user);
                 case 'text':
                     return $this->officialServe->textType($message);
                 case 'image':

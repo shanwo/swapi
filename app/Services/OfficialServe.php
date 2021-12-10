@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Models\ReplyModel;
 use App\Models\UserModel;
 use App\Models\UserThirdModel;
+use Illuminate\Support\Facades\Crypt;
 
 class OfficialServe extends Service
 {
+    public $appid;
+    public $source;
     protected $replyModel;
     protected $userModel;
     protected $userThirdModel;
@@ -26,16 +29,16 @@ class OfficialServe extends Service
      * @param $original
      * @return array
      */
-    public function eventType($message,$original)
+    public function eventType($message,$user)
     {
         $data = [];
-        $info = $this->userModel->getUser($original);
+        $info = $this->getUser($user);
         if ($original['subscribe']) {
             if ($info) {
-                $this->userModel->editUser($info['id'], $original);
+                $this->editUser($info['id'], $original);
             } else {
-                $this->userModel->addUser($original);
-                $info = $this->userModel->getUser($original['openid']);
+                $this->addUser($original);
+                $info = $this->getUser($original['openid']);
             }
         }
         switch ($message['Event']) {
@@ -95,32 +98,32 @@ class OfficialServe extends Service
         return $data;
     }
 
-    private function getUser($data)
+    private function getUser($user)
     {
-        $config = $this->configInfo('official');
+        $uid = 0;
         $where[] = ['source', '=', 'official'];
-        $where[] = ['open_id', '=', $data['openid']];
-        $where[] = ['app_id', '=', $config['app_id']];
+        $where[] = ['open_id', '=', $user['openid']];
+        $where[] = ['app_id', '=', $user['app_id']];
         $where[] = ['status', '=', 1];
         $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id', 'logins_number']);
         if ($userThird) {
             $update = [
-                'login_ip'      => $data['ip'],
+                'login_ip'      => $user['ip'],
                 'logins_number' => $userThird['logins_number'] + 1
             ];
             $this->userThirdModel->whereKey($userThird['id'])->update($update);
             $uid = $userThird['user_id'];
         } else {
-            if ($original['unionid']) {
-                $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $original['unionid'])->first(['id', 'user_id']);
+            if ($user['unionid']) {
+                $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $user['unionid'])->first(['id', 'user_id']);
                 $uid = $userThird['user_id'];
             }
-            $token = Crypt::encryptString($original['openid']);
+            $token = Crypt::encryptString($user['openid']);
             if (!$uid) {
                 $insertUser = [
-                    'nickname'  => htmlspecialchars($original['nickname']),
-                    'sex'       => $original['sex'],
-                    'avatar'    => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
+                    'nickname'  => htmlspecialchars($user['nickname']),
+                    'sex'       => $user['sex'],
+                    'avatar'    => $user['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
                     'api_token' => $token
                 ];
                 $uid = $this->userModel->insertGetId($insertUser);
@@ -135,13 +138,13 @@ class OfficialServe extends Service
             }
             $insertThird = [
                 'user_id'  => $uid,
-                'nickname' => htmlspecialchars($original['nickname']),
-                'union_id' => $original['unionid'],
-                'open_id'  => $original['openid'],
+                'nickname' => htmlspecialchars($user['nickname']),
+                'union_id' => $user['unionid'],
+                'open_id'  => $user['openid'],
                 'source'   => 'official',
-                'app_id'   => $config['key'],
-                'login_ip' => $data['ip'],
-                'original' => json_encode($original)
+                'app_id'   => $user['app_id'],
+                'login_ip' => $user['ip'],
+                'original' => json_encode($user)
             ];
             $this->userThirdModel->insertGetId($insertThird);
         }
