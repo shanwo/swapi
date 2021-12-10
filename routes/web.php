@@ -20,7 +20,7 @@ Route::get('MP_verify_wOQevRdcPyMeqMJL.txt', function () {
     return 'wOQevRdcPyMeqMJL';
 });
 
-Route::prefix('public')->group(function () {
+Route::prefix('base')->group(function () {
 //文件上传
     Route::post('upload', 'UploadController@file');
 //地区信息
@@ -75,14 +75,16 @@ Route::prefix('pay')->group(function () {
 });
 //回调
 Route::prefix('callback')->group(function () {
-    //登录回调
+    //登录
     Route::get('official', 'CallbackController@official');
     Route::get('wechat', 'CallbackController@wechat');
-    //公众号
-    Route::get('officialServer', 'CallbackController@officialBind');
-    Route::post('officialServer', 'CallbackController@officialServer');
     //支付
     Route::post('payment', 'CallbackController@payment');
+});
+//公众号
+Route::prefix('official')->group(function () {
+    Route::get('server', 'OfficialController@bind');
+    Route::post('server', 'OfficialController@server');
 });
 //测试接口
 Route::prefix('test')->group(function () {

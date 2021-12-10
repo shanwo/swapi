@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class OfficialController extends Controller
 {
-    protected $uid = 0;
     protected $officialServe;
-    protected $payment;
     protected $factory;
 
     public function __construct(Request $request)
@@ -20,7 +18,7 @@ class OfficialController extends Controller
         $this->factory = new Factory();
     }
 
-    public function officialBind()
+    public function bind()
     {
         $this->validate([
             'echostr'   => 'required|alpha_num|between:16,32',
@@ -40,7 +38,7 @@ class OfficialController extends Controller
         return $this->factory::officialAccount($config)->server->serve();
     }
 
-    public function officialServer()
+    public function server()
     {
         $this->validate([
             'signature'     => 'required|alpha_num|between:32,64',
