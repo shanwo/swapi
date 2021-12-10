@@ -131,29 +131,4 @@ class Controller extends BaseController
         }
         return $tmp;
     }
-
-    protected function driver($request, $name)
-    {
-        $config = $this->service->configInfo($name);
-        //公众号数据，使用微信驱动
-        if ($name == 'official') {
-            $socialite = new SocialiteManager([
-                'wechat' => [
-                    'client_id'     => $config['app_id'],
-                    'client_secret' => $config['secret'],
-                    'redirect'      => $config['callback'],
-                ],
-            ], $request);
-            return $socialite->driver('wechat')->scopes(['snsapi_userinfo']);
-        } else {
-            $socialite = new SocialiteManager([
-                $name => [
-                    'client_id'     => $config['key'],
-                    'client_secret' => $config['secret'],
-                    'redirect'      => $config['callback'],
-                ],
-            ], $request);
-            return $socialite->driver($name);
-        }
-    }
 }

@@ -11,6 +11,7 @@ use App\Models\AreaModel;
 use App\Models\UserModel;
 use App\Models\UserThirdModel;
 use Illuminate\Support\Facades\Crypt;
+use Overtrue\Socialite\SocialiteManager;
 
 class UserService extends Service
 {
@@ -65,6 +66,30 @@ class UserService extends Service
     }
 
     public function wechat($uid, $data)
+    public function driver($request, $name)
+    {
+        $config = $this->configInfo($name);
+        //公众号数据，使用微信驱动
+        if ($name == 'official') {
+            $socialite = new SocialiteManager([
+                'wechat' => [
+                    'client_id'     => $config['app_id'],
+                    'client_secret' => $config['secret'],
+                    'redirect'      => $config['callback'],
+                ],
+            ], $request);
+            return $socialite->driver('wechat')->scopes(['snsapi_userinfo']);
+        } else {
+            $socialite = new SocialiteManager([
+                $name => [
+                    'client_id'     => $config['key'],
+                    'client_secret' => $config['secret'],
+                    'redirect'      => $config['callback'],
+                ],
+            ], $request);
+            return $socialite->driver($name);
+        }
+    }
     {
         $original = $data['original'];
         $config = $this->configInfo($this->configName);
