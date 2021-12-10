@@ -29,13 +29,13 @@ class OfficialServe extends Service
     public function eventType($message,$original)
     {
         $data = [];
-        $info = $this->userModel->getUser($user['openid']);
-        if ($user['subscribe']) {
+        $info = $this->userModel->getUser($original);
+        if ($original['subscribe']) {
             if ($info) {
-                $this->userModel->editUser($info['id'], $user);
+                $this->userModel->editUser($info['id'], $original);
             } else {
-                $this->userModel->addUser($user);
-                $info = $this->userModel->getUser($user['openid']);
+                $this->userModel->addUser($original);
+                $info = $this->userModel->getUser($original['openid']);
             }
         }
         switch ($message['Event']) {
@@ -48,7 +48,7 @@ class OfficialServe extends Service
                 }
                 break;
             case 'SCAN':                    //扫描带参数二维码
-                $data = $this->scan($user['openid'], $event['EventKey']);
+                $data = $this->scan($original['openid'], $message['EventKey']);
                 break;
             case'LOCATION':                 //上报地理位置
                 break;
