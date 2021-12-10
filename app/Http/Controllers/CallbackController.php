@@ -11,11 +11,9 @@ use App\Services\OrderService;
 use App\Services\UserService;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
-use Overtrue\Socialite\AuthorizeFailedException;
 
 class CallbackController extends Controller
 {
-    protected $uid = 0;
     protected $userService;
     protected $orderService;
     protected $factory;
@@ -29,13 +27,6 @@ class CallbackController extends Controller
         $this->factory = new Factory();
     }
 
-    private function getUser($state, $name)
-    {
-        if ($state) {
-            $this->uid = $this->service->redis::GET('signIn:' . $name . ':' . $state);
-            $this->service->redis::DEL('signIn:' . $name . ':' . $state);
-        }
-    }
 
     /**
      * 第三方登录回调
@@ -52,27 +43,11 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $state = $this->request->input('state', 0);
-        $this->userService->configName = 'official';
-        $this->getUser($state, $this->userService->configName);
-        $data = [];
         try {
-            $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
-            $user['ip'] = $this->request->ip();
-            $uid = $this->userService->wechat($this->uid, $user);
-            $data = $this->userService->info($uid);
-            if (empty($data['msg'])) {
-                $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->oneDay * 30, $uid);
-                $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
-//                $arr = [$data['id'] => md5(dechex($data['id']))];
-//                $this->service->redis::setex('token:' . $data['api_token'], $this->service->oneDay * 30, json_encode($arr));
-//                $this->service->redis::setex('user:' . $data['id'], $this->service->oneDay * 30, json_encode($data, JSON_UNESCAPED_UNICODE));
-                $this->code = 200;
-            } else {
-                $this->msg = $data['msg'];
-            }
-        } catch (AuthorizeFailedException $e) {
-            $this->msg = '(' . $e->body['errcode'] . '):' . $e->body['errmsg'];
+            $data = $this->userService->getUserData($this->request,'official');
+            $this->code = 200;
+        } catch (\Exception $e) {
+            $this->msg = $e->getMessage();
         }
         return $this->returnApi($data);
     }
@@ -89,27 +64,11 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $state = $this->request->input('state', 0);
-        $this->userService->configName = 'wechat';
-        $this->getUser($state, $this->userService->configName);
-        $data = [];
         try {
-            $user = $this->driver($this->request, $this->userService->configName)->stateless()->user();
-            $user['ip'] = $this->request->ip();
-            $uid = $this->userService->wechat($this->uid, $user);
-            $data = $this->userService->info($uid);
-            if (empty($data['msg'])) {
-                $this->service->redis::SETEX('user_tokens:' . $data['api_token'], $this->service->oneDay * 30, $uid);
-                $this->service->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
-//            $arr = [$data['id'] => md5(dechex($data['id']))];
-//            $this->service->redis::setex('token:' . $data['api_token'], $this->service->oneDay * 30, json_encode($arr));
-//            $this->service->redis::setex('user:' . $data['id'], $this->service->oneDay * 30, json_encode($data, JSON_UNESCAPED_UNICODE));
-                $this->code = 200;
-            } else {
-                $this->msg = $data['msg'];
-            }
-        } catch (AuthorizeFailedException $e) {
-            $this->msg = '(' . $e->body['errcode'] . '):' . $e->body['errmsg'];
+            $data = $this->userService->getUserData($this->request,'wechat');
+            $this->code = 200;
+        } catch (\Exception $e) {
+            $this->msg = $e->getMessage();
         }
         return $this->returnApi($data);
     }
