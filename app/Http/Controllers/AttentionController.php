@@ -50,8 +50,8 @@ class AttentionController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->attentionService->status($this->request);
+        $this->attentionService->status($this->request);
         $this->code = 200;
-        return $this->returnApi($data);
+        return $this->returnApi();
     }
 }
