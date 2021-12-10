@@ -34,7 +34,7 @@ class UserController extends Controller
             return $this->returnApi();
         }
         $type = $this->request->input('type');
-        $data = $this->driver($this->request, $type)->redirect();
+        $data = $this->userService->driver($this->request, $type)->redirect();
         $url = $data->getTargetUrl();
         $secret = $this->request->input('secret', '');
         if ($secret) {
