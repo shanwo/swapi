@@ -63,11 +63,11 @@ class OfficialController extends Controller
         $this->official = $this->factory::officialAccount($config);
         $user = $this->official->user;
         $this->official->server->push(function ($message) use ($user,$config) {
-            $original['app_id'] = $config['app_id'];
-            $original['ip'] = $this->request->ip();
             $this->service->redis::SETEX('request_official_message:' . time(), $this->service->oneDay / 2, json_encode($message));
             switch ($message['MsgType']) {
                 case 'event':
+                    $original['app_id'] = $config['app_id'];
+                    $original['ip'] = $this->request->ip();
                     $original['user'] = $user->get($message['FromUserName']);
                     return $this->officialServe->eventType($message,$original);
                 case 'text':
