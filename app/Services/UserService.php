@@ -11,10 +11,12 @@ use App\Models\AreaModel;
 use App\Models\UserModel;
 use App\Models\UserThirdModel;
 use Illuminate\Support\Facades\Crypt;
+use Overtrue\Socialite\AuthorizeFailedException;
 use Overtrue\Socialite\SocialiteManager;
 
 class UserService extends Service
 {
+    public $uid = 0;
     public $configName;
     protected $areaModel;
     protected $userModel;
@@ -65,7 +67,6 @@ class UserService extends Service
         return $this->userModel->whereKey($uid)->update($update);
     }
 
-    public function wechat($uid, $data)
     public function driver($request, $name)
     {
         $config = $this->configInfo($name);
@@ -90,12 +91,39 @@ class UserService extends Service
             return $socialite->driver($name);
         }
     }
+
+    public function signInResult($request,$configName)
     {
-        $original = $data['original'];
-        $config = $this->configInfo($this->configName);
-        $where[] = ['source', '=', $this->configName];
+        $data = [];
+        try {
+            $state = $request->input('state', 0);
+            if ($state) {
+                $this->uid = $this->redis::GET('signIn:' . $configName . ':' . $state);
+                $this->redis::DEL('signIn:' . $configName . ':' . $state);
+            }
+            $user = $this->driver($request, $configName)->stateless()->user();
+            $user['ip'] = $request->ip();
+            $config = $this->configInfo($configName);
+            $config['name'] = $configName;
+            $uid = $this->wechat($user,$config);
+            $data = $this->info($uid);
+            $this->redis::SETEX('user_tokens:' . $data['api_token'], $this->oneDay * 30, $uid);
+            $this->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
+//            $arr = [$data['id'] => md5(dechex($data['id']))];
+//            $this->redis::setex('token:' . $data['api_token'], $this->oneDay * 30, json_encode($arr));
+//            $this->redis::setex('user:' . $data['id'], $this->oneDay * 30, json_encode($data, JSON_UNESCAPED_UNICODE));
+        } catch (AuthorizeFailedException $e) {
+            $data['msg'] = '(' . $e->body['errcode'] . '):' . $e->body['errmsg'];
+        }
+        return $data;
+    }
+
+    public function wechat($user,$config)
+    {
+        $original = $user['original'];
+        $where[] = ['source', '=', $config['name']];
         $where[] = ['open_id', '=', $original['openid']];
-        if($this->configName == 'official'){
+        if($config['name'] == 'official'){
             $app_id = $config['app_id'];
         }else{
             $app_id = $config['key'];
@@ -104,50 +132,51 @@ class UserService extends Service
         $where[] = ['status', '=', 1];
         $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id', 'logins_number']);
         if ($userThird) {
-            if (!empty($uid) && $uid != $userThird['user_id']) {
+            if (!empty($this->uid) && $this->uid != $userThird['user_id']) {
                 return ['msg' => '当前微信已绑定其他账号'];
             }
             $update = [
-                'login_ip'      => $data['ip'],
+                'login_ip'      => $original['ip'],
                 'logins_number' => $userThird['logins_number'] + 1
             ];
             $this->userThirdModel->whereKey($userThird['id'])->update($update);
-            $uid = $userThird['user_id'];
+            $this->uid = $userThird['user_id'];
         } else {
             if ($original['unionid']) {
                 $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $original['unionid'])->first(['id', 'user_id']);
-                $uid = $userThird['user_id'];
+                $this->uid = $userThird['user_id'];
             }
             $token = Crypt::encryptString($original['openid']);
-            if (!$uid) {
+            if (!$this->uid) {
                 $insertUser = [
                     'nickname'  => htmlspecialchars($original['nickname']),
                     'sex'       => $original['sex'],
                     'avatar'    => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
                     'api_token' => $token
                 ];
-                $uid = $this->userModel->insertGetId($insertUser);
-                $insertUser['id'] = $uid;
+                $this->uid = $this->userModel->insertGetId($insertUser);
+                $insertUser['id'] = $this->uid;
                 $pageService = new PageService();
                 $pageService->initial(env('USER_TEMPLATE', 1), $insertUser);
             } else {
                 $updateUser = [
                     'api_token' => $token
                 ];
-                $this->userModel->whereKey($uid)->update($updateUser);
+                $this->userModel->whereKey($this->uid)->update($updateUser);
             }
             $insertThird = [
-                'user_id'  => $uid,
+                'user_id'  => $this->uid,
                 'nickname' => htmlspecialchars($original['nickname']),
                 'union_id' => $original['unionid'],
                 'open_id'  => $original['openid'],
-                'source'   => $this->configName,
+                'source'   => $config['name'],
                 'app_id'   => $app_id,
-                'login_ip' => $data['ip'],
+                'login_ip' => $original['ip'],
                 'original' => json_encode($original)
             ];
             $this->userThirdModel->insertGetId($insertThird);
         }
-        return $uid;
+        return $this->uid;
     }
+
 }

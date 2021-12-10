@@ -43,12 +43,12 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        try {
-            $data = $this->userService->getUserData($this->request,'official');
-            $this->code = 200;
-        } catch (\Exception $e) {
-            $this->msg = $e->getMessage();
+        $data = $this->userService->signInResult($this->request,'official');
+        if(!empty($data['msg'])){
+            $this->msg = $data['msg'];
+            return $this->returnApi();
         }
+        $this->code = 200;
         return $this->returnApi($data);
     }
 
@@ -64,12 +64,12 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        try {
-            $data = $this->userService->getUserData($this->request,'wechat');
-            $this->code = 200;
-        } catch (\Exception $e) {
-            $this->msg = $e->getMessage();
+        $data = $this->userService->signInResult($this->request,'wechat');
+        if(!empty($data['msg'])){
+            $this->msg = $data['msg'];
+            return $this->returnApi();
         }
+        $this->code = 200;
         return $this->returnApi($data);
     }
 
