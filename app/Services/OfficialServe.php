@@ -89,6 +89,54 @@ class OfficialServe extends Service
         return $data;
     }
 
+    public function textType($message)
+    {
+        $text = $this->reply($message);
+        return $this->replyMsg($text);
+    }
+
+    public function imageType($message)
+    {
+        return '图片地址:' . $message['PicUrl'];
+    }
+
+    public function voiceType($message)
+    {
+        if ($message['Recognition']) {
+            $message['Content'] = $message['Recognition'];
+            $voice = $this->reply($message);
+            return $this->replyMsg($voice);
+        }
+        return '语音信息识别失败';
+    }
+
+    public function videoType($message)
+    {
+        return '这是一个视频';
+    }
+
+    public function locationType($message)
+    {
+        return '此位置是：' . $message['Label'] .
+            '位置经度:' . $message['Location_Y'] .
+            '位置纬度:' . $message['Location_X'];
+    }
+
+    public function linkType($message)
+    {
+        if ($message['Title']) {
+            $message['Content'] = $message['Title'];
+            $link = $this->reply($message);
+            return $this->replyMsg($link);
+        }
+        return '链接信息识别失败';
+    }
+
+    public function fileType($message)
+    {
+        return '这是一个文件';
+    }
+
     private function reply($message)
     {
         $where[] = ['status', '=', 1];
@@ -125,52 +173,7 @@ class OfficialServe extends Service
         return $data;
     }
 
-    public function textType($message)
-    {
-        return $this->reply($message);
-    }
-
-    public function imageType($message)
-    {
-        return '图片地址:'.$message['PicUrl'];
-    }
-
-    public function voiceType($message)
-    {
-        if ($message['Recognition']) {
-            $message['Content'] = $message['Recognition'];
-            return $this->reply($message);
-        }
-        return '语言信息识别失败';
-    }
-
-    public function videoType($message)
-    {
-        return '这是一个视频';
-    }
-
-    public function locationType($message)
-    {
-        return '此位置是：' . $message['Label'] .
-            '位置经度:' . $message['Location_Y'] .
-            '位置纬度:' . $message['Location_X'];
-    }
-
-    public function linkType($message)
-    {
-        if ($message['Title']) {
-            $message['Content'] = $message['Title'];
-            return $this->reply($message);
-        }
-        return '链接信息识别失败';
-    }
-
-    public function fileType($message)
-    {
-        return '这是一个文件';
-    }
-
-    public function replyMsg($reply)
+    private function replyMsg($reply)
     {
         $comment = json_decode($reply['comment'], true);
         switch ($reply['type']) {
