@@ -3,24 +3,30 @@
 namespace App\Services;
 
 use App\Models\ReplyModel;
+use App\Models\UserModel;
+use App\Models\UserThirdModel;
 
 class OfficialServe extends Service
 {
     protected $replyModel;
+    protected $userModel;
+    protected $userThirdModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->replyModel = new ReplyModel();
+        $this->userModel = new UserModel();
+        $this->userThirdModel = new UserThirdModel();
     }
 
     /**
      * 事件回复
-     * @param $event
-     *
-     * @return array|mixed
+     * @param $message
+     * @param $original
+     * @return array
      */
-    public function eventType($message)
+    public function eventType($message,$original)
     {
         $data = [];
         $info = $this->userModel->getUser($user['openid']);
@@ -89,6 +95,94 @@ class OfficialServe extends Service
         return $data;
     }
 
+    private function getUser($data)
+    {
+        $config = $this->configInfo('official');
+        $where[] = ['source', '=', 'official'];
+        $where[] = ['open_id', '=', $data['openid']];
+        $where[] = ['app_id', '=', $config['app_id']];
+        $where[] = ['status', '=', 1];
+        $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id', 'logins_number']);
+        if ($userThird) {
+            $update = [
+                'login_ip'      => $data['ip'],
+                'logins_number' => $userThird['logins_number'] + 1
+            ];
+            $this->userThirdModel->whereKey($userThird['id'])->update($update);
+            $uid = $userThird['user_id'];
+        } else {
+            if ($original['unionid']) {
+                $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $original['unionid'])->first(['id', 'user_id']);
+                $uid = $userThird['user_id'];
+            }
+            $token = Crypt::encryptString($original['openid']);
+            if (!$uid) {
+                $insertUser = [
+                    'nickname'  => htmlspecialchars($original['nickname']),
+                    'sex'       => $original['sex'],
+                    'avatar'    => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
+                    'api_token' => $token
+                ];
+                $uid = $this->userModel->insertGetId($insertUser);
+                $insertUser['id'] = $uid;
+                $pageService = new PageService();
+                $pageService->initial(env('USER_TEMPLATE', 1), $insertUser);
+            } else {
+                $updateUser = [
+                    'api_token' => $token
+                ];
+                $this->userModel->whereKey($uid)->update($updateUser);
+            }
+            $insertThird = [
+                'user_id'  => $uid,
+                'nickname' => htmlspecialchars($original['nickname']),
+                'union_id' => $original['unionid'],
+                'open_id'  => $original['openid'],
+                'source'   => 'official',
+                'app_id'   => $config['key'],
+                'login_ip' => $data['ip'],
+                'original' => json_encode($original)
+            ];
+            $this->userThirdModel->insertGetId($insertThird);
+        }
+    }
+
+    private function reply($message)
+    {
+        $where[] = ['status', '=', 1];
+        if (empty($message['Content'])) {
+            $where[] = ['type', '=', 0];
+        } else {
+            $where[] = ['keyword', '=', trim($message['Content'])];
+        }
+        return $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
+    }
+
+    private function unsubscribe($info)
+    {
+        $where[] = ['uid', '=', $info['id']];
+        $where[] = ['subscribe', '=', 1];
+        $channel = $this->model->subscribeInfo($where);
+        $where[] = ['cid', '=', $channel['cid']];
+        $this->model->subscribeStatus($where, 0);
+        $this->model->incChannel($channel['cid'], 'unsubscribe');
+    }
+
+    private function scan($openid, $key)
+    {
+        $data = [];
+        $channel = $this->model->getChannel($key);
+        $this->model->incChannel($channel['id'], 'number');
+        $where[] = ['status', '=', 1];
+        $where[] = ['keyword', '=', $key];
+        $reply = $this->replyModel->reply($where);
+        if ($reply) {
+            $type = new ReplyController($this->replyModel);
+            $data = $type->replyType($reply, $openid);
+        }
+        return $data;
+    }
+
     public function textType($message)
     {
         $text = $this->reply($message);
@@ -135,42 +229,6 @@ class OfficialServe extends Service
     public function fileType($message)
     {
         return '这是一个文件';
-    }
-
-    private function reply($message)
-    {
-        $where[] = ['status', '=', 1];
-        if (empty($message['Content'])) {
-            $where[] = ['type', '=', 0];
-        } else {
-            $where[] = ['keyword', '=', trim($message['Content'])];
-        }
-        return $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
-    }
-
-    private function unsubscribe($info)
-    {
-        $where[] = ['uid', '=', $info['id']];
-        $where[] = ['subscribe', '=', 1];
-        $channel = $this->model->subscribeInfo($where);
-        $where[] = ['cid', '=', $channel['cid']];
-        $this->model->subscribeStatus($where, 0);
-        $this->model->incChannel($channel['cid'], 'unsubscribe');
-    }
-
-    private function scan($openid, $key)
-    {
-        $data = [];
-        $channel = $this->model->getChannel($key);
-        $this->model->incChannel($channel['id'], 'number');
-        $where[] = ['status', '=', 1];
-        $where[] = ['keyword', '=', $key];
-        $reply = $this->replyModel->reply($where);
-        if ($reply) {
-            $type = new ReplyController($this->replyModel);
-            $data = $type->replyType($reply, $openid);
-        }
-        return $data;
     }
 
     private function replyMsg($reply)

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 class OfficialController extends Controller
 {
     protected $officialServe;
+    protected $official;
     protected $factory;
 
     public function __construct(Request $request)
@@ -59,12 +60,16 @@ class OfficialController extends Controller
             return $this->returnApi();
         }
         $config = $this->service->configInfo('official');
-        $official = $this->factory::officialAccount($config);
-        $official->server->push(function ($message) {
+        $this->official = $this->factory::officialAccount($config);
+        $user = $this->official->user;
+        $this->official->server->push(function ($message) use ($user,$config) {
+            $original['app_id'] = $config['app_id'];
+            $original['ip'] = $this->request->ip();
             $this->service->redis::SETEX('request_official_message:' . time(), $this->service->oneDay / 2, json_encode($message));
             switch ($message['MsgType']) {
                 case 'event':
-                    return $this->officialServe->eventType($message);
+                    $original['user'] = $user->get($message['FromUserName']);
+                    return $this->officialServe->eventType($message,$original);
                 case 'text':
                     return $this->officialServe->textType($message);
                 case 'image':
@@ -83,6 +88,6 @@ class OfficialController extends Controller
                     return '未识别的消息类型';
             }
         });
-        return $official->server->serve();
+        return $this->official->server->serve();
     }
 }
