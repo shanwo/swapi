@@ -26,32 +26,23 @@ class OfficialServe extends Service
     /**
      * 事件回复
      * @param $message
-     * @param $original
+     * @param $user
      * @return array
      */
     public function eventType($message,$user)
     {
-        $data = [];
-        $info = $this->getUser($user);
-        if ($original['subscribe']) {
-            if ($info) {
-                $this->editUser($info['id'], $original);
-            } else {
-                $this->addUser($original);
-                $info = $this->getUser($original['openid']);
-            }
-        }
+        $userServer = new UserService();
+        $uid = $userServer->wechat($user['user'],$user['config']);
+        $info = $userServer->info($uid);
         switch ($message['Event']) {
             case 'subscribe':               //订阅事件
                 $data = $this->reply($message);
                 break;
             case 'unsubscribe':             //取消订阅事件
-                if ($info) {
-                    $this->unsubscribe($info);
-                }
+                $this->unsubscribe($info);
                 break;
             case 'SCAN':                    //扫描带参数二维码
-                $data = $this->scan($original['openid'], $message['EventKey']);
+                $data = $this->scan($user['user']['openid'], $message['EventKey']);
                 break;
             case'LOCATION':                 //上报地理位置
                 break;
@@ -174,8 +165,6 @@ class OfficialServe extends Service
     private function scan($openid, $key)
     {
         $data = [];
-        $channel = $this->model->getChannel($key);
-        $this->model->incChannel($channel['id'], 'number');
         $where[] = ['status', '=', 1];
         $where[] = ['keyword', '=', $key];
         $reply = $this->replyModel->reply($where);

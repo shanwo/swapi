@@ -58,9 +58,10 @@ class OfficialController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $user = $this->official->user->get($this->request->input('openid',''));
-        $user['app_id'] = $this->official->userConfig['app_id'] ?? '';
-        $user['ip'] = $this->request->ip();
+        $user['user']['original'] = $this->official->user->get($this->request->input('openid',''));
+        $user['user']['ip'] = $this->request->ip();
+        $user['config']['name'] = 'official';
+        $user['config']['app_id'] = $this->official->userConfig['app_id'] ?? '';
         $this->official->server->push(function ($message) use ($user) {
             $this->service->redis::SETEX('request_official_message:' . time(), $this->service->oneDay / 2, json_encode($message));
             switch ($message['MsgType']) {
