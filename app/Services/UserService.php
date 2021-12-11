@@ -136,7 +136,7 @@ class UserService extends Service
                 return ['msg' => '当前微信已绑定其他账号'];
             }
             $update = [
-                'login_ip'      => $original['ip'],
+                'login_ip'      => $user['ip'],
                 'logins_number' => $userThird['logins_number'] + 1
             ];
             $this->userThirdModel->whereKey($userThird['id'])->update($update);
@@ -171,7 +171,7 @@ class UserService extends Service
                 'open_id'  => $original['openid'],
                 'source'   => $config['name'],
                 'app_id'   => $app_id,
-                'login_ip' => $original['ip'],
+                'login_ip' => $user['ip'],
                 'original' => json_encode($original)
             ];
             $this->userThirdModel->insertGetId($insertThird);
