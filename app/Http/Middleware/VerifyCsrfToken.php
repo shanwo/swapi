@@ -18,6 +18,7 @@ class VerifyCsrfToken extends Middleware
         'home/*',
         'user/signIn',
         'callback/*',
+        'official/*',
         'test/image',
         'test/check',
     ];
