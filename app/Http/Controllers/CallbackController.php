@@ -78,10 +78,8 @@ class CallbackController extends Controller
      */
     public function payment()
     {
-        $this->service->redis::SETEX('request_payment_message:' . time(), $this->service->oneDay / 24, json_encode($this->request->getContent()));
+        $this->service->redis::SETEX('callback:payment:content:' . time(), 3600, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
-        $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
-        $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
         $this->payment = $this->factory::Payment($config);
         $this->payment['request'] = $this->request;
         //支付结果通知
@@ -106,14 +104,16 @@ class CallbackController extends Controller
             $this->service->redis::DEL('pay_order:' . $message['out_trade_no']);
             return true;
         });
-        //退款结果通知
-        $response = $this->payment->handleRefundedNotify(function ($message, $reqInfo, $fail) {
-            // 其中 $message['req_info'] 获取到的是加密信息
-            // $reqInfo 为 message['req_info'] 解密后的信息
-            // 你的业务逻辑...
-            return true; // 返回 true 告诉微信“我已处理完成”
-            // 或返回错误原因 $fail('参数格式校验错误');
-        });
+        return $response;
+    }
+
+    //扫码支付回调
+    public function scanned()
+    {
+        $this->service->redis::SETEX('callback:scanned:content:' . time(), 3600, json_encode($this->request->getContent()));
+        $config = $this->service->configInfo('payment');
+        $this->payment = $this->factory::Payment($config);
+        $this->payment['request'] = $this->request;
         //扫码支付通知
         // 扫码支付通知接收第三个参数 `$alert`，如果触发该函数，会返回“业务错误”到微信服务器，触发 `$fail` 则返回“通信错误”
         $response = $this->payment->handleScannedNotify(function ($message, $fail, $alert) use ($payment) {
@@ -126,6 +126,24 @@ class CallbackController extends Controller
             ]);
             return $result['prepay_id'];
         });
-        return $response;
+    }
+
+    //退款回调
+    public function refund()
+    {
+        $this->service->redis::SETEX('callback:refund:content:' . time(), 3600, json_encode($this->request->getContent()));
+        $config = $this->service->configInfo('payment');
+        $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
+        $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
+        $this->payment = $this->factory::Payment($config);
+        $this->payment['request'] = $this->request;
+        //退款结果通知
+        $response = $this->payment->handleRefundedNotify(function ($message, $reqInfo, $fail) {
+            // 其中 $message['req_info'] 获取到的是加密信息
+            // $reqInfo 为 message['req_info'] 解密后的信息
+            // 你的业务逻辑...
+            return true; // 返回 true 告诉微信“我已处理完成”
+            // 或返回错误原因 $fail('参数格式校验错误');
+        });
     }
 }
