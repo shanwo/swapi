@@ -3,46 +3,45 @@
 namespace App\Services;
 
 use App\Models\ReplyModel;
-use App\Models\UserModel;
-use App\Models\UserThirdModel;
-use Illuminate\Support\Facades\Crypt;
 
 class OfficialServe extends Service
 {
-    public $appid;
-    public $source;
     protected $replyModel;
-    protected $userModel;
-    protected $userThirdModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->replyModel = new ReplyModel();
-        $this->userModel = new UserModel();
-        $this->userThirdModel = new UserThirdModel();
+    }
+
+    private function reply($message)
+    {
+        $where[] = ['status', '=', 1];
+        if (empty($message['Content'])) {
+            $where[] = ['type', '=', 0];
+        } else {
+            $where[] = ['keyword', '=', trim($message['Content'])];
+        }
+        return $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
     }
 
     /**
      * 事件回复
      * @param $message
      * @param $user
-     * @return array
+     * @param $config
+     * @return string|void
      */
-    public function eventType($message,$user)
+    public function eventType($message, $user, $config)
     {
-        $userServer = new UserService();
-        $uid = $userServer->wechat($user['user'],$user['config']);
-        $info = $userServer->info($uid);
         switch ($message['Event']) {
-            case 'subscribe':               //订阅事件
-                $data = $this->reply($message);
+            case'subscribe':               //订阅
+                (new UserService)->wechat($user, $config);
+                $text = $this->reply($message);
+                return $this->replyMsg($text);
+            case'unsubscribe':             //取消订阅
                 break;
-            case 'unsubscribe':             //取消订阅事件
-                $this->unsubscribe($info);
-                break;
-            case 'SCAN':                    //扫描带参数二维码
-                $data = $this->scan($user['user']['openid'], $message['EventKey']);
+            case'SCAN':                    //扫描带参数二维码
                 break;
             case'LOCATION':                 //上报地理位置
                 break;
@@ -86,93 +85,7 @@ class OfficialServe extends Service
                 break;
             default:
         }
-        return $data;
-    }
-
-    private function getUser($user)
-    {
-        $uid = 0;
-        $where[] = ['source', '=', 'official'];
-        $where[] = ['open_id', '=', $user['openid']];
-        $where[] = ['app_id', '=', $user['app_id']];
-        $where[] = ['status', '=', 1];
-        $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id', 'logins_number']);
-        if ($userThird) {
-            $update = [
-                'login_ip'      => $user['ip'],
-                'logins_number' => $userThird['logins_number'] + 1
-            ];
-            $this->userThirdModel->whereKey($userThird['id'])->update($update);
-            $uid = $userThird['user_id'];
-        } else {
-            if ($user['unionid']) {
-                $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $user['unionid'])->first(['id', 'user_id']);
-                $uid = $userThird['user_id'];
-            }
-            $token = Crypt::encryptString($user['openid']);
-            if (!$uid) {
-                $insertUser = [
-                    'nickname'  => htmlspecialchars($user['nickname']),
-                    'sex'       => $user['sex'],
-                    'avatar'    => $user['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
-                    'api_token' => $token
-                ];
-                $uid = $this->userModel->insertGetId($insertUser);
-                $insertUser['id'] = $uid;
-                $pageService = new PageService();
-                $pageService->initial(env('USER_TEMPLATE', 1), $insertUser);
-            } else {
-                $updateUser = [
-                    'api_token' => $token
-                ];
-                $this->userModel->whereKey($uid)->update($updateUser);
-            }
-            $insertThird = [
-                'user_id'  => $uid,
-                'nickname' => htmlspecialchars($user['nickname']),
-                'union_id' => $user['unionid'],
-                'open_id'  => $user['openid'],
-                'source'   => 'official',
-                'app_id'   => $user['app_id'],
-                'login_ip' => $user['ip'],
-                'original' => json_encode($user)
-            ];
-            $this->userThirdModel->insertGetId($insertThird);
-        }
-    }
-
-    private function reply($message)
-    {
-        $where[] = ['status', '=', 1];
-        if (empty($message['Content'])) {
-            $where[] = ['type', '=', 0];
-        } else {
-            $where[] = ['keyword', '=', trim($message['Content'])];
-        }
-        return $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
-    }
-
-    private function unsubscribe($info)
-    {
-        $where[] = ['uid', '=', $info['id']];
-        $where[] = ['subscribe', '=', 1];
-        $channel = $this->model->subscribeInfo($where);
-        $where[] = ['cid', '=', $channel['cid']];
-        $this->model->subscribeStatus($where, 0);
-        $this->model->incChannel($channel['cid'], 'unsubscribe');
-    }
-
-    private function scan($openid, $key)
-    {
-        $data = [];
-        $where[] = ['status', '=', 1];
-        $where[] = ['keyword', '=', $key];
-        $reply = $this->replyModel->reply($where);
-        if ($reply) {
-            $type = new ReplyController($this->replyModel);
-            $data = $type->replyType($reply, $openid);
-        }
-        return $data;
+        return '';
     }
 
     public function textType($message)
