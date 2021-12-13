@@ -9,6 +9,7 @@ namespace App\Services;
 
 use App\Models\OrderModel;
 use App\Models\UserModel;
+use function Symfony\Component\Translation\t;
 
 class OrderService extends Service
 {
@@ -51,26 +52,18 @@ class OrderService extends Service
             'snapshot'       => json_encode($request, JSON_UNESCAPED_UNICODE),
         ];
         $this->orderModel->insertGetId($insert);
-        switch ($pay['type']) {
-            case 1:
-                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+1 year'));
-                break;
-            case 2:
-                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+3 month'));
-                break;
-            case 3:
-                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+1 month'));
-                break;
-            case 4:
-                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+1 week'));
-                break;
-            case 5:
-                $update['expired_at'] = date('Y-m-d H:i:s', strtotime('+1 day'));
-                break;
-            default:
-                $update['expired_at'] = date('Y-m-d H:i:s');
-        }
+        $update['expired_at'] = date('Y-m-d H:i:s', $this->endTime($pay['type']));
         $update['type'] = 2;
+        $this->userModel->whereKey($user['id'])->update($update);
+        return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
+    }
+
+    public function edit($expire, $user)
+    {
+        $update['expired_at'] = date('Y-m-d H:i:s', $expire);
+        if ($expire < time()) {
+            $update['type'] = 1;
+        }
         $this->userModel->whereKey($user['id'])->update($update);
         return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
     }
