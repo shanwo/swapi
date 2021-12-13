@@ -38,6 +38,7 @@ class OrderService extends Service
         $pay = $info['pay'];
         $insert = [
             'user_id'        => $user['id'],
+            'pay_id'         => $pay['id'],
             'channel'        => $pay['channel'],
             'order_sn'       => $request['out_trade_no'],
             'third_sn'       => $request['transaction_id'],
