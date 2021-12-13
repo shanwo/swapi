@@ -24,8 +24,6 @@ class PayController extends Controller
         $this->adService = new AdService();
         $this->payService = new PayService();
         $config = $this->service->configInfo('payment');
-        $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
-        $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
         $this->payment = Factory::Payment($config);
     }
 
@@ -97,25 +95,6 @@ class PayController extends Controller
         $order_sn = $this->request->input('order_sn');
         $data = $this->payment->order->queryByOutTradeNumber($order_sn);
         $data['ad'] = $this->adService->info($this->request,10);
-        $this->code = 200;
-        return $this->returnApi($data);
-    }
-
-    public function refund()
-    {
-        $this->validate([
-            'order_sn' => 'required|alpha_num|size:16',
-        ], [
-            'order_sn' => '订单编号',
-        ]);
-        if ($this->msg) {
-            return $this->returnApi();
-        }
-        $order_sn = $this->request->input('order_sn');
-        $order = $this->payment->order->queryByOutTradeNumber($order_sn);
-        $data = $this->payment->refund->byTransactionId($order['transaction_id'], $order['out_trade_no'], $order['total_fee'], $order['cash_fee'], [
-            'refund_desc' => '测试退款',
-        ]);
         $this->code = 200;
         return $this->returnApi($data);
     }
