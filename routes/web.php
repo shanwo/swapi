@@ -79,7 +79,6 @@ Route::prefix('callback')->group(function () {
     Route::get('wechat', 'CallbackController@wechat');
     //支付
     Route::post('payment', 'CallbackController@payment');
-    Route::post('scanned', 'CallbackController@scanned');
     Route::post('refund', 'CallbackController@refund');
 });
 //公众号
