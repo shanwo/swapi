@@ -108,7 +108,6 @@ class UserService extends Service
             $uid = $this->wechat($user,$config);
             $data = $this->info($uid);
             $this->redis::SETEX('user_tokens:' . $data['api_token'], $this->oneDay * 30, $uid);
-            $this->redis::SET('user_infos:' . $uid, json_encode($data, JSON_UNESCAPED_UNICODE));
 //            $arr = [$data['id'] => md5(dechex($data['id']))];
 //            $this->redis::setex('token:' . $data['api_token'], $this->oneDay * 30, json_encode($arr));
 //            $this->redis::setex('user:' . $data['id'], $this->oneDay * 30, json_encode($data, JSON_UNESCAPED_UNICODE));
