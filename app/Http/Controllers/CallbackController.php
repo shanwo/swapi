@@ -42,8 +42,8 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->userService->signInResult($this->request,'official');
-        if(!empty($data['msg'])){
+        $data = $this->userService->signInResult($this->request, 'official');
+        if (!empty($data['msg'])) {
             $this->msg = $data['msg'];
             return $this->returnApi();
         }
@@ -63,8 +63,8 @@ class CallbackController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->userService->signInResult($this->request,'wechat');
-        if(!empty($data['msg'])){
+        $data = $this->userService->signInResult($this->request, 'wechat');
+        if (!empty($data['msg'])) {
             $this->msg = $data['msg'];
             return $this->returnApi();
         }
@@ -77,12 +77,12 @@ class CallbackController extends Controller
      */
     public function payment()
     {
-        $this->service->redis::SETEX('callback:payment:content:' . time(), 3600, json_encode($this->request->getContent()));
+        $this->service->redis::SETEX('callback:payment:' . time(), $this->service->oneDay / 2, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
         $payment = $this->factory::Payment($config);
         $payment['request'] = $this->request;
         //支付结果通知
-        return $payment->handlePaidNotify(function ($message, $fail) use ($payment)  {
+        return $payment->handlePaidNotify(function ($message, $fail) use ($payment) {
             $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
             $info = json_decode($info, true) ?? [];
             if (!$info) {
@@ -90,25 +90,27 @@ class CallbackController extends Controller
                 return true;
             }
             $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
-            if ($res && $res['status'] == 2) {
+            if ($res && $res['status'] == OrderService::ORDER_SUCCESS) {
                 return true;
             }
             if ($message['return_code'] === 'SUCCESS') {
                 if ($message['result_code'] === 'SUCCESS') {
                     $this->orderService->add($message, $info);
+                } else {
+                    $this->orderService->status($res['id'], OrderService::ORDER_FAIL);
                 }
+                $this->service->redis::DEL('pay_order:' . $message['out_trade_no']);
+                return true;
             } else {
                 return $fail('支付验证失败,请查看日志:' . time());
             }
-            $this->service->redis::DEL('pay_order:' . $message['out_trade_no']);
-            return true;
         });
     }
 
     //扫码支付回调
     public function scanned()
     {
-        $this->service->redis::SETEX('callback:scanned:content:' . time(), 3600, json_encode($this->request->getContent()));
+        $this->service->redis::SETEX('callback:scanned:' . time(), $this->service->oneDay / 2, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
         $payment = $this->factory::Payment($config);
         $payment['request'] = $this->request;
@@ -129,7 +131,7 @@ class CallbackController extends Controller
     //退款回调
     public function refund()
     {
-        $this->service->redis::SETEX('callback:refund:content:' . time(), 3600, json_encode($this->request->getContent()));
+        $this->service->redis::SETEX('callback:refund:' . time(), $this->service->oneDay / 2, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
         $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
         $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
@@ -140,6 +142,7 @@ class CallbackController extends Controller
             // 其中 $message['req_info'] 获取到的是加密信息
             // $reqInfo 为 message['req_info'] 解密后的信息
             // 你的业务逻辑...
+            $this->orderService->status($res['id'] ?? 0, OrderService::ORDER_REFUND);
             return true; // 返回 true 告诉微信“我已处理完成”
             // 或返回错误原因 $fail('参数格式校验错误');
         });
