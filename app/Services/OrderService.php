@@ -14,6 +14,10 @@ class OrderService extends Service
 {
     protected $userModel;
     protected $orderModel;
+    const ORDER_CREATE = 1;
+    const ORDER_SUCCESS = 2;
+    const ORDER_FAIL = 3;
+    const ORDER_REFUND = 4;
 
     public function __construct()
     {
@@ -40,7 +44,7 @@ class OrderService extends Service
             'original_price' => $pay['original_price'],
             'activity_price' => $pay['activity_price'],
             'pay_price'      => $request['cash_fee'],
-            'status'         => 2,
+            'status'         => self::ORDER_SUCCESS,
             'payated_at'     => date('Y-m-d H:i:s', strtotime($request['time_end'])),
             'snapshot'       => json_encode($request, JSON_UNESCAPED_UNICODE),
         ];
@@ -66,6 +70,12 @@ class OrderService extends Service
         }
         $update['type'] = 2;
         $this->userModel->whereKey($user['id'])->update($update);
-        return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user,$update), JSON_UNESCAPED_UNICODE));
+        return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
+    }
+
+    public function status($id, $status)
+    {
+        $update['status'] = $status;
+        $this->orderModel->whereKey($id)->update($update);
     }
 }
