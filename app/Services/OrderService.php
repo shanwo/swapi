@@ -12,12 +12,13 @@ use App\Models\UserModel;
 
 class OrderService extends Service
 {
+    const ORDER_CREATE = 10;
+    const ORDER_CANCEL = 20;
+    const ORDER_SUCCESS = 30;
+    const ORDER_FAIL = 40;
+    const ORDER_REFUND = 50;
     protected $userModel;
     protected $orderModel;
-    const ORDER_CREATE = 1;
-    const ORDER_SUCCESS = 2;
-    const ORDER_FAIL = 3;
-    const ORDER_REFUND = 4;
 
     public function __construct()
     {
