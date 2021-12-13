@@ -17,7 +17,6 @@ class CallbackController extends Controller
     protected $userService;
     protected $orderService;
     protected $factory;
-    protected $payment;
 
     public function __construct(Request $request)
     {
@@ -80,14 +79,14 @@ class CallbackController extends Controller
     {
         $this->service->redis::SETEX('callback:payment:content:' . time(), 3600, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
-        $this->payment = $this->factory::Payment($config);
-        $this->payment['request'] = $this->request;
+        $payment = $this->factory::Payment($config);
+        $payment['request'] = $this->request;
         //支付结果通知
-        $response = $this->payment->handlePaidNotify(function ($message, $fail) {
+        return $payment->handlePaidNotify(function ($message, $fail) use ($payment)  {
             $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
             $info = json_decode($info, true) ?? [];
             if (!$info) {
-                $this->payment->refund->byTransactionId($message['transaction_id'], $message['out_trade_no'], $message['total_fee'], $message['cash_fee'], ['refund_desc' => '订单支付超时',]);
+                $payment->refund->byTransactionId($message['transaction_id'], $message['out_trade_no'], $message['total_fee'], $message['cash_fee'], ['refund_desc' => '订单支付超时']);
                 return true;
             }
             $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
@@ -104,7 +103,6 @@ class CallbackController extends Controller
             $this->service->redis::DEL('pay_order:' . $message['out_trade_no']);
             return true;
         });
-        return $response;
     }
 
     //扫码支付回调
@@ -112,11 +110,11 @@ class CallbackController extends Controller
     {
         $this->service->redis::SETEX('callback:scanned:content:' . time(), 3600, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
-        $this->payment = $this->factory::Payment($config);
-        $this->payment['request'] = $this->request;
+        $payment = $this->factory::Payment($config);
+        $payment['request'] = $this->request;
         //扫码支付通知
         // 扫码支付通知接收第三个参数 `$alert`，如果触发该函数，会返回“业务错误”到微信服务器，触发 `$fail` 则返回“通信错误”
-        $response = $this->payment->handleScannedNotify(function ($message, $fail, $alert) use ($payment) {
+        return $payment->handleScannedNotify(function ($message, $fail, $alert) use ($payment) {
             // 如：$alert('商品已售空');
             // 如业务流程正常，则要调用“统一下单”接口，并返回 prepay_id 字符串，代码如下
             $result = $payment->order->unify([
@@ -135,10 +133,10 @@ class CallbackController extends Controller
         $config = $this->service->configInfo('payment');
         $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
         $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
-        $this->payment = $this->factory::Payment($config);
-        $this->payment['request'] = $this->request;
+        $payment = $this->factory::Payment($config);
+        $payment['request'] = $this->request;
         //退款结果通知
-        $response = $this->payment->handleRefundedNotify(function ($message, $reqInfo, $fail) {
+        return $payment->handleRefundedNotify(function ($message, $reqInfo, $fail) {
             // 其中 $message['req_info'] 获取到的是加密信息
             // $reqInfo 为 message['req_info'] 解密后的信息
             // 你的业务逻辑...
