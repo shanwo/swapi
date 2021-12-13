@@ -8,6 +8,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\OrderService;
+use App\Services\PayService;
 use App\Services\UserService;
 use EasyWeChat\Factory;
 use Illuminate\Http\Request;
@@ -118,12 +119,40 @@ class CallbackController extends Controller
         $payment['request'] = $this->request;
         //退款结果通知
         return $payment->handleRefundedNotify(function ($message, $reqInfo, $fail) {
-            // 其中 $message['req_info'] 获取到的是加密信息
-            // $reqInfo 为 message['req_info'] 解密后的信息
-            // 你的业务逻辑...
-            $this->orderService->status($res['id'] ?? 0, OrderService::ORDER_REFUND);
-            return true; // 返回 true 告诉微信“我已处理完成”
-            // 或返回错误原因 $fail('参数格式校验错误');
+        //$message:{
+        //  "appid": "wx508dad4113cb2e4a",
+        //  "bank_type": "GDB_CREDIT",
+        //  "cash_fee": "1",
+        //  "fee_type": "CNY",
+        //  "is_subscribe": "Y",
+        //  "mch_id": "1611897290",
+        //  "nonce_str": "61b719205eacd",
+        //  "openid": "obRG15m_vZDwiKqo1lNh1nIGefkQ",
+        //  "out_trade_no": "61b7192018000129",
+        //  "result_code": "SUCCESS",
+        //  "return_code": "SUCCESS",
+        //  "sign": "D96EABF81F5049DAE726A35A0E21A21D",
+        //  "time_end": "20211213175807",
+        //  "total_fee": "1",
+        //  "trade_type": "NATIVE",
+        //  "transaction_id": "4200001146202112131894709074"
+        //}
+            $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
+            $this->request->merge(['id'=>$res['id'],'channel'=>$res['channel']]);
+            $pay = (new PayService())->send($this->request);
+            $user = $this->userService->info($res['user_id']);
+            if($user['type'] != 2){
+                return $fail('非会员状态不可发起退款');
+            }
+            $expired = strtotime($user['expired_at']);
+            $endTime = $this->service->endTime($pay['type']);
+            if($expired < $endTime - 60){
+                return $fail('会员到期时间小于当前订单购买时间');
+            }
+            $this->orderService->status($res['id'], OrderService::ORDER_REFUND);
+            //todo $endTime 新的会员到期时间(时间戳)
+            $this->orderService->edit($endTime, $user);
+            return true;
         });
     }
 }
