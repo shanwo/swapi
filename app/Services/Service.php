@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\Redis;
 
 class Service
 {
+    const ORDER_CREATE = 10;
+    const ORDER_CANCEL = 20;
+    const ORDER_SUCCESS = 30;
+    const ORDER_FAIL = 40;
+    const ORDER_REFUND = 50;
+    const USER_ENABLE  = 1;
+    const USER_VIP = 2;
+    const USER_DISABLE = 3;
     public $redis;
     public $page = 1;
     public $size = 5;
@@ -78,6 +86,6 @@ class Service
             default:
                 $time = time();
         }
-        return $time;
+        return $time - time();
     }
 }
