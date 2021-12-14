@@ -46,8 +46,16 @@ class OrderService extends Service
             'snapshot'       => json_encode($request, JSON_UNESCAPED_UNICODE),
         ];
         $this->orderModel->insertGetId($insert);
-        $update['expired_at'] = date('Y-m-d H:i:s', $this->endTime($pay['type']));
-        $update['type'] = 2;
+        $info = $this->userModel->whereKey($user['id'])->first();
+        $expire = time() + $this->endTime($pay['type']);
+        if($info['type'] == Service::USER_VIP){
+            $expire = strtotime($info['expired_at']);
+            if(time() < $expire){
+                $expire = $expire + $this->endTime($pay['type']);
+            }
+        }
+        $update['type'] = Service::USER_VIP;
+        $update['expired_at'] = date('Y-m-d H:i:s',$expire);
         $this->userModel->whereKey($user['id'])->update($update);
         return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
     }
@@ -55,9 +63,6 @@ class OrderService extends Service
     public function edit($expire, $user)
     {
         $update['expired_at'] = date('Y-m-d H:i:s', $expire);
-        if ($expire < time()) {
-            $update['type'] = 1;
-        }
         $this->userModel->whereKey($user['id'])->update($update);
         return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
     }

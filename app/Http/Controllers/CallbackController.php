@@ -75,6 +75,8 @@ class CallbackController extends Controller
 
     /**
      * 支付回调
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \EasyWeChat\Kernel\Exceptions\Exception
      */
     public function payment()
     {
@@ -82,7 +84,6 @@ class CallbackController extends Controller
         $config = $this->service->configInfo('payment');
         $payment = $this->factory::Payment($config);
         $payment['request'] = $this->request;
-        //支付结果通知
         return $payment->handlePaidNotify(function ($message, $fail) use ($payment) {
             $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
             $info = json_decode($info, true) ?? [];
@@ -108,7 +109,11 @@ class CallbackController extends Controller
         });
     }
 
-    //退款回调
+    /**
+     * 退款回调
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \EasyWeChat\Kernel\Exceptions\Exception
+     */
     public function refund()
     {
         $this->service->redis::SETEX('callback:refund:' . time(), $this->service->oneDay / 2, json_encode($this->request->getContent()));
@@ -117,41 +122,22 @@ class CallbackController extends Controller
         $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
         $payment = $this->factory::Payment($config);
         $payment['request'] = $this->request;
-        //退款结果通知
         return $payment->handleRefundedNotify(function ($message, $reqInfo, $fail) {
-        //$message:{
-        //  "appid": "wx508dad4113cb2e4a",
-        //  "bank_type": "GDB_CREDIT",
-        //  "cash_fee": "1",
-        //  "fee_type": "CNY",
-        //  "is_subscribe": "Y",
-        //  "mch_id": "1611897290",
-        //  "nonce_str": "61b719205eacd",
-        //  "openid": "obRG15m_vZDwiKqo1lNh1nIGefkQ",
-        //  "out_trade_no": "61b7192018000129",
-        //  "result_code": "SUCCESS",
-        //  "return_code": "SUCCESS",
-        //  "sign": "D96EABF81F5049DAE726A35A0E21A21D",
-        //  "time_end": "20211213175807",
-        //  "total_fee": "1",
-        //  "trade_type": "NATIVE",
-        //  "transaction_id": "4200001146202112131894709074"
-        //}
             $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
-            $this->request->merge(['id'=>$res['id'],'channel'=>$res['channel']]);
-            $pay = (new PayService())->send($this->request);
+            $pay = $this->service->redis::HGET('pay_channel:' . $res['channel'], $res['pay_id']);
+            $pay = json_decode($pay, true);
             $user = $this->userService->info($res['user_id']);
-            if($user['type'] != 2){
+            if($user['type'] != OrderService::USER_VIP){
                 return $fail('非会员状态不可发起退款');
             }
             $expired = strtotime($user['expired_at']);
-            $endTime = $this->service->endTime($pay['type']);
-            if($expired < $endTime - 60){
-                return $fail('会员到期时间小于当前订单购买时间');
+            $endTime = time() + $this->service->endTime($pay['type']) - 60;
+            if($expired < $endTime){
+                return $fail('会员到期时间小于购买时间，不可发起退款');
             }
+            $expired = $expired - $this->service->endTime($pay['type']);
+            $this->orderService->edit($expired, $user);
             $this->orderService->status($res['id'], OrderService::ORDER_REFUND);
-            //todo $endTime 新的会员到期时间(时间戳)
-            $this->orderService->edit($endTime, $user);
             return true;
         });
     }
