@@ -74,6 +74,7 @@ class PageService extends Service
     public function initial($tid, $user)
     {
         $template = $this->templateModel->whereKey($tid)->first();
+        if(!$template) return false;
         $head = json_decode($template['head_data'], true);
         $head['avatar'] = $user['avatar'];
         $head['nickname'] = $user['nickname'];
