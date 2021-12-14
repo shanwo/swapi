@@ -18,7 +18,7 @@ class OfficialServe extends Service
     {
         $where[] = ['status', '=', 1];
         if (empty($message['Content'])) {
-            $where[] = ['type', '=', 0];
+            $where[] = ['keyword', '=', '关注'];
         } else {
             $where[] = ['keyword', '=', trim($message['Content'])];
         }
