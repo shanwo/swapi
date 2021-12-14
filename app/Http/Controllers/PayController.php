@@ -55,7 +55,10 @@ class PayController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $info = $this->payService->send($this->request);
+        $id = $this->request->input('id');
+        $channel = $this->request->input('channel', 0);
+        $pay = $this->service->redis::HGET('pay_channel:' . $channel, $id);
+        $info = json_decode($pay, true);
         $type = $this->request->input('type');
         $user = $this->request->user();
         $order_sn = dechex(time()) . rand(10, 99) . mb_substr(sprintf("%04d", $user->id), -4) . rand(10, 99);
