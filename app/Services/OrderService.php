@@ -55,7 +55,7 @@ class OrderService extends Service
             }
         }
         if (in_array($pay['type'], [1, 2, 3])) {
-            $pages = (4 - $pay['type']) + 1;
+            $pages = (Service::PAGE_MAX - $pay['type']) + Service::PAGE_MIN;
             if ($info['pages'] < $pages) $update['pages'] = $pages;
         }
         $update['type'] = Service::USER_VIP;

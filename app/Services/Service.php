@@ -20,6 +20,8 @@ class Service
     const USER_ENABLE = 1;
     const USER_VIP = 2;
     const USER_DISABLE = 3;
+    const PAGE_MAX = 4;
+    const PAGE_MIN = 1;
     const DELETE_YES = -1;
     const DELETE_NO = 1;
     const SORT_ALL = 0;
