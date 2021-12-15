@@ -119,7 +119,7 @@ class PageService extends Service
             'head_schema'   => $template['head_schema'],
             'head_data'     => json_encode($head, JSON_UNESCAPED_UNICODE),
             'center_schema' => $template['center_schema'],
-            'center_data'   => json_encode($center, JSON_UNESCAPED_UNICODE),
+            'center_data'   => json_encode($center, JSON_UNESCAPED_UNICODE),        //todo 链接替换
             'bottom_schema' => $template['bottom_schema'],
             'bottom_data'   => json_encode($bottom, JSON_UNESCAPED_UNICODE),
         ];
@@ -127,10 +127,10 @@ class PageService extends Service
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
         $id = $this->pageModel->insertGetId($insert);
         $data = [
-            "id"         => $id,
-            "follow"     => 0,
-            "is_open"    => 0,
-            "created_at" => date('y-m-d H:i:s'),
+            'id'         => $id,
+            'follow'     => 0,
+            'is_open'    => 0,
+            'created_at' => date('Y-m-d H:i:s'),
         ];
         $this->redis::HSET('user_pages:' . $uid, $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
         $head['id'] = $id;
@@ -161,10 +161,10 @@ class PageService extends Service
             $head['pendant'] = $headData['pendant'] ?? '';
             $update['head_data'] = json_encode($head, JSON_UNESCAPED_UNICODE);
             $data = [
-                "id"         => $id,
-                "follow"     => $info['follow'],
-                "is_open"    => $info['is_open'],
-                "created_at" => $info['created_at'],
+                'id'         => $id,
+                'follow'     => $info['follow'],
+                'is_open'    => $info['is_open'],
+                'created_at' => $info['created_at'],
             ];
             $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
             $head['id'] = $id;
