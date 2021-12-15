@@ -100,9 +100,12 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
+        if($this->request->user()->type != $this->pageService::USER_VIP){
+            $this->request->except('background');
+        }
         $pages = $this->service->redis::HKEYS('user_pages:' . $this->request->user()->id);
-        if($this->request->user()->type != 2 || count($pages) >= $this->request->user()->pages) {
-            $this->msg = '闪页数已达上限，开通会员创建更多页面';
+        if(count($pages) >= $this->request->user()->pages) {
+            $this->msg = '您的闪页数已达上限';
             return $this->returnApi();
         }
         $this->code = 200;
@@ -114,6 +117,7 @@ class PageController extends Controller
     {
         $this->validate([
             'id'                    => 'required|integer|gt:0|exists:sw_page,id',
+            'template_id'           => 'required|integer|gt:0|exists:sw_template,id',
             'background'            => 'nullable|url|max:128',
             'head_data'             => 'required_without_all:center_data,bottom_data|array',
             'head_data.avatar'      => 'required|url|max:128',
@@ -154,11 +158,20 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $pages = $this->service->redis::HKEYS('user_pages:' . $this->request->user()->id);
-        sort($pages);
-        if($this->request->user()->type != 2 && reset($pages) != $this->request->input('id')) {
-            $this->msg = '非默认闪页开通会员后可修改';
-            return $this->returnApi();
+        if($this->request->user()->type != $this->pageService::USER_VIP){
+            $this->request->except('background');
+            $pages = $this->service->redis::HKEYS('user_pages:' . $this->request->user()->id);
+            sort($pages);
+            if(reset($pages) != $this->request->input('id')) {
+                $this->msg = '此闪页开通会员后可修改';
+                return $this->returnApi();
+            }
+            $template = $this->service->redis::GET('template_infos:' . $this->request->input('template_id'));
+            $template = json_decode($template, true);
+            if($template['type'] == $this->pageService::USER_VIP) {
+                $this->msg = '此模板开通会员后可使用';
+                return $this->returnApi();
+            }
         }
         $data = $this->pageService->edit($this->request);
         return $this->returnApi($data);
