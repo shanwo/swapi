@@ -100,16 +100,12 @@ class HomeService extends Service
     {
         if ($this->redis::GET('set_home')) return ;
         $where[] = ['is_delete', '=', Service::DELETE_NO];
-        $data = $this->pageModel->select('id', 'user_id', 'browse', 'sort', 'is_open', 'head_data')->where($where)->get()->toArray();
+        $data = $this->pageModel->select('id', 'user_id', 'follow', 'is_open', 'head_data')->where($where)->get()->toArray();
         foreach ($data as $k => &$v) {
             $tmp = json_decode($v['head_data'], true);
             $v = array_merge($v, $tmp);
             unset($v['head_data']);
             $this->redis::HSET('user_pages:' . $v['user_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
-            if ($v['is_open']) {
-//                $this->redis::SADD('recent', $v['id']);
-//                $this->redis::ZADD('hot', $v['browse'] + $v['sort'], $v['id']);
-            }
         }
         $this->redis::SETEX('set_home', 15, date('Y-m-d H:i:s'));
     }
