@@ -137,6 +137,7 @@ class PageController extends Controller
             'bottom_data.*.image'   => 'required|url|max:128',
         ], [
             'id'                    => 'ID',
+            'template_id'           => '模板ID',
             'background'            => '背景图',
             'head_data'             => '顶部配置',
             'head_data.avatar'      => '头像',
