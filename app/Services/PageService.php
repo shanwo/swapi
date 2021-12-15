@@ -32,7 +32,7 @@ class PageService extends Service
         if (empty($data)) {
             $where[] = ['user_id', '=', $uid];
             $where[] = ['is_delete', '=', Service::DELETE_NO];
-            $data = $this->pageModel->select('id', 'follow', 'is_open', 'head_data', 'created_at')->where($where)->get()->toArray();
+            $data = $this->pageModel->select('id', 'user_id', 'follow', 'is_open', 'head_data', 'created_at')->where($where)->get()->toArray();
             foreach ($data as $k => &$v) {
                 $tmp = json_decode($v['head_data'], true);
                 $v = array_merge($v, $tmp);
