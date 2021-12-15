@@ -20,6 +20,8 @@ class Service
     const USER_ENABLE  = 1;
     const USER_VIP = 2;
     const USER_DISABLE = 3;
+    const DELETE_YES = -1;
+    const DELETE_NO = 1;
     const SORT_ALL = 0;
     const SORT_DECORATION = 1;
     const SORT_TUTORIALS = 2;
@@ -44,7 +46,7 @@ class Service
         if ($config) {
             $data = json_decode($config, true);
         } else {
-            $lists = $this->configModel->where(['autoload' => 1,'is_delete' => 0])->get()->toArray();
+            $lists = $this->configModel->where(['autoload' => 1, 'is_delete' => Service::DELETE_NO])->get()->toArray();
             foreach ($lists as $k => $v) {
                 $v['option_value'] = json_decode($v['option_value'], true);
                 $this->redis::SET('config:' . $v['option_name'], json_encode($v, JSON_UNESCAPED_UNICODE));
