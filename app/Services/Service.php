@@ -17,7 +17,7 @@ class Service
     const ORDER_SUCCESS = 30;
     const ORDER_FAIL = 40;
     const ORDER_REFUND = 50;
-    const USER_ENABLE  = 1;
+    const USER_ENABLE = 1;
     const USER_VIP = 2;
     const USER_DISABLE = 3;
     const DELETE_YES = -1;
