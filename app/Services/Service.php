@@ -20,6 +20,11 @@ class Service
     const USER_ENABLE  = 1;
     const USER_VIP = 2;
     const USER_DISABLE = 3;
+    const SORT_ALL = 0;
+    const SORT_DECORATION = 1;
+    const SORT_TUTORIALS = 2;
+    const SORT_TEMPLATE = 3;
+    const SORT_lINT = 4;
     public $redis;
     public $page = 1;
     public $size = 5;

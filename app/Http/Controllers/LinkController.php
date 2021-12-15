@@ -34,7 +34,7 @@ class LinkController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data['sort'] = $this->sortService->lists(4);
+        $data['sort'] = $this->sortService->lists($this->service::SORT_lINT);
         $data['lists'] = $this->linkService->lists($this->request, array_column($data['sort'], 'id'));
         $this->code = 200;
         return $this->returnApi($data);

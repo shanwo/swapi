@@ -21,7 +21,7 @@ class LinkService extends Service
 
     public function lists($request, $sids = [])
     {
-        $sort = $request->input('sort_id', 0);
+        $sort = $request->input('sort_id', Service::SORT_ALL);
         $data = $this->hGetCache('link', $sort, $sids);
         if (!$data) {
             $where[] = ['is_delete', '=', 0];
