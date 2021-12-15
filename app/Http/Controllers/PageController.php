@@ -100,13 +100,13 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = [];
-        if($this->request->user()->type == 2) {
-            $data = $this->pageService->add($this->request);
-            $this->code = 200;
-        }else{
-            $this->msg = '此功能需开通会员使用';
+        $pages = $this->service->redis::HKEYS('user_pages:' . $this->request->user()->id);
+        if($this->request->user()->type != 2 || count($pages) >= $this->request->user()->pages) {
+            $this->msg = '闪页数已达上限，开通会员创建更多页面';
+            return $this->returnApi();
         }
+        $this->code = 200;
+        $data = $this->pageService->add($this->request);
         return $this->returnApi($data);
     }
 
@@ -154,8 +154,13 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
+        $pages = $this->service->redis::HKEYS('user_pages:' . $this->request->user()->id);
+        sort($pages);
+        if($this->request->user()->type != 2 && reset($pages) != $this->request->input('id')) {
+            $this->msg = '非默认闪页开通会员后可修改';
+            return $this->returnApi();
+        }
         $data = $this->pageService->edit($this->request);
-        $this->code = 200;
         return $this->returnApi($data);
     }
 
