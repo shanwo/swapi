@@ -11,7 +11,6 @@ use App\Services\Service;
 use GuzzleHttp\Client;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use Overtrue\Socialite\SocialiteManager;
 use Ramsey\Uuid\Uuid;
 
 class Controller extends BaseController
