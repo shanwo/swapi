@@ -10,13 +10,11 @@ namespace App\Services;
 use App\Models\LinkModel;
 use App\Models\PageModel;
 use App\Models\TemplateModel;
-use App\Models\UserModel;
 
 class PageService extends Service
 {
     protected $pageModel;
     protected $linkModel;
-    protected $userModel;
     protected $templateModel;
 
     public function __construct()
@@ -24,7 +22,6 @@ class PageService extends Service
         parent::__construct();
         $this->pageModel = new PageModel();
         $this->linkModel = new LinkModel();
-        $this->userModel = new UserModel();
         $this->templateModel = new TemplateModel();
     }
 
@@ -96,7 +93,6 @@ class PageService extends Service
         ];
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
-        $this->userModel->whereKey($user['id'])->increment('pages');
         return $this->pageModel->insertGetId($insert);
     }
 
@@ -129,7 +125,6 @@ class PageService extends Service
         ];
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
-        $this->userModel->whereKey($uid)->increment('pages');
         $id = $this->pageModel->insertGetId($insert);
         $data = [
             "id"         => $id,
@@ -212,7 +207,6 @@ class PageService extends Service
             $this->redis::DEL('list_pages:' . $id);
             $this->redis::DEL('info_pages:' . $id);
             $this->redis::HDEL('user_pages:' . $uid, $id);
-            $this->userModel->whereKey($uid)->decrement('pages');
             $update['status'] = $status;
         }
         return $this->pageModel->whereKey($id)->where($where)->update($update);
