@@ -163,12 +163,12 @@ class PageController extends Controller
     {
         $this->validate([
             'id'        => 'required|integer|gt:0|exists:sw_page,id',
-            'is_open'   => 'required_without:is_delete|integer|between:0,1',
-            'is_delete' => 'required_without:is_open|integer|between:1',
+            'is_open'   => 'required_without:status|integer|between:0,1',
+            'status'    => 'required_without:is_open|integer|between:-1,1',
         ], [
             'id'        => 'ID',
             'is_open'   => '广场',
-            'is_delete' => '删除',
+            'status'    => '状态',
         ]);
         if ($this->msg) {
             return $this->returnApi();
