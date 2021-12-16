@@ -66,13 +66,6 @@ class HomeService extends Service
         $page = $this->redis::GET('info_pages:' . $id);
         $info = json_decode($page, true) ?? [];
         if (!$info) {
-            if ($id) {
-                $where[] = ['id', '=', $id];
-            } else {
-                $code = $request->input('code', '');
-                $where[] = ['code', '=', $code];
-            }
-            $where[] = ['is_delete', '=', Service::DELETE_NO];
             $info = $this->pageService->info($id);
             if (!$info) {
                 $info = ['msg' => '页面不存在'];
