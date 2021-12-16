@@ -27,16 +27,16 @@ class PageService extends Service
 
     public function lists($request)
     {
-        $uid = $request->user()->id;
-        $data = $this->redis::HGETALL('user_pages:' . $uid);
+        $user = $request->user();
+        $data = $this->redis::HGETALL('user_pages:' . $user->id);
         if (empty($data)) {
-            $where[] = ['user_id', '=', $uid];
+            $where[] = ['user_id', '=', $user->id];
             $data = $this->pageModel->select('id', 'user_id', 'follow', 'is_open', 'head_data', 'created_at')->where($where)->get()->toArray();
             foreach ($data as $k => &$v) {
                 $tmp = json_decode($v['head_data'], true);
                 $v = array_merge($v, $tmp);
                 unset($v['head_data']);
-                $this->redis::HSET('user_pages:' . $uid, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
+                $this->redis::HSET('user_pages:' . $user->id, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
             }
         } else {
             foreach ($data as $k => &$v) {
