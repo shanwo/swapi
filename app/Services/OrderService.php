@@ -59,6 +59,7 @@ class OrderService extends Service
             if ($info['pages'] < $pages) $update['pages'] = $pages;
         }
         $update['type'] = Service::USER_VIP;
+        $update['vip_type'] = $pay['type'];
         $update['expired_at'] = date('Y-m-d H:i:s', $expire);
         $this->userModel->whereKey($user['id'])->update($update);
         return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
