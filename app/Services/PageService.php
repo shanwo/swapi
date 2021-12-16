@@ -43,6 +43,17 @@ class PageService extends Service
                 $v = json_decode($v, true);
             }
         }
+        $edit = Service::PAGE_MIN;
+        if ($user->type == Service::USER_VIP && in_array($user->vip_type, [1, 2, 3, 4])) {
+            $edit = (Service::PAGE_MAX - $user->vip_type) + Service::PAGE_MIN;
+        }
+        foreach ($data as $k => &$v) {
+            $v['edit'] = 0;
+            if ($edit) {
+                $v['edit'] = 1;
+                $edit--;
+            }
+        }
         return ['lists' => array_values($data)];
     }
 
