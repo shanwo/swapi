@@ -70,7 +70,7 @@ class PageService extends Service
     public function initial($tid, $user)
     {
         $template = $this->templateModel->whereKey($tid)->first();
-        if(!$template) return false;
+        if (!$template) return false;
         $head = json_decode($template['head_data'], true);
         $head['avatar'] = $user['avatar'];
         $head['nickname'] = $user['nickname'];
@@ -114,7 +114,7 @@ class PageService extends Service
         $insert = [
             'user_id'       => $uid,
             'template_id'   => $tid,
-            'background'    => $request->input('background',$template['background']),
+            'background'    => $request->input('background', $template['background']),
             'head_schema'   => $template['head_schema'],
             'head_data'     => json_encode($head, JSON_UNESCAPED_UNICODE),
             'center_schema' => $template['center_schema'],
@@ -146,7 +146,7 @@ class PageService extends Service
         $template = $this->templateModel->whereKey($tid)->first();
         $update = [
             'template_id'   => $tid,
-            'background'    => $request->input('background',$template['background']),
+            'background'    => $request->input('background', $template['background']),
             'head_schema'   => $template['head_schema'],
             'center_schema' => $template['center_schema'],
             'bottom_schema' => $template['bottom_schema'],
