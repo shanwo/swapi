@@ -53,13 +53,21 @@ class OrderService extends Service
             if (time() < $expire) {
                 $expire = $expire + $this->endTime($pay['type']);
             }
-        }
-        if (in_array($pay['type'], [1, 2, 3])) {
-            $pages = (Service::PAGE_MAX - $pay['type']) + Service::PAGE_MIN;
-            if ($info['pages'] < $pages) $update['pages'] = $pages;
+            if ($pay['type'] < $info['vip_type']) {
+                $update['vip_type'] = $pay['type'];
+                if (in_array($pay['type'], [1, 2, 3, 4])) {
+                    $pages = (Service::PAGE_MAX - $pay['type']) + Service::PAGE_MIN;
+                    $update['pages'] = $pages;
+                }
+            }
+        } else {
+            $update['vip_type'] = $pay['type'];
+            if (in_array($pay['type'], [1, 2, 3, 4])) {
+                $pages = (Service::PAGE_MAX - $pay['type']) + Service::PAGE_MIN;
+                if ($info['pages'] < $pages) $update['pages'] = $pages;
+            }
         }
         $update['type'] = Service::USER_VIP;
-        $update['vip_type'] = $pay['type'];
         $update['expired_at'] = date('Y-m-d H:i:s', $expire);
         $this->userModel->whereKey($user['id'])->update($update);
         return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
