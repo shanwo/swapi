@@ -163,7 +163,7 @@ class UserService extends Service
                 $insertUser['id'] = $this->uid;
                 $pageService = new PageService();
                 $pageService->initial(env('USER_TEMPLATE', 1), $insertUser);
-            } else {
+            } else {    //绑定用户，闪页数量+1
                 $updateUser = [
                     'api_token' => $token
                 ];

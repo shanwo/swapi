@@ -25,7 +25,7 @@ class UserController extends Controller
     {
         $this->validate([
             'type'   => 'required|alpha_num|in:official,wechat',
-            'secret' => 'filled|string|between:64,256',
+            'secret' => 'filled|string|between:64,256',         //账号绑定密钥，绑定一种类型赠送1个闪页
         ], [
             'type'   => '登录类型',
             'secret' => '密钥',
