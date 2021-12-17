@@ -48,6 +48,9 @@ class UserService extends Service
         $uid = $request->user()->id;
         $aid = $request->input('area_id');
         $area = $this->areaModel->whereKey($aid)->first();
+        list($province,$city) = explode('-',$area['merger_name']);
+        $this->setTag('province',$uid,$province);
+        $this->setTag('city',$uid,$city);
         $contact = $request->input('contact');
         $update = [
             'nickname'    => $request->input('nickname'),
@@ -58,10 +61,14 @@ class UserService extends Service
         ];
         $sex = $request->input('sex', '');
         if (is_numeric($sex)) {
+            $this->setTag('sex',$uid,$sex);
             $update['sex'] = $sex;
         }
         $birthday = $request->input('birthday', '');
         if ($birthday) {
+            $this->setTag('birthday',$uid,substr($birthday,5));
+            $age = date('Y') - substr($birthday,0,4);
+            $this->setTag('age',$uid,$age);
             $update['birthday'] = $birthday;
         }
         return $this->userModel->whereKey($uid)->update($update);
@@ -174,5 +181,4 @@ class UserService extends Service
         }
         return $this->uid;
     }
-
 }

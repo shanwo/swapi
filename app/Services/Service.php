@@ -8,6 +8,8 @@
 namespace App\Services;
 
 use App\Models\ConfigModel;
+use App\Models\TagModel;
+use App\Models\UserTagModel;
 use Illuminate\Support\Facades\Redis;
 
 class Service
@@ -20,8 +22,8 @@ class Service
     const USER_ENABLE = 1;
     const USER_VIP = 2;
     const USER_DISABLE = 3;
-    const PAGE_MAX = 4;
     const PAGE_MIN = 1;
+    const PAGE_MAX = 4;
     const DELETE_YES = -1;
     const DELETE_NO = 1;
     const SORT_ALL = 0;
@@ -31,14 +33,18 @@ class Service
     const SORT_lINT = 4;
     public $redis;
     public $page = 1;
-    public $size = 5;
+    public $size = 10;
     public $oneDay = 86400;
     protected $configModel;
+    protected $tagModel;
+    protected $userTagModel;
 
     public function __construct()
     {
         $this->redis = new Redis();
         $this->configModel = new ConfigModel();
+        $this->tagModel = new TagModel();
+        $this->userTagModel = new UserTagModel();
     }
 
     public function configInfo($name)
@@ -96,5 +102,36 @@ class Service
                 $time = time();
         }
         return $time - time();
+    }
+
+    public function setTag($key, $uid, $value)
+    {
+        $tag = $this->redis::GET('tags:' . $key);
+        if ($tag) {
+            $tag = json_decode($tag, true);
+        } else {
+            $lists = $this->tagModel->select('id', 'mark')->where(['status' => 1, 'is_delete' => Service::DELETE_NO])->get()->toArray();
+            foreach ($lists as $k => $v) {
+                if ($v['mark'] == $key) {
+                    $tag = $v;
+                }
+                $this->redis::SET('tags:' . $v['mark'], json_encode(array_merge($v), JSON_UNESCAPED_UNICODE));
+            }
+        }
+        if ($tag) {
+            $userTag = $this->redis::HGET('user_tags:' . $uid, $tag['mark']);
+            if (!$userTag) {
+//                $userTag = $this->userTagModel->select('id')->where(['user_id' => $uid, 'tag_id' => $tag['id']])->first();
+                $userTag = [
+                    'user_id' => $uid,
+                    'tag_id'  => $tag['id'],
+                    'value'   => $value
+                ];
+                $this->userTagModel->insertGetId($userTag);
+            } else {
+                $this->userTagModel->whereKey($userTag['id'])->update(['value' => $value]);
+            }
+            $this->redis::HSET('user_tags:' . $uid, $tag['mark'], $value);
+        }
     }
 }
