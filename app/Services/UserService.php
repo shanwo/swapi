@@ -34,7 +34,7 @@ class UserService extends Service
     {
         $info = $this->redis::GET('user_infos:' . $id);
         $info = json_decode($info, true) ?? [];
-        if(!$info){
+        if (!$info) {
             $info = $this->userModel->whereKey($id)->first();
             $info['contact'] = json_decode($info['contact'], true);
             $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'open_id', 'login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
@@ -48,9 +48,9 @@ class UserService extends Service
         $uid = $request->user()->id;
         $aid = $request->input('area_id');
         $area = $this->areaModel->whereKey($aid)->first();
-        list($province,$city) = explode('-',$area['merger_name']);
-        $this->setTag('province',$uid,$province);
-        $this->setTag('city',$uid,$city);
+        [$province, $city] = explode('-', $area['merger_name']);
+        $this->setTag('province', $uid, $province);
+        $this->setTag('city', $uid, $city);
         $contact = $request->input('contact');
         $update = [
             'nickname'    => $request->input('nickname'),
@@ -61,14 +61,16 @@ class UserService extends Service
         ];
         $sex = $request->input('sex', '');
         if (is_numeric($sex)) {
-            $this->setTag('sex',$uid,$sex);
+            $this->setTag('sex', $uid, $sex);
             $update['sex'] = $sex;
         }
         $birthday = $request->input('birthday', '');
         if ($birthday) {
-            $this->setTag('birthday',$uid,substr($birthday,5));
-            $age = date('Y') - substr($birthday,0,4);
-            $this->setTag('age',$uid,$age);
+            [$month, $day] = explode('-', substr($birthday, 5));
+            $this->setTag('constellation ', $uid, $this->constellation($month, $day));
+            $this->setTag('birthday', $uid, $month . '-' . $day);
+            $age = date('Y') - substr($birthday, 0, 4);
+            $this->setTag('age', $uid, $age);
             $update['birthday'] = $birthday;
         }
         return $this->userModel->whereKey($uid)->update($update);
@@ -99,7 +101,7 @@ class UserService extends Service
         }
     }
 
-    public function signInResult($request,$configName)
+    public function signInResult($request, $configName)
     {
         $data = [];
         try {
@@ -112,7 +114,7 @@ class UserService extends Service
             $user['ip'] = $request->ip();
             $config = $this->configInfo($configName);
             $config['name'] = $configName;
-            $uid = $this->wechat($user,$config);
+            $uid = $this->wechat($user, $config);
             $data = $this->info($uid);
             $this->redis::SETEX('user_tokens:' . $data['api_token'], $this->oneDay * 30, $uid);
         } catch (AuthorizeFailedException $e) {
@@ -121,14 +123,14 @@ class UserService extends Service
         return $data;
     }
 
-    public function wechat($user,$config)
+    public function wechat($user, $config)
     {
         $original = $user['original'];
         $where[] = ['source', '=', $config['name']];
         $where[] = ['open_id', '=', $original['openid']];
-        if($config['name'] == 'official'){
+        if ($config['name'] == 'official') {
             $app_id = $config['app_id'];
-        }else{
+        } else {
             $app_id = $config['key'];
         }
         $where[] = ['app_id', '=', $app_id];
@@ -180,5 +182,29 @@ class UserService extends Service
             $this->userThirdModel->insertGetId($insertThird);
         }
         return $this->uid;
+    }
+
+    private function constellation($month, $day)
+    {
+        if ($month < 1 || $month > 12 || $day < 1 || $day > 31) return false;
+        $constellations = [
+            ["20" => "宝瓶座"],
+            ["19" => "双鱼座"],
+            ["21" => "白羊座"],
+            ["20" => "金牛座"],
+            ["21" => "双子座"],
+            ["22" => "巨蟹座"],
+            ["23" => "狮子座"],
+            ["23" => "处女座"],
+            ["23" => "天秤座"],
+            ["24" => "天蝎座"],
+            ["22" => "射手座"],
+            ["22" => "摩羯座"]
+        ];
+        [$constellation_start, $constellation_name] = each($constellations[(int)$month - 1]);
+        if ($day < $constellation_start) {
+            [$constellation_start, $constellation_name] = each($constellations[($month - 2 < 0) ? $month = 11 : $month -= 2]);
+        }
+        return $constellation_name;
     }
 }
