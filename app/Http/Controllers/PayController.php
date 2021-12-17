@@ -37,7 +37,7 @@ class PayController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $data = $this->payService->lists($this->request);
+        $data['lists'] = $this->payService->lists($this->request);
         $this->code = 200;
         return $this->returnApi($data);
     }
