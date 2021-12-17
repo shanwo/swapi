@@ -76,7 +76,7 @@ class UserController extends Controller
             'avatar'         => 'required|url|max:128',
             'nickname'       => 'required|string|between:2,32',
             'sex'            => 'nullable|integer|between:0,2',
-            'birthday'       => 'nullable|date_format:Y-m-d|after_or_equal:1950-01-01|before_or_equal:' . date('Y-m-d', strtotime('-1 month')),
+            'birthday'       => 'nullable|date_format:Y-m-d|after_or_equal:1950-01-01|before_or_equal:' . date('Y-m-01', strtotime('-1 month')),
             'contact'        => 'nullable|array',
             'contact.wechat' => 'nullable|alpha_dash|between:6,20',
             'contact.phone'  => 'nullable|integer|between:13000000000,19999999999',
