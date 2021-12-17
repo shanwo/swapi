@@ -65,11 +65,11 @@ class UserService extends Service
             $update['sex'] = $sex;
         }
         $birthday = $request->input('birthday', '');
-        if ($birthday) {
-            [$month, $day] = explode('-', substr($birthday, 5));
-            $this->setTag('constellation ', $uid, $this->constellation($month, $day));
-            $this->setTag('birthday', $uid, $month . '-' . $day);
-            $age = date('Y') - substr($birthday, 0, 4);
+        if ($birthday && !$request->user()->birthday) {
+            $birth = $this->birthday($birthday);
+            $this->setTag('constellation ', $uid, $birth['xz']);
+            $this->setTag('birthday', $uid, $birth['m'].'-'.$birth['d']);
+            $age = date('Y') - $birth['y'];
             $this->setTag('age', $uid, $age);
             $update['birthday'] = $birthday;
         }
@@ -184,27 +184,34 @@ class UserService extends Service
         return $this->uid;
     }
 
-    private function constellation($month, $day)
+    /**
+     * 查询干支、生肖和星座
+     * @param $birthday
+     * @return array
+     */
+    public function birthday($birthday)
     {
-        if ($month < 1 || $month > 12 || $day < 1 || $day > 31) return false;
-        $constellations = [
-            ["20" => "宝瓶座"],
-            ["19" => "双鱼座"],
-            ["21" => "白羊座"],
-            ["20" => "金牛座"],
-            ["21" => "双子座"],
-            ["22" => "巨蟹座"],
-            ["23" => "狮子座"],
-            ["23" => "处女座"],
-            ["23" => "天秤座"],
-            ["24" => "天蝎座"],
-            ["22" => "射手座"],
-            ["22" => "摩羯座"]
-        ];
-        [$constellation_start, $constellation_name] = each($constellations[(int)$month - 1]);
-        if ($day < $constellation_start) {
-            [$constellation_start, $constellation_name] = each($constellations[($month - 2 < 0) ? $month = 11 : $month -= 2]);
+        [$y, $m, $d] = explode('-', $birthday);
+        $xzdict = ['摩羯', '水瓶', '双鱼', '白羊', '金牛', '双子', '巨蟹', '狮子', '处女', '天秤', '天蝎', '射手'];
+        $zone = [1222, 122, 222, 321, 421, 522, 622, 722, 822, 922, 1022, 1122, 1222];
+        if ((100 * $m + $d) >= $zone[0] || (100 * $m + $d) < $zone[1]) {
+            $i = 0;
+        } else {
+            for ($i = 1; $i < 12; $i++) {
+                if ((100 * $m + $d) >= $zone[$i] && (100 * $m + $d) < $zone[$i + 1]) {
+                    break;
+                }
+            }
         }
-        return $constellation_name;
+        $result['xz'] = $xzdict[$i] . '座';
+        $gzdict = [['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'], ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']];
+        $i = $y - 1900 + 36;
+        $result['gz'] = $gzdict[0][($i % 10)] . $gzdict[1][($i % 12)];
+        $sxdict = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+        $result['sx'] = $sxdict[(($y - 4) % 12)];
+        $result['y'] = $y;
+        $result['m'] = $m;
+        $result['d'] = $d;
+        return $result;
     }
 }
