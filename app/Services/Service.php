@@ -74,7 +74,7 @@ class Service
         return $data;
     }
 
-    public function endTime($type)
+    public function lengthTime($type)
     {
         switch ($type) {
             case 1:

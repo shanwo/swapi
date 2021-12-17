@@ -47,11 +47,11 @@ class OrderService extends Service
         ];
         $this->orderModel->insertGetId($insert);
         $info = $this->userModel->whereKey($user['id'])->first();
-        $expire = time() + $this->endTime($pay['type']);
+        $expire = time() + $this->lengthTime($pay['type']);
         if ($info['type'] == Service::USER_VIP) {
             $expire = strtotime($info['expired_at']);
             if (time() < $expire) {
-                $expire = $expire + $this->endTime($pay['type']);
+                $expire = $expire + $this->lengthTime($pay['type']);
             }
             if ($pay['type'] < $info['vip_type']) {
                 $update['vip_type'] = $pay['type'];

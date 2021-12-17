@@ -131,11 +131,11 @@ class CallbackController extends Controller
                 return $fail('非会员状态不可发起退款');
             }
             $expired = strtotime($user['expired_at']);
-            $endTime = time() + $this->service->endTime($pay['type']) - 60;
+            $endTime = time() + $this->service->lengthTime($pay['type']) - 60;
             if($expired < $endTime){
                 return $fail('会员到期时间小于购买时间，不可发起退款');
             }
-            $expired = $expired - $this->service->endTime($pay['type']);
+            $expired = $expired - $this->service->lengthTime($pay['type']);
             $this->orderService->edit($expired, $user);
             $this->orderService->status($res['id'], OrderService::ORDER_REFUND);
             return true;
