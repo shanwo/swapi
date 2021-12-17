@@ -70,6 +70,8 @@ class OrderService extends Service
         $update['type'] = Service::USER_VIP;
         $update['expired_at'] = date('Y-m-d H:i:s', $expire);
         $this->userModel->whereKey($user['id'])->update($update);
+        $this->setTag('pay_vip',$user['id'], 'Y');
+        $this->setTag('vip_type',$user['id'], $pay['type']);
         return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
     }
 
