@@ -51,7 +51,7 @@ class UserService extends Service
         [$province, $city] = explode('-', $area['merger_name']);
         $this->setTag('province', $uid, $province);
         $this->setTag('city', $uid, $city);
-        $contact = $request->input('contact');
+        $contact = $request->input('contact', []);
         $update = [
             'nickname'    => $request->input('nickname'),
             'avatar'      => $request->input('avatar'),
@@ -68,7 +68,7 @@ class UserService extends Service
         if ($birthday && !$request->user()->birthday) {
             $birth = $this->birthday($birthday);
             $this->setTag('constellation ', $uid, $birth['xz']);
-            $this->setTag('birthday', $uid, $birth['m'].'-'.$birth['d']);
+            $this->setTag('birthday', $uid, $birth['m'] . '-' . $birth['d']);
             $age = date('Y') - $birth['y'];
             $this->setTag('age', $uid, $age);
             $update['birthday'] = $birthday;

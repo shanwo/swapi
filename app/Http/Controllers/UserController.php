@@ -48,7 +48,7 @@ class UserController extends Controller
             }
         }
         $this->code = 200;
-        return $this->returnApi(['redirect_url'=>$url]);
+        return $this->returnApi(['redirect_url' => $url]);
     }
 
     public function info()
@@ -76,13 +76,13 @@ class UserController extends Controller
             'avatar'         => 'required|url|max:128',
             'nickname'       => 'required|string|between:2,32',
             'sex'            => 'nullable|integer|between:0,2',
-            'birthday'       => 'nullable|date_format:Y-m-d',
-            'contact'        => 'required|array',
-            'contact.wechat' => 'required|alpha_dash|between:6,20',
-            'contact.phone'  => 'required|integer|between:13000000000,19999999999',
-            'contact.qq'     => 'required|integer|between:10000,9999999999',
-            'contact.weibo'  => 'required|string|between:4,32',
-            'contact.email'  => 'required|email|between:8,32',
+            'birthday'       => 'nullable|date_format:Y-m-d|after_or_equal:1950-01-01|before_or_equal:' . date('Y-m-d', strtotime('-1 month')),
+            'contact'        => 'nullable|array',
+            'contact.wechat' => 'nullable|alpha_dash|between:6,20',
+            'contact.phone'  => 'nullable|integer|between:13000000000,19999999999',
+            'contact.qq'     => 'nullable|integer|between:10000,9999999999',
+            'contact.weibo'  => 'nullable|string|between:4,32',
+            'contact.email'  => 'nullable|email|between:8,32',
         ], [
             'area_id'        => '省市区',
             'avatar'         => '头像地址',
