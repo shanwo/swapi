@@ -56,10 +56,9 @@ class Service
         } else {
             $lists = $this->configModel->where(['autoload' => 1, 'is_delete' => Service::DELETE_NO])->get()->toArray();
             foreach ($lists as $k => $v) {
-                $v['option_value'] = json_decode($v['option_value'], true);
-                $this->redis::SET('config:' . $v['option_name'], json_encode($v['option_value'], JSON_UNESCAPED_UNICODE));
+                $this->redis::SET('config:' . $v['option_name'], $v['option_value']);
                 if ($v['option_name'] == $name) {
-                    $data = $v['option_value'];
+                    $data = json_decode($v['option_value'], true);
                 }
             }
         }
