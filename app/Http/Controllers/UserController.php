@@ -51,6 +51,13 @@ class UserController extends Controller
         return $this->returnApi(['redirect_url' => $url]);
     }
 
+    public function signOut()
+    {
+        $this->code = 200;
+        $this->service->redis::DEL('user_tokens:' . $this->request->user()->api_token);
+        return $this->returnApi();
+    }
+
     public function info()
     {
         $this->validate([

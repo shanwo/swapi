@@ -63,6 +63,7 @@ Route::prefix('home')->group(function () {
 //用户
 Route::prefix('user')->group(function () {
     Route::get('signIn', 'UserController@signIn');
+    Route::get('signOut', 'UserController@signOut');
     Route::get('info', 'UserController@info');
     Route::post('edit', 'UserController@edit');
 });
