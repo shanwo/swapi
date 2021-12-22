@@ -57,13 +57,13 @@ class Service
             $lists = $this->configModel->where(['autoload' => 1, 'is_delete' => Service::DELETE_NO])->get()->toArray();
             foreach ($lists as $k => $v) {
                 $v['option_value'] = json_decode($v['option_value'], true);
-                $this->redis::SET('config:' . $v['option_name'], json_encode($v, JSON_UNESCAPED_UNICODE));
+                $this->redis::SET('config:' . $v['option_name'], json_encode($v['option_value'], JSON_UNESCAPED_UNICODE));
                 if ($v['option_name'] == $name) {
-                    $data = $v;
+                    $data = $v['option_value'];
                 }
             }
         }
-        return $data['option_value'];
+        return $data;
     }
 
     public function hGetCache($key, $sort, $sids)
