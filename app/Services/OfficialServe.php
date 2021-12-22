@@ -22,7 +22,9 @@ class OfficialServe extends Service
         } else {
             $where[] = ['keyword', '=', trim($message['Content'])];
         }
-        return $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
+        $info = $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
+        $this->replyModel->whereKey($info['id'])->increment('number');
+        return $info;
     }
 
     /**
