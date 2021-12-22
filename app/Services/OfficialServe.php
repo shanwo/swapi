@@ -23,7 +23,7 @@ class OfficialServe extends Service
             $where[] = ['keyword', '=', trim($message['Content'])];
         }
         $info = $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
-        $this->replyModel->whereKey($info['id'])->increment('number');
+        if ($info) $this->replyModel->whereKey($info['id'])->increment('number');
         return $info;
     }
 
@@ -130,7 +130,7 @@ class OfficialServe extends Service
             $link = $this->reply($message);
             return $this->replyMsg($link);
         }
-        return '链接信息识别失败';
+        return '这个链接识别不出来啊';
     }
 
     public function fileType($message)
