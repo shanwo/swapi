@@ -105,22 +105,20 @@ class Service
 
     public function setTag($key, $uid, $value)
     {
-        $tag = $this->redis::GET('tags:' . $key);
-        if ($tag) {
-            $tag = json_decode($tag, true);
-        } else {
+        $tag = $this->redis::HGET('tags', $key);
+        if (!$tag) {
             $lists = $this->tagModel->select('id', 'mark')->where(['status' => 1, 'is_delete' => Service::DELETE_NO])->get()->toArray();
             foreach ($lists as $k => $v) {
                 if ($v['mark'] == $key) {
-                    $tag = $v;
+                    $tag = $v['id'];
                 }
-                $this->redis::SET('tags:' . $v['mark'], json_encode(array_merge($v), JSON_UNESCAPED_UNICODE));
+                $this->redis::HSET('tags', $v['mark'], $v['id']);
             }
         }
         if ($tag) {
-            $userTag = $this->redis::HGET('user_tags:' . $uid, $tag['mark']);
+            $userTag = $this->redis::HGET('user_tags:' . $uid, $key);
             if ($userTag) {
-                $this->userTagModel->whereKey($userTag['id'])->update(['value' => $value]);
+                $this->userTagModel->where(['user_id' => $uid, 'tag_id' => $tag])->update(['value' => $value]);
             } else {
                 $lists = $this->userTagModel->select('id', 'value', 'mark')->where(['user_id' => $uid])->get()->toArray();
                 foreach ($lists as $k => $v) {
@@ -128,12 +126,13 @@ class Service
                 }
                 $userTag = [
                     'user_id' => $uid,
-                    'tag_id'  => $tag['id'],
+                    'tag_id'  => $tag,
+                    'mark'    => $key,
                     'value'   => $value
                 ];
                 $this->userTagModel->insertGetId($userTag);
             }
-            $this->redis::HSET('user_tags:' . $uid, $tag['mark'], $value);
+            $this->redis::HSET('user_tags:' . $uid, $key, $value);
         }
     }
 }
