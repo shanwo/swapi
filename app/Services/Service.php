@@ -120,16 +120,19 @@ class Service
         }
         if ($tag) {
             $userTag = $this->redis::HGET('user_tags:' . $uid, $tag['mark']);
-            if (!$userTag) {
-//                $userTag = $this->userTagModel->select('id')->where(['user_id' => $uid, 'tag_id' => $tag['id']])->first();
+            if ($userTag) {
+                $this->userTagModel->whereKey($userTag['id'])->update(['value' => $value]);
+            } else {
+                $lists = $this->userTagModel->select('id', 'value', 'mark')->where(['user_id' => $uid])->get()->toArray();
+                foreach ($lists as $k => $v) {
+                    $this->redis::HSET('user_tags:' . $uid, $v['mark'], $v['value']);
+                }
                 $userTag = [
                     'user_id' => $uid,
                     'tag_id'  => $tag['id'],
                     'value'   => $value
                 ];
                 $this->userTagModel->insertGetId($userTag);
-            } else {
-                $this->userTagModel->whereKey($userTag['id'])->update(['value' => $value]);
             }
             $this->redis::HSET('user_tags:' . $uid, $tag['mark'], $value);
         }
