@@ -16,15 +16,32 @@ class OfficialServe extends Service
 
     private function reply($message)
     {
-        $where[] = ['status', '=', 1];
-        if (empty($message['Content'])) {
-            $where[] = ['keyword', '=', '关注'];
-        } else {
-            $where[] = ['keyword', '=', trim($message['Content'])];
+        $keyword = '关注';
+        if (!empty($message['Content'])) {
+            $keyword = trim($message['Content']);
         }
-        $info = $this->replyModel->select('id', 'type', 'comment')->where($where)->first();
-        if ($info) $this->replyModel->whereKey($info['id'])->increment('number');
-        return $info;
+        $data = [];
+        $reply = $this->redis::HGET('reply', $keyword);
+        if ($reply) {
+            $data = json_decode($reply, true);
+        } else {
+            $where[] = ['status', '=', 1];
+            $where[] = ['is_delete', '=', Service::DELETE_NO];
+            $lists = $this->replyModel->select('id', 'keyword', 'comment')->where($where)->get()->toArray();
+            foreach ($lists as $k => $v) {
+                $number = $this->redis::ZSCORE('reply_number', $v['keyword']);
+                if ($number) {
+                    $this->replyModel->whereKey($v['id'])->increment('number', $number);
+                    $this->redis::ZREM('reply_number', $v['keyword']);
+                }
+                $this->redis::HSET('reply', $v['keyword'], $v['comment']);
+                if ($v['keyword'] == $keyword) {
+                    $data = json_decode($v['comment'], true);
+                }
+            }
+        }
+        if ($data) $this->redis::ZINCRBY('reply_number', 1, $keyword);
+        return $data;
     }
 
     /**
