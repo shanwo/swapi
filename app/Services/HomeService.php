@@ -62,7 +62,8 @@ class HomeService extends Service
 
     public function info($request)
     {
-        $id = $request->input('id', 0);
+        $code = $request->input('code');
+        $id = $this->redis::HGET('info_pages_code', $code);
         $page = $this->redis::GET('info_pages:' . $id);
         $info = json_decode($page, true) ?? [];
         if (!$info) {

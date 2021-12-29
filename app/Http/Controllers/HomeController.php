@@ -59,11 +59,9 @@ class HomeController extends Controller
     public function info()
     {
         $this->validate([
-            'id'   => 'required|integer|gt:0',
-            'code' => 'required_without:id|string|between:6,16',
+            'code' => 'required|string|between:4,16',
         ], [
-            'page' => 'ID',
-            'size' => '闪码',
+            'code' => '闪码',
         ]);
         if ($this->msg) {
             return $this->returnApi();
