@@ -192,7 +192,7 @@ class UserService extends Service
     public function birthday($birthday)
     {
         [$y, $m, $d] = explode('-', $birthday);
-        $xzdict = ['摩羯', '水瓶', '双鱼', '白羊', '金牛', '双子', '巨蟹', '狮子', '处女', '天秤', '天蝎', '射手'];
+        $xzdict = ['摩羯座', '水瓶座', '双鱼座', '白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', '天秤座', '天蝎座', '射手座'];
         $zone = [1222, 122, 222, 321, 421, 522, 622, 722, 822, 922, 1022, 1122, 1222];
         if ((100 * $m + $d) >= $zone[0] || (100 * $m + $d) < $zone[1]) {
             $i = 0;
@@ -203,7 +203,7 @@ class UserService extends Service
                 }
             }
         }
-        $result['xz'] = $xzdict[$i] . '座';
+        $result['xz'] = $xzdict[$i];
         $gzdict = [['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'], ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']];
         $i = $y - 1900 + 36;
         $result['gz'] = $gzdict[0][($i % 10)] . $gzdict[1][($i % 12)];
