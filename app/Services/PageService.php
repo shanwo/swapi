@@ -112,8 +112,8 @@ class PageService extends Service
         $uid = $request->user()->id;
         $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();
-        $head = json_decode($template['head_data'], true);
         $headData = $request->input('head_data');
+        $head = json_decode($template['head_data'], true);
         $head['avatar'] = $headData['avatar'];
         $head['nickname'] = $headData['nickname'];
         $head['signature'] = $headData['signature'] ?? '';
