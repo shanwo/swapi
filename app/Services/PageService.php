@@ -92,6 +92,7 @@ class PageService extends Service
         $incLbIds = array_column($bottom, 'id');
         $insert = [
             'user_id'       => $user['id'],
+            'code'          => uniqid(),
             'template_id'   => $tid,
             'background'    => $template['background'],
             'head_schema'   => $template['head_schema'],
@@ -124,6 +125,7 @@ class PageService extends Service
         $incLbIds = array_column($bottom, 'id');
         $insert = [
             'user_id'       => $uid,
+            'code'          => uniqid(),
             'template_id'   => $tid,
             'background'    => $request->input('background', $template['background']),
             'head_schema'   => $template['head_schema'],
@@ -153,9 +155,11 @@ class PageService extends Service
         $incLcIds = $incLbIds = $decLcIds = $decLbIds = $head = [];
         $id = $request->input('id');
         $info = $this->info($id);
+        $code = $request->input('code', $info['code']);
         $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();
         $update = [
+            'code'          => $code,
             'template_id'   => $tid,
             'background'    => $request->input('background', $template['background']),
             'head_schema'   => $template['head_schema'],
