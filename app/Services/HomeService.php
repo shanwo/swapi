@@ -69,9 +69,8 @@ class HomeService extends Service
         if (!$info) {
             $info = $this->pageService->info($id);
             if (!$info) {
-                $info = ['msg' => '页面不存在'];
                 $this->redis::SETEX('info_pages:' . $id, 60,'{}');
-                return $info;
+                return ['msg' => '页面不存在'];
             }
         }
         if (!$this->redis::GET('click:' . $id . ':' . $request->ip())) {
