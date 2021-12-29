@@ -118,6 +118,7 @@ class PageController extends Controller
         $this->validate([
             'id'                    => 'required|integer|gt:0|exists:sw_page,id',
             'template_id'           => 'required|integer|gt:0|exists:sw_template,id',
+            'code'                  => 'nullable|string|between:4,16',
             'background'            => 'nullable|url|max:128',
             'head_data'             => 'required_without_all:center_data,bottom_data|array',
             'head_data.avatar'      => 'required|url|max:128',
@@ -138,6 +139,7 @@ class PageController extends Controller
         ], [
             'id'                    => 'ID',
             'template_id'           => '模板ID',
+            'code'                  => '闪码',
             'background'            => '背景图',
             'head_data'             => '顶部配置',
             'head_data.avatar'      => '头像',
@@ -160,6 +162,7 @@ class PageController extends Controller
             return $this->returnApi();
         }
         if($this->request->user()->type != $this->pageService::USER_VIP){
+            $this->request->except('code');
             $this->request->except('background');
             $pages = $this->service->redis::HKEYS('user_pages:' . $this->request->user()->id);
             sort($pages);
