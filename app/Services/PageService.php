@@ -199,6 +199,7 @@ class PageService extends Service
             $this->linkModel->whereIn('id', $incLbIds)->increment('number');
             $this->linkModel->whereIn('id', $decLbIds)->decrement('number');
         }
+        $this->redis::HDET('pages_code', $info['code']);
         $this->redis::DEL('info_pages:' . $id);
         $where[] = ['user_id', '=', $info['user_id']];
         return $this->pageModel->whereKey($id)->where($where)->update($update);
