@@ -70,7 +70,7 @@ class HomeService extends Service
             $info = $this->pageService->info($id);
             if (!$info) {
                 $info = ['msg' => '页面不存在'];
-                $this->redis::SETEX('info_pages:' . $id, 60, json_encode($info, JSON_UNESCAPED_UNICODE));
+                $this->redis::SETEX('info_pages:' . $id, 60,'{}');
                 return $info;
             }
         }
