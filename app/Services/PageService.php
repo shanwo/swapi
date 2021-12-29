@@ -31,7 +31,7 @@ class PageService extends Service
         $data = $this->redis::HGETALL('user_pages:' . $user->id);
         if (empty($data)) {
             $where[] = ['user_id', '=', $user->id];
-            $data = $this->pageModel->select('id', 'user_id', 'follow', 'is_open', 'head_data', 'created_at')->where($where)->get()->toArray();
+            $data = $this->pageModel->select('id', 'user_id', 'follow', 'browse', 'is_open', 'head_data')->where($where)->get()->toArray();
             foreach ($data as $k => &$v) {
                 $tmp = json_decode($v['head_data'], true);
                 $v = array_merge($v, $tmp);
@@ -71,9 +71,16 @@ class PageService extends Service
             $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
             $this->redis::SET('info_pages:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
-            $head = $info['head_data'];
-            $head['id'] = $id;
-            $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
+            $this->redis::HSET('pages_code', $info['code'], $id);
+            $data = $info['head_data'];
+            $data['code'] = $info['code'];
+            $this->redis::SET('list_pages:' . $id, json_encode($data, JSON_UNESCAPED_UNICODE));
+            $data['id'] = $id;
+            $data['user_id'] = $info['user_id'];
+            $data['follow'] = $info['follow'];      //todo 获取当前计数值更新关注数、浏览数
+            $data['browse'] = $info['browse'];
+            $data['is_open'] = $info['is_open'];
+            $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode($data, JSON_UNESCAPED_UNICODE));
         }
         return $info;
     }
@@ -137,16 +144,7 @@ class PageService extends Service
         ];
         $this->linkModel->whereIn('id', $incLcIds)->increment('number');
         $this->linkModel->whereIn('id', $incLbIds)->increment('number');
-        $id = $this->pageModel->insertGetId($insert);
-        $data = [
-            'id'         => $id,
-            'follow'     => 0,
-            'is_open'    => 0,
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
-        $this->redis::HSET('user_pages:' . $uid, $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
-        $head['id'] = $id;
-        return $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
+        return $this->pageModel->insertGetId($insert);
 
     }
 
@@ -173,15 +171,6 @@ class PageService extends Service
             $head['badge'] = $headData['badge'] ?? '';
             $head['pendant'] = $headData['pendant'] ?? '';
             $update['head_data'] = json_encode($head, JSON_UNESCAPED_UNICODE);
-            $data = [
-                'id'         => $id,
-                'follow'     => $info['follow'],
-                'is_open'    => $info['is_open'],
-                'created_at' => $info['created_at'],
-            ];
-            $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode(array_merge($data, $head), JSON_UNESCAPED_UNICODE));
-            $head['id'] = $id;
-            $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
         }
         $centerData = $request->input('center_data', []);
         if ($centerData) {
@@ -202,6 +191,7 @@ class PageService extends Service
         $this->redis::HDET('pages_code', $info['code']);
         $this->redis::DEL('info_pages:' . $id);
         $where[] = ['user_id', '=', $info['user_id']];
+        //todo 获取当前计数值更新关注数、浏览数
         return $this->pageModel->whereKey($id)->where($where)->update($update);
     }
 
