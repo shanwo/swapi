@@ -152,7 +152,6 @@ class PageService extends Service
 
     public function edit($request)
     {
-        $incLcIds = $incLbIds = $decLcIds = $decLbIds = $head = [];
         $id = $request->input('id');
         $info = $this->info($id);
         $code = $request->input('code', $info['code']);
