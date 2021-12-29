@@ -84,7 +84,7 @@ class UploadService extends Service
         } else {
             $path = app('env') . '/' . $type . date('/Y/m/');
         }
-        $name = dechex(LARAVEL_START * 10000);
+        $name = uniqid();
         if ($ext) {
             $name = $name . '.' . $ext;
         }
