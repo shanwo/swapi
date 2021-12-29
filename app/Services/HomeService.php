@@ -69,7 +69,7 @@ class HomeService extends Service
         if (!$info) {
             $info = $this->pageService->info($id);
             if (!$info) {
-                $this->redis::SETEX('info_pages:' . $id, 60,'{}');
+                $this->redis::SETEX('info_pages:' . $id, 60, '{}');
                 return ['msg' => '页面不存在'];
             }
         }
@@ -91,9 +91,9 @@ class HomeService extends Service
 
     private function setPage()
     {
-        if ($this->redis::GET('set_home')) return ;
+        if ($this->redis::GET('set_home')) return;
         $where[] = ['is_delete', '=', Service::DELETE_NO];
-        $data = $this->pageModel->select('id', 'user_id', 'follow', 'is_open', 'head_data')->where($where)->get()->toArray();
+        $data = $this->pageModel->select('id', 'user_id', 'follow', 'browse', 'is_open', 'head_data')->where($where)->get()->toArray();
         foreach ($data as $k => &$v) {
             $tmp = json_decode($v['head_data'], true);
             $v = array_merge($v, $tmp);
