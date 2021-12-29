@@ -185,17 +185,17 @@ class PageService extends Service
             $incLcIds = array_column($centerData, 'id');
             $decLcIds = array_column($info['center_data'], 'id');
             $update['center_data'] = json_encode($centerData, JSON_UNESCAPED_UNICODE);
+            $this->linkModel->whereIn('id', $incLcIds)->increment('number');
+            $this->linkModel->whereIn('id', $decLcIds)->decrement('number');
         }
         $bottomData = $request->input('bottom_data', []);
         if ($bottomData) {
             $incLbIds = array_column($bottomData, 'id');
             $decLbIds = array_column($info['bottom_data'], 'id');
             $update['bottom_data'] = json_encode($bottomData, JSON_UNESCAPED_UNICODE);
+            $this->linkModel->whereIn('id', $incLbIds)->increment('number');
+            $this->linkModel->whereIn('id', $decLbIds)->decrement('number');
         }
-        $this->linkModel->whereIn('id', $incLcIds)->increment('number');
-        $this->linkModel->whereIn('id', $incLbIds)->increment('number');
-        $this->linkModel->whereIn('id', $decLcIds)->decrement('number');
-        $this->linkModel->whereIn('id', $decLbIds)->decrement('number');
         $this->redis::DEL('info_pages:' . $id);
         $where[] = ['user_id', '=', $info['user_id']];
         return $this->pageModel->whereKey($id)->where($where)->update($update);
