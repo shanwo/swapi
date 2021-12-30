@@ -77,12 +77,17 @@ class PageService extends Service
             $this->redis::SET('list_pages:' . $id, json_encode($data, JSON_UNESCAPED_UNICODE));
             $data['id'] = $id;
             $data['user_id'] = $info['user_id'];
-            $data['follow'] = $info['follow'];      //todo 获取当前计数值更新关注数、浏览数
+            $data['follow'] = $info['follow'];
             $data['browse'] = $info['browse'];
             $data['is_open'] = $info['is_open'];
             $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode($data, JSON_UNESCAPED_UNICODE));
+            $this->updateNumber($id,$info['user_id']);
         }
         return $info;
+    }
+
+    private function updateNumber ($pid,$uid)
+    {
     }
 
     public function initial($tid, $user)
@@ -191,7 +196,6 @@ class PageService extends Service
         $this->redis::HDET('pages_code', $info['code']);
         $this->redis::DEL('info_pages:' . $id);
         $where[] = ['user_id', '=', $info['user_id']];
-        //todo 获取当前计数值更新关注数、浏览数
         return $this->pageModel->whereKey($id)->where($where)->update($update);
     }
 
