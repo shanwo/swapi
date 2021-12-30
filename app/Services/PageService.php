@@ -7,6 +7,7 @@
 
 namespace App\Services;
 
+use App\Models\BrowseModel;
 use App\Models\LinkModel;
 use App\Models\PageModel;
 use App\Models\TemplateModel;
@@ -15,6 +16,7 @@ class PageService extends Service
 {
     protected $pageModel;
     protected $linkModel;
+    protected $browseModel;
     protected $templateModel;
 
     public function __construct()
@@ -22,6 +24,7 @@ class PageService extends Service
         parent::__construct();
         $this->pageModel = new PageModel();
         $this->linkModel = new LinkModel();
+        $this->browseModel = new BrowseModel();
         $this->templateModel = new TemplateModel();
     }
 
@@ -86,23 +89,50 @@ class PageService extends Service
         return $info;
     }
 
-    private function updateNumber ($pid)
+    private function updateNumber($pid)
     {
-        if ($this->redis::GET('set_page_number:'.$pid)) return;
-        $browses = 0;
-        $this->size = 500;
-        $number = $this->redis::ZCARD('page_browses_click:'.$pid);  //当前用户总浏览信息
+        if ($this->redis::GET('set_page_number:' . $pid)) return;
+        $browses = $uids = [];
+        $this->size = 4;
+        $page = 1;
+        $number = $this->redis::ZCARD('page_browses_click:' . $pid);
         while ($number > 0) {
-            $start = ($this->page - 1) * $this->size;
+            $start = ($page - 1) * $this->size;
             $stop = ($start + $this->size) - 1;
-            $ids = $this->redis::ZREVRANGE('page_browses_click:'.$pid, $start, $stop);
-            $number -= count($ids);
-            $browses += array_sum($ids);
-            $this->page++;
+            $browses += $this->redis::ZRANGE('page_browses_click:' . $pid, $start, $stop, ['WITHSCORES' => true]);
+            $number -= count($browses);
+            $page++;
         }
-        $this->pageModel->whereKey($pid)->increment('browse', $browses);
-        $this->redis::DEL('page_browses_click:'.$pid);
-        return $this->redis::SETEX('set_page_number:'.$pid, $this->oneDay / 2, date('Y-m-d H:i:s'));
+        $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
+        $this->redis::DEL('page_browses_click:' . $pid);
+        $number = $this->redis::LLEN('page_browses:' . $pid);
+        $page = 1;
+        while ($number > 0) {
+            $start = ($page - 1) * $this->size;
+            $stop = ($start + $this->size) - 1;
+            $uids += $this->redis::LRANGE('page_browses:' . $pid, $start, $stop);
+            $number -= count($uids);
+            $page++;
+        }
+        $where[] = ['page_id', '=', $pid];
+        $all = $this->browseModel->select('user_id')->where($where)->get()->toArray();
+        $original = array_column($all, 'user_id');
+        $add = array_diff($uids, $original);
+        $insert = [];
+        foreach ($add as $k => $v) {
+            $insert[] = [
+                'user_id' => $v,
+                'page_id' => $pid,
+                'click'   => $browses[$v]
+            ];
+        }
+        $this->browseModel->insert($insert);
+        //todo 更新现有的值
+        $edit = array_intersect($uids, $original);
+
+        
+        $this->redis::DEL('page_browses:' . $pid);
+        return $this->redis::SETEX('set_page_number:' . $pid, $this->oneDay / 2, date('Y-m-d H:i:s'));
     }
 
     public function initial($tid, $user)
