@@ -7,7 +7,6 @@
 
 namespace App\Services;
 
-use App\Models\BrowseModel;
 use App\Models\PageModel;
 
 class HomeService extends Service
