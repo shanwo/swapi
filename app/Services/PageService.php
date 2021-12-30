@@ -81,13 +81,28 @@ class PageService extends Service
             $data['browse'] = $info['browse'];
             $data['is_open'] = $info['is_open'];
             $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode($data, JSON_UNESCAPED_UNICODE));
-            $this->updateNumber($id,$info['user_id']);
         }
+        $this->updateNumber($id);
         return $info;
     }
 
-    private function updateNumber ($pid,$uid)
+    private function updateNumber ($pid)
     {
+        if ($this->redis::GET('set_page_number:'.$pid)) return;
+        $browses = 0;
+        $this->size = 500;
+        $number = $this->redis::ZCARD('page_browses_click:'.$pid);  //当前用户总浏览信息
+        while ($number > 0) {
+            $start = ($this->page - 1) * $this->size;
+            $stop = ($start + $this->size) - 1;
+            $ids = $this->redis::ZREVRANGE('page_browses_click:'.$pid, $start, $stop);
+            $number -= count($ids);
+            $browses += array_sum($ids);
+            $this->page++;
+        }
+        $this->pageModel->whereKey($pid)->increment('browse', $browses);
+        $this->redis::DEL('page_browses_click:'.$pid);
+        return $this->redis::SETEX('set_page_number:'.$pid, $this->oneDay / 2, date('Y-m-d H:i:s'));
     }
 
     public function initial($tid, $user)
