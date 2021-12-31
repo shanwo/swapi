@@ -195,6 +195,8 @@ class PageService extends Service
     {
         $id = $request->input('id');
         $info = $this->info($id);
+        $uid = $request->user()->id;
+        if($info['user_id'] != $uid) return ['msg' => '页面与用户不匹配'];
         $code = $request->input('code', $info['code']);
         $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();
@@ -233,7 +235,7 @@ class PageService extends Service
         }
         $this->redis::HDET('pages_code', $info['code']);
         $this->redis::DEL('info_pages:' . $id);
-        $where[] = ['user_id', '=', $info['user_id']];
+        $where[] = ['user_id', '=', $uid];
         return $this->pageModel->whereKey($id)->where($where)->update($update);
     }
 

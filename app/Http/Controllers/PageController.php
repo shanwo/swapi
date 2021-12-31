@@ -178,6 +178,11 @@ class PageController extends Controller
             }
         }
         $data = $this->pageService->edit($this->request);
+        if(!empty($data['msg'])){
+            $this->msg = $data['msg'];
+            return $this->returnApi();
+        }
+        $this->code = 200;
         return $this->returnApi($data);
     }
 
