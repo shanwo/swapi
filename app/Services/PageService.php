@@ -199,7 +199,7 @@ class PageService extends Service
         if ($info['user_id'] != $uid) return ['msg' => '页面与用户不匹配'];
         $code = $request->input('code', $info['code']);
         $hid = $this->redis::HGET('pages_code', $code);
-        if($hid != $id) return ['msg' => '闪码已存在'];
+        if ($hid != $id) return ['msg' => '闪码已存在'];
         $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();
         $update = [
