@@ -34,7 +34,7 @@ class PageService extends Service
         $data = $this->redis::HGETALL('user_pages:' . $user->id);
         if (empty($data)) {
             $where[] = ['user_id', '=', $user->id];
-            $data = $this->pageModel->select('id', 'user_id', 'follow', 'browse', 'is_open', 'head_data')->where($where)->get()->toArray();
+            $data = $this->pageModel->select('id', 'user_id', 'follow', 'browse', 'is_open', 'head_data')->where($where)->get()->toArray();//todo 排序
             foreach ($data as $k => &$v) {
                 $tmp = json_decode($v['head_data'], true);
                 $v = array_merge($v, $tmp);
@@ -62,6 +62,8 @@ class PageService extends Service
 
     public function info($id)
     {
+        $this->updateNumber($id);
+        die;
         $info = $this->redis::GET('info_pages:' . $id);
         $info = json_decode($info, true);
         if (!$info) {
@@ -73,7 +75,7 @@ class PageService extends Service
             $info['center_data'] = json_decode($info['center_data'], true);
             $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
-            $this->redis::SET('info_pages:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
+            $this->redis::SETEX('info_pages:' . $id, $this->oneDay * 30, json_encode($info, JSON_UNESCAPED_UNICODE));
             $this->redis::HSET('pages_code', $info['code'], $id);
             $data = $info['head_data'];
             $data['code'] = $info['code'];
@@ -103,8 +105,8 @@ class PageService extends Service
             $number -= count($browses);
             $page++;
         }
-        $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
-        $this->redis::DEL('page_browses_click:' . $pid);
+//        $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
+//        $this->redis::DEL('page_browses_click:' . $pid);
         $number = $this->redis::LLEN('page_browses:' . $pid);
         $page = 1;
         while ($number > 0) {
@@ -115,8 +117,8 @@ class PageService extends Service
             $page++;
         }
         $where[] = ['page_id', '=', $pid];
-        $all = $this->browseModel->select('user_id')->where($where)->get()->toArray();
-        $original = array_column($all, 'user_id');
+        $all = $this->browseModel->select('id','user_id')->where($where)->get()->toArray();
+        $original = array_column($all, 'user_id','id');
         $add = array_diff($uids, $original);
         $insert = [];
         foreach ($add as $k => $v) {
@@ -126,12 +128,28 @@ class PageService extends Service
                 'click'   => $browses[$v]
             ];
         }
-        $this->browseModel->insert($insert);
-        //todo 更新现有的值
-        $edit = array_intersect($uids, $original);
+//        $this->browseModel->insert($insert);
+        $edit = array_intersect($original,$uids);
+        $ids = implode(',', array_keys($edit));
+        $sql1 = 'UPDATE sw_browse SET click = CASE id ';
+        $sql2 = '';
+        foreach ($edit as $id => $ordinal) {
+            $sql2 .=sprintf("WHEN %d THEN click+%d ",$id,$browses[$ordinal]);
+        }
+        $sql3 = "END WHERE id IN ($ids)";
+        $sql = $sql1.$sql2.$sql3;//todo 执行sql
 
-        
-        $this->redis::DEL('page_browses:' . $pid);
+
+        dump($sql);
+        dump($edit);
+//^ array:3 [
+//1 => 2
+//4 => 3
+//6 => 5
+//]
+//        $this->browseModel->where('id', array_keys($edit)); 优化上面sql//https://laravel-news.com/laravel-collections-when-method
+        die;
+//        $this->redis::DEL('page_browses:' . $pid);
         return $this->redis::SETEX('set_page_number:' . $pid, $this->oneDay / 2, date('Y-m-d H:i:s'));
     }
 
