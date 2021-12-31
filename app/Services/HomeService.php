@@ -63,8 +63,7 @@ class HomeService extends Service
     {
         $code = $request->input('code');
         $id = $this->redis::HGET('pages_code', $code);
-        $page = $this->redis::GET('info_pages:' . $id); //todo 页面要设置缓存时间，否则里面的更新无效
-        $info = $this->pageService->info($id); //todo 临时打印
+        $page = $this->redis::GET('info_pages:' . $id);
         $info = json_decode($page, true) ?? [];
         if (!$info) {
             $info = $this->pageService->info($id);

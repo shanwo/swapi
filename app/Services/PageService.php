@@ -62,8 +62,6 @@ class PageService extends Service
 
     public function info($id)
     {
-        $this->updateNumber($id);
-        die;
         $info = $this->redis::GET('info_pages:' . $id);
         $info = json_decode($info, true);
         if (!$info) {
@@ -75,7 +73,7 @@ class PageService extends Service
             $info['center_data'] = json_decode($info['center_data'], true);
             $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
-            $this->redis::SETEX('info_pages:' . $id, $this->oneDay * 30, json_encode($info, JSON_UNESCAPED_UNICODE));
+            $this->redis::SETEX('info_pages:' . $id, $this->oneDay * 7, json_encode($info, JSON_UNESCAPED_UNICODE));
             $this->redis::HSET('pages_code', $info['code'], $id);
             $data = $info['head_data'];
             $data['code'] = $info['code'];
@@ -94,7 +92,7 @@ class PageService extends Service
     private function updateNumber($pid)
     {
         if ($this->redis::GET('set_page_number:' . $pid)) return;
-        $browses = $uids = [];
+        $browses = [];
         $this->size = 4;
         $page = 1;
         $number = $this->redis::ZCARD('page_browses_click:' . $pid);
@@ -105,51 +103,28 @@ class PageService extends Service
             $number -= count($browses);
             $page++;
         }
-//        $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
-//        $this->redis::DEL('page_browses_click:' . $pid);
-        $number = $this->redis::LLEN('page_browses:' . $pid);
-        $page = 1;
-        while ($number > 0) {
-            $start = ($page - 1) * $this->size;
-            $stop = ($start + $this->size) - 1;
-            $uids += $this->redis::LRANGE('page_browses:' . $pid, $start, $stop);
-            $number -= count($uids);
-            $page++;
-        }
+        $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
         $where[] = ['page_id', '=', $pid];
-        $all = $this->browseModel->select('id','user_id')->where($where)->get()->toArray();
-        $original = array_column($all, 'user_id','id');
-        $add = array_diff($uids, $original);
+        $allBrowse = $this->browseModel->select('id','user_id')->where($where)->get()->toArray();
+        $original = array_column($allBrowse,'id', 'user_id');
+        $add = array_diff_key($browses, $original);
         $insert = [];
         foreach ($add as $k => $v) {
             $insert[] = [
-                'user_id' => $v,
+                'user_id' => $k,
                 'page_id' => $pid,
-                'click'   => $browses[$v]
+                'click'   => $v
             ];
         }
-//        $this->browseModel->insert($insert);
-        $edit = array_intersect($original,$uids);
-        $ids = implode(',', array_keys($edit));
-        $sql1 = 'UPDATE sw_browse SET click = CASE id ';
-        $sql2 = '';
-        foreach ($edit as $id => $ordinal) {
-            $sql2 .=sprintf("WHEN %d THEN click+%d ",$id,$browses[$ordinal]);
+        $this->browseModel->insert($insert);
+        $edit = array_intersect_key($original,$browses);
+        $ids = implode(',', array_values($edit));
+        $sql = "UPDATE sw_browse SET click = CASE id ";
+        foreach ($edit as $uid => $id) {
+            $sql .=sprintf("WHEN %d THEN click + %d ",$id,$browses[$uid]);
         }
-        $sql3 = "END WHERE id IN ($ids)";
-        $sql = $sql1.$sql2.$sql3;//todo 执行sql
-
-
-        dump($sql);
-        dump($edit);
-//^ array:3 [
-//1 => 2
-//4 => 3
-//6 => 5
-//]
-//        $this->browseModel->where('id', array_keys($edit)); 优化上面sql//https://laravel-news.com/laravel-collections-when-method
-        die;
-//        $this->redis::DEL('page_browses:' . $pid);
+        \Illuminate\Support\Facades\DB::update($sql."END WHERE id IN ($ids)");
+        $this->redis::DEL('page_browses_click:' . $pid);
         return $this->redis::SETEX('set_page_number:' . $pid, $this->oneDay / 2, date('Y-m-d H:i:s'));
     }
 
