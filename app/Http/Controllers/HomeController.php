@@ -35,7 +35,7 @@ class HomeController extends Controller
             return $this->returnApi();
         }
         $data = $this->homeService->hot($this->request);
-        $data['ad'] = $this->adService->info($this->request,1);
+        $data['ad'] = $this->adService->info($this->request, 1);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -51,7 +51,7 @@ class HomeController extends Controller
             return $this->returnApi();
         }
         $data = $this->homeService->recent($this->request);
-        $data['ad'] = $this->adService->info($this->request,2);
+        $data['ad'] = $this->adService->info($this->request, 2);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -67,8 +67,8 @@ class HomeController extends Controller
             return $this->returnApi();
         }
         $data = $this->homeService->info($this->request);
-        $data['ad'] = $this->adService->info($this->request,3);
-        if(!empty($data['msg'])){
+        $data['ad'] = $this->adService->info($this->request, 3);
+        if (!empty($data['msg'])) {
             $this->msg = $data['msg'];
             return $this->returnApi();
         }

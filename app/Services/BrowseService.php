@@ -60,7 +60,7 @@ class BrowseService extends Service
 
     private function setPage($pid)
     {
-        if ($this->redis::GET('set_page_browses')) return ;
+        if ($this->redis::GET('set_page_browses')) return;
         $where[] = ['page_id', '=', $pid];
         $all = $this->browseModel->select('user_id')->where($where)->get()->toArray();
         foreach ($all as $k => $v) {
@@ -71,7 +71,7 @@ class BrowseService extends Service
 
     private function setUser($uid)
     {
-        if ($this->redis::GET('set_user_browses')) return ;
+        if ($this->redis::GET('set_user_browses')) return;
         $where[] = ['user_id', '=', $uid];
         $all = $this->browseModel->select('page_id')->where($where)->get()->toArray();
         foreach ($all as $k => $v) {

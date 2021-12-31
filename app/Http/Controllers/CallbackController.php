@@ -127,12 +127,12 @@ class CallbackController extends Controller
             $pay = $this->service->redis::HGET('pay_channel:' . $res['channel'], $res['pay_id']);
             $pay = json_decode($pay, true);
             $user = $this->userService->info($res['user_id']);
-            if($user['type'] != OrderService::USER_VIP){
+            if ($user['type'] != OrderService::USER_VIP) {
                 return $fail('非会员状态不可发起退款');
             }
             $expired = strtotime($user['expired_at']);
             $endTime = time() + $this->service->lengthTime($pay['type']) - 60;
-            if($expired < $endTime){
+            if ($expired < $endTime) {
                 return $fail('会员到期时间小于购买时间，不可发起退款');
             }
             $expired = $expired - $this->service->lengthTime($pay['type']);

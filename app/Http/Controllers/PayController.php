@@ -97,7 +97,7 @@ class PayController extends Controller
         }
         $order_sn = $this->request->input('order_sn');
         $data = $this->payment->order->queryByOutTradeNumber($order_sn);
-        $data['ad'] = $this->adService->info($this->request,10);
+        $data['ad'] = $this->adService->info($this->request, 10);
         $this->code = 200;
         return $this->returnApi($data);
     }

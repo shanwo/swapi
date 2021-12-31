@@ -105,8 +105,8 @@ class PageService extends Service
         }
         $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
         $where[] = ['page_id', '=', $pid];
-        $allBrowse = $this->browseModel->select('id','user_id')->where($where)->get()->toArray();
-        $original = array_column($allBrowse,'id', 'user_id');
+        $allBrowse = $this->browseModel->select('id', 'user_id')->where($where)->get()->toArray();
+        $original = array_column($allBrowse, 'id', 'user_id');
         $add = array_diff_key($browses, $original);
         $insert = [];
         foreach ($add as $k => $v) {
@@ -117,13 +117,13 @@ class PageService extends Service
             ];
         }
         $this->browseModel->insert($insert);
-        $edit = array_intersect_key($original,$browses);
+        $edit = array_intersect_key($original, $browses);
         $ids = implode(',', array_values($edit));
         $sql = "UPDATE sw_browse SET click = CASE id ";
         foreach ($edit as $uid => $id) {
-            $sql .=sprintf("WHEN %d THEN click + %d ",$id,$browses[$uid]);
+            $sql .= sprintf("WHEN %d THEN click + %d ", $id, $browses[$uid]);
         }
-        \Illuminate\Support\Facades\DB::update($sql."END WHERE id IN ($ids)");
+        \Illuminate\Support\Facades\DB::update($sql . "END WHERE id IN ($ids)");
         $this->redis::DEL('page_browses_click:' . $pid);
         return $this->redis::SETEX('set_page_number:' . $pid, $this->oneDay / 2, date('Y-m-d H:i:s'));
     }
@@ -196,7 +196,7 @@ class PageService extends Service
         $id = $request->input('id');
         $info = $this->info($id);
         $uid = $request->user()->id;
-        if($info['user_id'] != $uid) return ['msg' => '页面与用户不匹配'];
+        if ($info['user_id'] != $uid) return ['msg' => '页面与用户不匹配'];
         $code = $request->input('code', $info['code']);
         $tid = $request->input('template_id');
         $template = $this->templateModel->whereKey($tid)->first();

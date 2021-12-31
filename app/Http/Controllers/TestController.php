@@ -38,7 +38,7 @@ class TestController extends Controller
         }
         $id = $this->request->input('id');
         $user = $this->userService->info($id);
-        $data = $this->pageService->initial(1,$user);
+        $data = $this->pageService->initial(1, $user);
         $this->code = 200;
         return $this->returnApi($data);
     }

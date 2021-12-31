@@ -35,7 +35,7 @@ class PageController extends Controller
             return $this->returnApi();
         }
         $data = $this->pageService->lists($this->request);
-        $data['ad'] = $this->adService->info($this->request,4);
+        $data['ad'] = $this->adService->info($this->request, 4);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -100,11 +100,11 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        if($this->request->user()->type != $this->pageService::USER_VIP){
+        if ($this->request->user()->type != $this->pageService::USER_VIP) {
             $this->request->except('background');
         }
         $pages = $this->service->redis::HKEYS('user_pages:' . $this->request->user()->id);
-        if(count($pages) >= $this->request->user()->pages) {
+        if (count($pages) >= $this->request->user()->pages) {
             $this->msg = '您的闪页数已达上限';
             return $this->returnApi();
         }
@@ -161,24 +161,24 @@ class PageController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        if($this->request->user()->type != $this->pageService::USER_VIP){
+        if ($this->request->user()->type != $this->pageService::USER_VIP) {
             $this->request->except('code');
             $this->request->except('background');
             $pages = $this->service->redis::HKEYS('user_pages:' . $this->request->user()->id);
             sort($pages);
-            if(reset($pages) != $this->request->input('id')) {
+            if (reset($pages) != $this->request->input('id')) {
                 $this->msg = '此闪页开通会员后可修改';
                 return $this->returnApi();
             }
             $template = $this->service->redis::GET('template_infos:' . $this->request->input('template_id'));
             $template = json_decode($template, true);
-            if($template['type'] == $this->pageService::USER_VIP) {
+            if ($template['type'] == $this->pageService::USER_VIP) {
                 $this->msg = '此模板开通会员后可使用';
                 return $this->returnApi();
             }
         }
         $data = $this->pageService->edit($this->request);
-        if(!empty($data['msg'])){
+        if (!empty($data['msg'])) {
             $this->msg = $data['msg'];
             return $this->returnApi();
         }
@@ -189,13 +189,13 @@ class PageController extends Controller
     public function status()
     {
         $this->validate([
-            'id'        => 'required|integer|gt:0|exists:sw_page,id',
-            'is_open'   => 'required_without:status|integer|between:0,1',
-            'status'    => 'required_without:is_open|integer|between:-1,1',
+            'id'      => 'required|integer|gt:0|exists:sw_page,id',
+            'is_open' => 'required_without:status|integer|between:0,1',
+            'status'  => 'required_without:is_open|integer|between:-1,1',
         ], [
-            'id'        => 'ID',
-            'is_open'   => '广场',
-            'status'    => '状态',
+            'id'      => 'ID',
+            'is_open' => '广场',
+            'status'  => '状态',
         ]);
         if ($this->msg) {
             return $this->returnApi();
