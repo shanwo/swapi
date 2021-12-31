@@ -75,14 +75,14 @@ class HomeService extends Service
         if (!$this->redis::GET('click:' . $id . ':' . $request->ip())) {
             $this->redis::ZINCRBY('hot', 1, $id);
             $this->redis::SETEX('click:' . $id . ':' . $request->ip(), 15, date('Y-m-d H:i:s'));
-            $uid = $request->user()->id;
-            if ($uid) {
-                $this->redis::ZINCRBY('user_browses_click:' . $uid, 1, $id);
-                $this->redis::ZINCRBY('page_browses_click:' . $id, 1, $uid);
-                $this->redis::LREM('user_browses:' . $uid, 0, $id);
-                $this->redis::LREM('page_browses:' . $id, 0, $uid);
-                $this->redis::LPUSH('user_browses:' . $uid, $id);
-                $this->redis::LPUSH('page_browses:' . $id, $uid);
+            $user = $request->user();
+            if ($user) {
+                $this->redis::ZINCRBY('user_browses_click:' . $user->id, 1, $id);
+                $this->redis::ZINCRBY('page_browses_click:' . $id, 1, $user->id);
+                $this->redis::LREM('user_browses:' . $user->id, 0, $id);
+                $this->redis::LREM('page_browses:' . $id, 0, $user->id);
+                $this->redis::LPUSH('user_browses:' . $user->id, $id);
+                $this->redis::LPUSH('page_browses:' . $id, $user->id);
             }
         }
         return $info;
