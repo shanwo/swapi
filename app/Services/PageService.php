@@ -92,16 +92,15 @@ class PageService extends Service
     private function updateNumber($pid)
     {
         if ($this->redis::GET('set_page_number:' . $pid)) return;
+        $this->size = 200;
         $browses = [];
-        $this->size = 4;
-        $page = 1;
         $number = $this->redis::ZCARD('page_browses_click:' . $pid);
         while ($number > 0) {
-            $start = ($page - 1) * $this->size;
+            $start = ($this->page - 1) * $this->size;
             $stop = ($start + $this->size) - 1;
             $browses += $this->redis::ZRANGE('page_browses_click:' . $pid, $start, $stop, ['WITHSCORES' => true]);
             $number -= count($browses);
-            $page++;
+            $this->page++;
         }
         $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
         $where[] = ['page_id', '=', $pid];
