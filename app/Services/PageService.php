@@ -95,11 +95,10 @@ class PageService extends Service
         $this->size = 200;
         $browses = [];
         $number = $this->redis::ZCARD('page_browses_click:' . $pid);
-        while ($number > 0) {
+        while ($number > count($browses)) {
             $start = ($this->page - 1) * $this->size;
             $stop = ($start + $this->size) - 1;
             $browses += $this->redis::ZRANGE('page_browses_click:' . $pid, $start, $stop, ['WITHSCORES' => true]);
-            $number -= count($browses);
             $this->page++;
         }
         $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
