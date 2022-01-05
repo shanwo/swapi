@@ -117,7 +117,7 @@ class PageService extends Service
         $this->browseModel->insert($insert);
         $edit = array_intersect_key($original, $browses);
         $ids = implode(',', array_values($edit));
-        $sql = "UPDATE sw_browse SET click = CASE id ";
+        $sql = "UPDATE sw_browse SET click = CASE id "; //todo 逻辑有疑问，待验证
         foreach ($edit as $uid => $id) {
             $sql .= sprintf("WHEN %d THEN click + %d ", $id, $browses[$uid]);
         }
