@@ -155,7 +155,7 @@ class PageService extends Service
     public function edit($request)
     {
         $id = $request->input('id');
-        $info = $this->info($id);
+        $info = $this->pageModel->whereKey($id)->first();
         $uid = $request->user()->id;
         if ($info['user_id'] != $uid) return ['msg' => '页面与用户不匹配'];
         $code = $request->input('code', $info['code']);
@@ -205,20 +205,13 @@ class PageService extends Service
     public function status($request)
     {
         $uid = $request->user()->id;
-        $where[] = ['user_id', '=', $uid];
         $update = [];
         $id = $request->input('id');
         $open = $request->input('is_open');
-        if (is_numeric($open)) {
-            $update['is_open'] = $open;
-            if ($open == 2) {
-                $this->redis::SADD('recent', $id);
-//                $info = $this->info($id);
-//                $this->redis::ZADD('hot', $info['browse'] + $info['sort'], $id);
-            } else {
-                $this->redis::SREM('recent', $id);
-                $this->redis::ZREM('hot', $id);
-            }
+        $update['is_open'] = $open;
+        if(!$open){
+            $this->redis::SREM('recent', $id);
+            $this->redis::ZREM('hot', $id);
         }
         $status = $request->input('status');
         if ($status == -1) {
@@ -230,6 +223,7 @@ class PageService extends Service
             $update['status'] = $status;
             $this->updateNumber($id);
         }
+        $where[] = ['user_id', '=', $uid];
         return $this->pageModel->whereKey($id)->where($where)->update($update);
     }
 
