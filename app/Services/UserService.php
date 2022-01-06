@@ -36,6 +36,7 @@ class UserService extends Service
         $info = json_decode($info, true) ?? [];
         if (!$info) {
             $info = $this->userModel->whereKey($id)->first();
+            if ($info['type'] == Service::USER_DISABLE) return ['msg' => '当前账户已被禁用，不可登录'];
             $info['contact'] = json_decode($info['contact'], true);
             $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'open_id', 'login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
             $this->redis::SET('user_infos:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
@@ -116,7 +117,7 @@ class UserService extends Service
             $config['name'] = $configName;
             $uid = $this->wechat($user, $config);
             $data = $this->info($uid);
-            $this->redis::SETEX('user_tokens:' . $data['api_token'], $this->oneDay * 30, $uid);
+            if (!empty($data['api_token'])) $this->redis::SETEX('user_tokens:' . $data['api_token'], $this->oneDay * 30, $uid);
         } catch (AuthorizeFailedException $e) {
             $data['msg'] = '(' . $e->body['errcode'] . '):' . $e->body['errmsg'];
         }
@@ -163,7 +164,7 @@ class UserService extends Service
                 $insertUser['id'] = $this->uid;
                 $pageService = new PageService();
                 $pageService->initial(env('USER_TEMPLATE', 1), $insertUser);
-            } else {    //绑定用户，闪页数量+1
+            } else {
                 $updateUser = [
                     'api_token' => $token
                 ];
