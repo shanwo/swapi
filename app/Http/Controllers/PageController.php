@@ -190,7 +190,7 @@ class PageController extends Controller
     {
         $this->validate([
             'id'      => 'required|integer|gt:0|exists:sw_page,id',
-            'is_open' => 'required_without:status|integer|between:0,1',
+            'is_open' => 'required_without:status|integer|between:0,3',
             'status'  => 'required_without:is_open|integer|between:-1,1',
         ], [
             'id'      => 'ID',
