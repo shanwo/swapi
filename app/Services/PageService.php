@@ -89,43 +89,6 @@ class PageService extends Service
         return $info;
     }
 
-    private function updateNumber($pid)
-    {
-        if ($this->redis::GET('set_page_number:' . $pid)) return;
-        $this->size = 200;
-        $browses = [];
-        $number = $this->redis::ZCARD('page_browses_click:' . $pid);
-        while ($number > count($browses)) {
-            $start = ($this->page - 1) * $this->size;
-            $stop = ($start + $this->size) - 1;
-            $browses += $this->redis::ZRANGE('page_browses_click:' . $pid, $start, $stop, ['WITHSCORES' => true]);
-            $this->page++;
-        }
-        $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
-        $where[] = ['page_id', '=', $pid];
-        $allBrowse = $this->browseModel->select('id', 'user_id')->where($where)->get()->toArray();
-        $original = array_column($allBrowse, 'id', 'user_id');
-        $add = array_diff_key($browses, $original);
-        $insert = [];
-        foreach ($add as $k => $v) {
-            $insert[] = [
-                'user_id' => $k,
-                'page_id' => $pid,
-                'click'   => $v
-            ];
-        }
-        $this->browseModel->insert($insert);
-        $edit = array_intersect_key($original, $browses);
-        $ids = implode(',', array_values($edit));
-        $sql = "UPDATE sw_browse SET click = CASE id "; //todo 逻辑有疑问，待验证
-        foreach ($edit as $uid => $id) {
-            $sql .= sprintf("WHEN %d THEN click + %d ", $id, $browses[$uid]);
-        }
-        \Illuminate\Support\Facades\DB::update($sql . "END WHERE id IN ($ids)");
-        $this->redis::DEL('page_browses_click:' . $pid);
-        return $this->redis::SETEX('set_page_number:' . $pid, $this->oneDay / 2, date('Y-m-d H:i:s'));
-    }
-
     public function initial($tid, $user)
     {
         $template = $this->templateModel->whereKey($tid)->first();
@@ -248,9 +211,9 @@ class PageService extends Service
         $open = $request->input('is_open');
         if (is_numeric($open)) {
             $update['is_open'] = $open;
-            if ($open) {
+            if ($open == 2) {
+                $this->redis::SADD('recent', $id);
 //                $info = $this->info($id);
-//                $this->redis::SADD('recent', $id);
 //                $this->redis::ZADD('hot', $info['browse'] + $info['sort'], $id);
             } else {
                 $this->redis::SREM('recent', $id);
@@ -258,14 +221,51 @@ class PageService extends Service
             }
         }
         $status = $request->input('status');
-        if ($status) {
+        if ($status == -1) {
             $this->redis::ZREM('hot', $id);
             $this->redis::SREM('recent', $id);
             $this->redis::DEL('list_pages:' . $id);
             $this->redis::DEL('info_pages:' . $id);
             $this->redis::HDEL('user_pages:' . $uid, $id);
             $update['status'] = $status;
+            $this->updateNumber($id);
         }
         return $this->pageModel->whereKey($id)->where($where)->update($update);
+    }
+
+    private function updateNumber($pid)
+    {
+        if ($this->redis::GET('set_page_number:' . $pid)) return;
+        $this->size = 200;
+        $ids = $browses = [];
+        $number = $this->redis::ZCARD('page_browses_click:' . $pid);
+        while ($number > count($browses)) {
+            $start = ($this->page - 1) * $this->size;
+            $stop = ($start + $this->size) - 1;
+            $browses += $this->redis::ZRANGE('page_browses_click:' . $pid, $start, $stop, ['WITHSCORES' => true]);
+            $this->page++;
+        }
+        $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
+        $allBrowse = $this->browseModel->select('id', 'user_id')->where('page_id', '=', $pid)->get()->toArray();
+        $original = array_column($allBrowse, 'id', 'user_id');
+        $add = array_diff_key($browses, $original);
+        $insert = [];
+        foreach ($add as $uid => $num) {
+            $insert[] = ['user_id' => $uid, 'page_id' => $pid, 'click' => $num];
+        }
+        $this->browseModel->insert($insert);
+        $edit = array_intersect_key($browses, $original);
+        $sql = "UPDATE sw_browse SET click = CASE id ";
+        foreach ($edit as $uid => $num) {
+            $ids[] = $original[$uid];
+            $sql .= sprintf("WHEN %d THEN click + %d ", $original[$uid], $num);
+        }
+        $ids = implode(',', $ids);
+        \Illuminate\Support\Facades\DB::update($sql . "END WHERE id IN ($ids)");
+        foreach ($browses as $uid => $num) {
+            $this->redis::ZRANK('user_browses_click:' . $uid, $pid);
+        }
+        $this->redis::DEL('page_browses_click:' . $pid);
+        return $this->redis::SETEX('set_page_number:' . $pid, $this->oneDay / 24, date('Y-m-d H:i:s'));
     }
 }
