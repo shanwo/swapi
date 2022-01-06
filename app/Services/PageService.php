@@ -204,8 +204,8 @@ class PageService extends Service
 
     public function status($request)
     {
-        $uid = $request->user()->id;
         $update = [];
+        $uid = $request->user()->id;
         $id = $request->input('id');
         $open = $request->input('is_open');
         $update['is_open'] = $open;
