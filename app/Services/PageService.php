@@ -75,15 +75,15 @@ class PageService extends Service
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
             $this->redis::SETEX('info_pages:' . $id, rand($this->oneDay * 3, $this->oneDay * 7), json_encode($info, JSON_UNESCAPED_UNICODE));
             $this->redis::HSET('pages_code', $info['code'], $id);
-            $data = $info['head_data'];
-            $data['code'] = $info['code'];
-            $this->redis::SET('list_pages:' . $id, json_encode($data, JSON_UNESCAPED_UNICODE));
-            $data['id'] = $id;
-            $data['user_id'] = $info['user_id'];
-            $data['follow'] = $info['follow'];
-            $data['browse'] = $info['browse'];
-            $data['is_open'] = $info['is_open'];
-            $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode($data, JSON_UNESCAPED_UNICODE));
+            $head = $info['head_data'];
+            $head['code'] = $info['code'];
+            $this->redis::SET('list_pages:' . $id, json_encode($head, JSON_UNESCAPED_UNICODE));
+            $head['id'] = $id;
+            $head['user_id'] = $info['user_id'];
+            $head['follow'] = $info['follow'];
+            $head['browse'] = $info['browse'];
+            $head['is_open'] = $info['is_open'];
+            $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode($head, JSON_UNESCAPED_UNICODE));
         }
         $this->updateNumber($id);
         return $info;
