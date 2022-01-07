@@ -7,6 +7,7 @@
 
 namespace App\Services;
 
+use App\Models\AttentionModel;
 use App\Models\BrowseModel;
 use App\Models\LinkModel;
 use App\Models\PageModel;
@@ -18,6 +19,7 @@ class PageService extends Service
     protected $linkModel;
     protected $browseModel;
     protected $templateModel;
+    protected $attentionModel;
 
     public function __construct()
     {
@@ -26,6 +28,7 @@ class PageService extends Service
         $this->linkModel = new LinkModel();
         $this->browseModel = new BrowseModel();
         $this->templateModel = new TemplateModel();
+        $this->attentionModel = new AttentionModel();
     }
 
     public function lists($request)
@@ -85,7 +88,8 @@ class PageService extends Service
             $head['is_open'] = $info['is_open'];
             $this->redis::HSET('user_pages:' . $info['user_id'], $id, json_encode($head, JSON_UNESCAPED_UNICODE));
         }
-        $this->updateNumber($id);
+        $this->updateBrowse($id);
+        $this->updateAttention($id);
         return $info;
     }
 
@@ -209,7 +213,7 @@ class PageService extends Service
         $id = $request->input('id');
         $open = $request->input('is_open');
         $update['is_open'] = $open;
-        if(!$open){
+        if (!$open) {
             $this->redis::SREM('recent', $id);
             $this->redis::ZREM('hot', $id);
         }
@@ -221,13 +225,19 @@ class PageService extends Service
             $this->redis::DEL('info_pages:' . $id);
             $this->redis::HDEL('user_pages:' . $uid, $id);
             $update['status'] = $status;
-            $this->updateNumber($id);
+            $this->updateBrowse($id);
+            $this->updateAttention($id);
         }
         $where[] = ['user_id', '=', $uid];
         return $this->pageModel->whereKey($id)->where($where)->update($update);
     }
 
-    private function updateNumber($pid)
+    /**
+     * 更新缓存的浏览数入库
+     * @param $pid
+     * @return void
+     */
+    private function updateBrowse($pid)
     {
         if ($this->redis::GET('set_page_number:' . $pid)) return;
         $this->size = 200;
@@ -261,5 +271,38 @@ class PageService extends Service
         }
         $this->redis::DEL('page_browses_click:' . $pid);
         return $this->redis::SETEX('set_page_number:' . $pid, $this->oneDay / 24, date('Y-m-d H:i:s'));
+    }
+
+    /**
+     * 更新缓存的关注数入库
+     * @param $pid
+     * @return void
+     */
+    public function updateAttention($pid)
+    {
+        if ($this->redis::GET('set_page_attention:' . $pid)) return;
+        $this->size = 200;
+        $insert = $attentions = [];
+        $number = $this->redis::ZCARD('page_attentions:' . $pid);
+        while ($number > count($attentions)) {
+            $start = ($this->page - 1) * $this->size;
+            $stop = ($start + $this->size) - 1;
+            $attentions += $this->redis::ZREVRANGE('page_attentions:' . $pid, $start, $stop, ['WITHSCORES' => true]);
+            $this->page++;
+        }
+        $allAttention = $this->attentionModel->select('id', 'user_id')->where('page_id', '=', $pid)->get()->toArray();
+        $original = array_column($allAttention, 'id', 'user_id');
+        $add = array_diff_key($attentions, $original);
+        foreach ($add as $uid => $num) {
+            $date = date('Y-m-d H:i:s', intval($num));
+            $insert[] = ['user_id' => $uid, 'page_id' => $pid, 'status' => self::ENABLE, 'updated_at' => $date, 'created_at' => $date];
+        }
+        $this->attentionModel->insert($insert);
+        $edit = array_diff_key($original, $attentions);
+        $this->pageModel->whereKey($pid)->increment('follow', count($add));
+        $this->pageModel->whereKey($pid)->decrement('follow', count($edit));
+        $this->attentionModel->whereIn('id', array_values($edit))->update(['status' => self::DISABLE]);
+        $this->redis::DEL('page_attentions:' . $pid);
+        return $this->redis::SETEX('set_page_attention:' . $pid, $this->oneDay / 24, date('Y-m-d H:i:s'));
     }
 }
