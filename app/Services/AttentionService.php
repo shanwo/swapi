@@ -27,26 +27,26 @@ class AttentionService extends Service
         $pid = $request->input('page_id', 0);
         $lists = [];
         if ($pid) {
-            $pages = $this->redis::LRANGE('page_attentions:' . $pid, $start, $stop);
-            if (!$start && !$pages) $this->setPage($pid);
-            $total = $this->redis::LLEN('page_attentions:' . $pid);
-            foreach ($pages as $k => $v) {
-                $info = $this->redis::GET('list_pages:' . $v);
-                $info = json_decode($info, true);
+            $data = $this->redis::ZREVRANGE('page_attentions:' . $pid, $start, $stop);
+            if (!$start && !$data) $data = $this->setPage($pid);
+            $total = $this->redis::ZCARD('page_attentions:' . $pid);
+            foreach ($data as $k => $v) {
+                $info = $this->redis::GET('user_infos:' . $v);
                 if ($info) {
+                    $info = json_decode($info, true);
                     $lists[] = ['id' => $v, 'avatar' => $info['avatar'], 'nickname' => $info['nickname']];
                 }
             }
         } else {
             $uid = $request->user()->id;
-            $users = $this->redis::LRANGE('user_attentions:' . $uid, $start, $stop);
-            if (!$start && !$users) $this->setUser($uid);
-            $total = $this->redis::LLEN('user_attentions:' . $uid);
-            foreach ($users as $k => $v) {
-                $info = $this->redis::GET('user_infos:' . $v);
+            $data = $this->redis::ZREVRANGE('user_attentions:' . $uid, $start, $stop);
+            if (!$start && !$data) $data = $this->setUser($uid);
+            $total = $this->redis::ZCARD('user_attentions:' . $uid);
+            foreach ($data as $k => $v) {
+                $info = $this->redis::GET('list_pages:' . $v);
+                $info = json_decode($info, true);
                 if ($info) {
-                    $info = json_decode($info, true);
-                    $lists[] = ['id' => $info['id'], 'avatar' => $info['avatar'], 'nickname' => $info['nickname']];
+                    $lists[] = ['id' => $v, 'avatar' => $info['avatar'], 'nickname' => $info['nickname']];
                 }
             }
         }
@@ -64,11 +64,11 @@ class AttentionService extends Service
         $pid = $request->input('page_id');
         $status = $request->input('status');
         if ($status) {
-            $this->redis::LPUSH('user_attentions:' . $uid, $pid);
-            $this->redis::LPUSH('page_attentions:' . $pid, $uid);
+            $this->redis::ZADD('user_attentions:' . $uid, time(), $pid);
+            $this->redis::ZADD('page_attentions:' . $pid, time(), $uid);
         } else {
-            $this->redis::LREM('user_attentions:' . $uid, 0, $pid);
-            $this->redis::LREM('page_attentions:' . $pid, 0, $uid);
+            $this->redis::ZREM('user_attentions:' . $uid, $pid);
+            $this->redis::ZREM('user_attentions:' . $pid, $uid);
         }
     }
 
@@ -77,11 +77,12 @@ class AttentionService extends Service
         if ($this->redis::GET('set_page_attentions')) return;
         $where[] = ['status', '<>', -1];
         $where[] = ['page_id', '=', $pid];
-        $all = $this->attentionModel->select('user_id')->where($where)->get()->toArray();
+        $all = $this->attentionModel->select('user_id','updated_at')->where($where)->get()->toArray();
         foreach ($all as $k => $v) {
-            $this->redis::LPUSH('page_attentions:' . $pid, $v['user_id']);
+            $this->redis::ZADD('page_attentions:' . $pid, strtotime($v['updated_at']), $v['user_id']);
         }
         $this->redis::SETEX('set_page_attentions', 15, date('Y-m-d H:i:s'));
+        return array_column($all,'user_id');
     }
 
     private function setUser($uid)
@@ -89,10 +90,11 @@ class AttentionService extends Service
         if ($this->redis::GET('set_user_attentions')) return;
         $where[] = ['status', '<>', -1];
         $where[] = ['user_id', '=', $uid];
-        $all = $this->attentionModel->select('page_id')->where($where)->get()->toArray();
+        $all = $this->attentionModel->select('page_id','updated_at')->where($where)->get()->toArray();
         foreach ($all as $k => $v) {
-            $this->redis::LPUSH('user_attentions:' . $uid, $v['page_id']);
+            $this->redis::ZADD('user_attentions:' . $uid, strtotime($v['updated_at']), $v['page_id']);
         }
         $this->redis::SETEX('set_user_attentions', 15, date('Y-m-d H:i:s'));
+        return array_column($all,'page_id');
     }
 }
