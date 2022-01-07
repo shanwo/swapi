@@ -246,7 +246,7 @@ class PageService extends Service
         while ($number > count($browses)) {
             $start = ($this->page - 1) * $this->size;
             $stop = ($start + $this->size) - 1;
-            $browses += $this->redis::ZRANGE('page_browses_click:' . $pid, $start, $stop, ['WITHSCORES' => true]);
+            $browses += $this->redis::ZRANGE('page_browses_click:' . $pid, $start, $stop, true);
             $this->page++;
         }
         $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
@@ -287,7 +287,7 @@ class PageService extends Service
         while ($number > count($attentions)) {
             $start = ($this->page - 1) * $this->size;
             $stop = ($start + $this->size) - 1;
-            $attentions += $this->redis::ZREVRANGE('page_attentions:' . $pid, $start, $stop, ['WITHSCORES' => true]);
+            $attentions += $this->redis::ZREVRANGE('page_attentions:' . $pid, $start, $stop, true);
             $this->page++;
         }
         $allAttention = $this->attentionModel->select('id', 'user_id')->where('page_id', '=', $pid)->get()->toArray();
