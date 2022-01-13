@@ -67,9 +67,9 @@ class OfficialServe extends Service
                 'content'  => mb_substr($keyword, 4)
             ];
             $this->feedbackModel->insertGetId($insert);
-            return '您提交的信息我已经记下啦';
+            return '你提交的信息小闪已经记下啦[耶]';
         }
-        return "如果您有什么想说的，请发送\n#闪我#[您想说的话]";
+        return "小闪搞没懂你的意思哇\n如果你有什么想说的，请发送\n#闪我#[想说的话]";
     }
 
     /**
