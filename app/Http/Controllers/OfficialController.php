@@ -63,13 +63,13 @@ class OfficialController extends Controller
         $this->service->redis::SETEX('request_official:request:' . time(), $this->service->oneDay / 2, json_encode($this->request->all()));
         $this->official->server->push(function ($message) use ($user) {
             $this->service->redis::SETEX('request_official:message:' . time(), $this->service->oneDay / 2, json_encode($message));
+            $config = $this->official->getConfig();
+            $config['name'] = 'official';
             switch ($message['MsgType']) {
                 case 'event':
-                    $config = $this->official->getConfig();
-                    $config['name'] = 'official';
                     return $this->officialServe->eventType($message, $user, $config);
                 case 'text':
-                    return $this->officialServe->textType($message);
+                    return $this->officialServe->textType($message,$config);
                 case 'image':
                     return $this->officialServe->imageType($message);
                 case 'voice':
