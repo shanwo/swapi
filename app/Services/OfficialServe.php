@@ -40,7 +40,7 @@ class OfficialServe extends Service
                     $this->replyModel->whereKey($v['id'])->increment('number', $number);
                     $this->redis::ZREM('reply_number', $v['keyword']);
                 }
-                $v['comment'] = json_decode($v['comment'],true);
+                $v['comment'] = json_decode($v['comment'], true);
                 $this->redis::HSET('reply', $v['keyword'], json_encode($v));
                 if ($v['keyword'] == $keyword) $data = $v;
             }
@@ -152,6 +152,7 @@ class OfficialServe extends Service
         if ($message['Recognition']) {
             $message['Content'] = $message['Recognition'];
             $voice = $this->reply($message);
+            if (!$voice) return '你说：' . $message['Recognition'];
             return $this->replyMsg($voice);
         }
         return '语音信息识别失败';
@@ -165,8 +166,8 @@ class OfficialServe extends Service
     public function locationType($message)
     {
         return "此位置是：" . $message['Label'] .
-            "\n位置经度:" . $message['Location_Y'] .
-            "\n位置纬度:" . $message['Location_X'];
+            "\n经度:" . $message['Location_Y'] .
+            "\n纬度:" . $message['Location_X'];
     }
 
     public function linkType($message)
@@ -174,6 +175,7 @@ class OfficialServe extends Service
         if ($message['Title']) {
             $message['Content'] = $message['Title'];
             $link = $this->reply($message);
+            if (!$link) return '名称：' . $message['Title'] . "\n地址:" . $message['Url'];
             return $this->replyMsg($link);
         }
         return '这个链接识别不出来啊';
