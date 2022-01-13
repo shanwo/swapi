@@ -144,7 +144,7 @@ class OfficialServe extends Service
 
     public function imageType($message)
     {
-        return '图片地址:' . $message['PicUrl'];
+        return "识别结果\n" . $message['PicUrl'];
     }
 
     public function voiceType($message)
@@ -152,7 +152,7 @@ class OfficialServe extends Service
         if ($message['Recognition']) {
             $message['Content'] = $message['Recognition'];
             $voice = $this->reply($message);
-            if (!$voice) return '你说：' . $message['Recognition'];
+            if (!$voice) return "识别结果\n" . $message['Recognition'];
             return $this->replyMsg($voice);
         }
         return '语音信息识别失败';
@@ -175,10 +175,10 @@ class OfficialServe extends Service
         if ($message['Title']) {
             $message['Content'] = $message['Title'];
             $link = $this->reply($message);
-            if (!$link) return '名称：' . $message['Title'] . "\n地址:" . $message['Url'];
+            if (!$link) return "识别结果\n" . $message['Title'] . "\n" . $message['Url'];
             return $this->replyMsg($link);
         }
-        return '这个链接识别不出来啊';
+        return '这个链接有问题啊,小闪识别不出来吖';
     }
 
     public function fileType($message)
