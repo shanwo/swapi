@@ -69,7 +69,7 @@ class OfficialServe extends Service
             $this->feedbackModel->insertGetId($insert);
             return '你提交的信息小闪已经记下啦[耶]';
         }
-        return "小闪搞没懂你的意思哇[委屈]\n如果你有什么想说的，可以用这样告诉我：\n#酱紫#[想说的话]";
+        return "小闪搞没懂你的意思哇[委屈]\n如果你有什么话，可以这样告诉我：\n#酱紫#[想说的话]";
     }
 
     /**
