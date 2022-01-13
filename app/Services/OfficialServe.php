@@ -68,7 +68,7 @@ class OfficialServe extends Service
                 'content'  => mb_substr($keyword, 4, -1)
             ];
             $this->feedbackModel->insertGetId($insert);
-            return '您提交的信息已记录啦';
+            return '您提交的信息已经记录啦';
         }
     }
 
@@ -225,7 +225,7 @@ class OfficialServe extends Service
                     'show_cover'     => $comment['show_cover'],
                 ]);
             default:
-                return "如果您有什么想说的，请发送\n#闪我#(您想说的话)";
+                return "如果您有什么想说的，请发送\n*闪我*[您想说的话]";
         }
     }
 }
