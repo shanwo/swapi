@@ -225,7 +225,7 @@ class OfficialServe extends Service
                     'show_cover'     => $comment['show_cover'],
                 ]);
             default:
-                return "如果您有什么想说的，请发送\n*闪我*[您想说的话]";
+                return "如果您有什么想说的，请发送\n#闪我#[您想说的话]";
         }
     }
 }
