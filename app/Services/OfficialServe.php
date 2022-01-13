@@ -69,6 +69,7 @@ class OfficialServe extends Service
             $this->feedbackModel->insertGetId($insert);
             return '您提交的信息已经记录啦';
         }
+        return "如果您有什么想说的，请发送\n#闪我#[您想说的话]";
     }
 
     /**
@@ -134,10 +135,10 @@ class OfficialServe extends Service
         return '';
     }
 
-    public function textType($message,$config)
+    public function textType($message, $config)
     {
         $text = $this->reply($message);
-        if(!$text) return $this->feedback($message,$config);
+        if (!$text) return $this->feedback($message, $config);
         return $this->replyMsg($text);
     }
 
@@ -163,9 +164,9 @@ class OfficialServe extends Service
 
     public function locationType($message)
     {
-        return '此位置是：' . $message['Label'] .
-            '位置经度:' . $message['Location_Y'] .
-            '位置纬度:' . $message['Location_X'];
+        return "此位置是：" . $message['Label'] .
+            "\n位置经度:" . $message['Location_Y'] .
+            "\n位置纬度:" . $message['Location_X'];
     }
 
     public function linkType($message)
@@ -185,7 +186,7 @@ class OfficialServe extends Service
 
     private function replyMsg($reply)
     {
-        $comment = json_decode($reply['comment'], true);
+        $comment = $reply['comment'];
         switch ($reply['type']) {
             case 1:                         //文本消息
                 return $comment['Content'];
@@ -223,8 +224,6 @@ class OfficialServe extends Service
                     'source_url'     => $comment['source_url'],
                     'show_cover'     => $comment['show_cover'],
                 ]);
-            default:
-                return "如果您有什么想说的，请发送\n#闪我#[您想说的话]";
         }
     }
 }
