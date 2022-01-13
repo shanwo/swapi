@@ -2,16 +2,22 @@
 
 namespace App\Services;
 
+use App\Models\FeedbackModel;
 use App\Models\ReplyModel;
+use App\Models\UserThirdModel;
 
 class OfficialServe extends Service
 {
     protected $replyModel;
+    protected $feedbackModel;
+    protected $userThirdModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->replyModel = new ReplyModel();
+        $this->feedbackModel = new FeedbackModel();
+        $this->userThirdModel = new UserThirdModel();
     }
 
     private function reply($message)
@@ -42,6 +48,28 @@ class OfficialServe extends Service
         }
         if ($data) $this->redis::ZINCRBY('reply_number', 1, $keyword);
         return $data;
+    }
+
+    private function feedback($message,$config)
+    {
+        $keyword = trim($message['Content']);
+        $sw = mb_substr($keyword, 0, 4);
+        if (strcmp($sw, '#闪我#') == 0) {
+            $where = [
+                ['source', '=', $config['name']],
+                ['open_id', '=', $message['FromUserName']],
+                ['app_id', '=', $config['app_id']],
+                ['status', '=', 1]
+            ];
+            $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id']);
+            $insert = [
+                'user_id'  => $userThird['user_id'],
+                'contacts' => '微信公众号',
+                'content'  => mb_substr($keyword, 4, -1)
+            ];
+            $this->feedbackModel->insertGetId($insert);
+            return '您提交的信息已记录啦';
+        }
     }
 
     /**
@@ -107,9 +135,10 @@ class OfficialServe extends Service
         return '';
     }
 
-    public function textType($message)
+    public function textType($message,$config)
     {
         $text = $this->reply($message);
+        if(!$text) return $this->feedback($message,$config);
         return $this->replyMsg($text);
     }
 
@@ -190,13 +219,13 @@ class OfficialServe extends Service
                     'title'          => $comment['Title'],
                     'author'         => $comment['Author'],
                     'content'        => $comment['Description'],
-                    'thumb_media_id' => $comment['thumb_media_id'],
+                    'thumb_media_id' => $comment['ThumbMediaId'],
                     'digest'         => $comment['digest'],
                     'source_url'     => $comment['source_url'],
                     'show_cover'     => $comment['show_cover'],
                 ]);
             default:
-                return '我好像不明白...';
+                return "如果您有什么想说的，请发送\n#闪我#(您想说的话)";
         }
     }
 }
