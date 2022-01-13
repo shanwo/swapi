@@ -53,7 +53,7 @@ class OfficialServe extends Service
     {
         $keyword = trim($message['Content']);
         $sw = mb_substr($keyword, 0, 4);
-        if (strcmp($sw, '#闪我#') == 0) {
+        if (strcmp($sw, '#酱紫#') == 0) {
             $where = [
                 ['source', '=', $config['name']],
                 ['open_id', '=', $message['FromUserName']],
@@ -69,7 +69,7 @@ class OfficialServe extends Service
             $this->feedbackModel->insertGetId($insert);
             return '你提交的信息小闪已经记下啦[耶]';
         }
-        return "小闪搞没懂你的意思哇\n如果你有什么想说的，请发送\n#闪我#[想说的话]";
+        return "小闪搞没懂你的意思哇[委屈]\n如果你有什么想说的，可以用这样告诉我：\n#酱紫#[想说的话]";
     }
 
     /**
