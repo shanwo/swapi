@@ -33,24 +33,23 @@ class OfficialServe extends Service
         } else {
             $where[] = ['status', '=', 1];
             $where[] = ['is_delete', '=', Service::DELETE_NO];
-            $lists = $this->replyModel->select('id', 'keyword', 'comment')->where($where)->get()->toArray();
+            $lists = $this->replyModel->select('id', 'type', 'keyword', 'comment')->where($where)->get()->toArray();
             foreach ($lists as $k => $v) {
                 $number = $this->redis::ZSCORE('reply_number', $v['keyword']);
                 if ($number) {
                     $this->replyModel->whereKey($v['id'])->increment('number', $number);
                     $this->redis::ZREM('reply_number', $v['keyword']);
                 }
-                $this->redis::HSET('reply', $v['keyword'], $v['comment']);
-                if ($v['keyword'] == $keyword) {
-                    $data = json_decode($v['comment'], true);
-                }
+                $v['comment'] = json_decode($v['comment'],true);
+                $this->redis::HSET('reply', $v['keyword'], json_encode($v));
+                if ($v['keyword'] == $keyword) $data = $v;
             }
         }
         if ($data) $this->redis::ZINCRBY('reply_number', 1, $keyword);
         return $data;
     }
 
-    private function feedback($message,$config)
+    private function feedback($message, $config)
     {
         $keyword = trim($message['Content']);
         $sw = mb_substr($keyword, 0, 4);
