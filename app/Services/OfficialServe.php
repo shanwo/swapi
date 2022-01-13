@@ -64,10 +64,10 @@ class OfficialServe extends Service
             $insert = [
                 'user_id'  => $userThird['user_id'],
                 'contacts' => '微信公众号',
-                'content'  => mb_substr($keyword, 4, -1)
+                'content'  => mb_substr($keyword, 4)
             ];
             $this->feedbackModel->insertGetId($insert);
-            return '您提交的信息已经记录啦';
+            return '您提交的信息我已经记下啦';
         }
         return "如果您有什么想说的，请发送\n#闪我#[您想说的话]";
     }
