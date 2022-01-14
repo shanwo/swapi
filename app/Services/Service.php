@@ -118,13 +118,13 @@ class Service
             }
         }
         if ($tag) {
-            $userTag = $this->redis::HGET('user_tags:' . $uid, $key);
+            $userTag = $this->redis::SISMEMBER('tag_users:' . $key, $uid);
             if ($userTag) {
                 $this->userTagModel->where(['user_id' => $uid, 'tag_id' => $tag])->update(['value' => $value]);
             } else {
                 $lists = $this->userTagModel->select('id', 'value', 'mark')->where(['user_id' => $uid])->get()->toArray();
                 foreach ($lists as $k => $v) {
-                    $this->redis::HSET('user_tags:' . $uid, $v['mark'], $v['value']);
+                    $this->redis::SADD('tag_users:' . $v['mark'], $uid);
                 }
                 $userTag = [
                     'user_id' => $uid,
@@ -134,7 +134,7 @@ class Service
                 ];
                 $this->userTagModel->insertGetId($userTag);
             }
-            $this->redis::HSET('user_tags:' . $uid, $key, $value);
+            $this->redis::SADD('tag_users:' . $key, $uid);
         }
     }
 }
