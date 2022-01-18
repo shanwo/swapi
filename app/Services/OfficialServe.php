@@ -216,16 +216,6 @@ class OfficialServe extends Service
                     'url'         => $comment['Url'],
                     'picurl'      => $comment['PicUrl'],
                 ]);
-            case 7:                         //文章消息
-                return new \EasyWeChat\Kernel\Messages\Article([
-                    'title'          => $comment['Title'],
-                    'author'         => $comment['Author'],
-                    'content'        => $comment['Description'],
-                    'thumb_media_id' => $comment['ThumbMediaId'],
-                    'digest'         => $comment['digest'],
-                    'source_url'     => $comment['source_url'],
-                    'show_cover'     => $comment['show_cover'],
-                ]);
         }
     }
 }
