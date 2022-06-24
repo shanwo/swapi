@@ -22,6 +22,7 @@ class Handler extends ExceptionHandler
         NotFoundHttpException::class         => LogLevel::ERROR,                           //错误
         QueryException::class                => LogLevel::CRITICAL,                        //严重
         \RedisException::class               => LogLevel::CRITICAL,                        //严重
+        \InvalidArgumentException::class     => LogLevel::CRITICAL,                        //严重
         \ErrorException::class               => LogLevel::ALERT,                           //警报
         \Error::class                        => LogLevel::EMERGENCY,                       //紧急
     ];
@@ -83,6 +84,16 @@ class Handler extends ExceptionHandler
             return response()->json($result);
         });
         $this->renderable(function (\RedisException $e, $request) {
+            $result = [
+                'request' => $request->input(),
+                'data'    => $e->getMessage(),
+                'code'    => 700,
+                'msg'     => '数据库链接错误',
+                'uuid'    => Uuid::uuid6(),
+            ];
+            return response()->json($result);
+        });
+        $this->renderable(function (\InvalidArgumentException $e, $request) {
             $result = [
                 'request' => $request->input(),
                 'data'    => $e->getMessage(),
