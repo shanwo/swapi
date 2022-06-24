@@ -2,105 +2,115 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Support\Facades\Log;
+use Psr\Log\LogLevel;
 use Ramsey\Uuid\Uuid;
-use Throwable;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
     /**
+     * A list of exception types with their corresponding custom log levels.
+     *
+     * @var array<class-string<\Throwable>, \Psr\Log\LogLevel::*>
+     */
+    protected $code = 0;
+    protected $levels = [
+        MethodNotAllowedHttpException::class => LogLevel::WARNING,                         //警告
+        NotFoundHttpException::class         => LogLevel::ERROR,                           //错误
+        QueryException::class                => LogLevel::CRITICAL,                        //严重
+        \RedisException::class               => LogLevel::CRITICAL,                        //严重
+        \ErrorException::class               => LogLevel::ALERT,                           //警报
+        \Error::class                        => LogLevel::EMERGENCY,                       //紧急
+    ];
+    /**
      * A list of the exception types that are not reported.
      *
-     * @var array
+     * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
         //
     ];
-    protected $code = 0;
-    protected $levels = [
-        100 => 'debug',
-        200 => 'info',
-        300 => 'notice',
-        400 => 'notice',
-        500 => 'warning',
-        600 => 'error',
-        700 => 'critical',
-        800 => 'alert',
-        900 => 'emergency',
-    ];
 
     /**
-     * A list of the inputs that are never flashed for validation exceptions.
+     * A list of the inputs that are never flashed to the session on validation exceptions.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $dontFlash = [
+        'current_password',
         'password',
         'password_confirmation',
     ];
 
     /**
-     * Report or log an exception.
+     * Register the exception handling callbacks for the application.
      *
-     * @param \Throwable $exception
      * @return void
-     *
-     * @throws \Exception
      */
-    public function report(Throwable $exception)
+    public function register()
     {
-        parent::report($exception);
-    }
-
-    /**
-     * Render an exception into an HTTP response.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \Throwable $exception
-     * @return \Symfony\Component\HttpFoundation\Response
-     *
-     * @throws \Throwable
-     */
-    public function render($request, Throwable $exception)
-    {
-        $classArray = explode(DIRECTORY_SEPARATOR, get_class($exception));
-        if(count($classArray) == 1) $classArray = explode('\\', reset($classArray));
-        switch (end($classArray)) {
-            case 'MethodNotAllowedHttpException':
-                $this->code = 500;
-                break;
-            case 'NotFoundHttpException':
-                $this->code = 600;
-                break;
-            case 'QueryException':
-                $this->code = 700;
-                break;
-            case 'ReflectionException':
-                $this->code = 800;
-                break;
-            default :
-                $this->code = 900;
-        }
-        if ($this->code) {
-            $msg = [
-                500 => '请求类型不匹配',
-                600 => '请求地址未开放',
-                700 => '数据库语句错误',
-                800 => '服务端接口异常',
-                900 => '程序错误请重试',
-            ];
+        $this->renderable(function (MethodNotAllowedHttpException $e, $request) {
             $result = [
                 'request' => $request->input(),
-                'data'    => $exception->getMessage(),
-                'code'    => $this->code,
-                'msg'     => $msg[$this->code],
+                'data'    => $e->getMessage(),
+                'code'    => 500,
+                'msg'     => '请求类型不匹配',
                 'uuid'    => Uuid::uuid6(),
             ];
-            Log::log($this->levels[$this->code], 'Render Data', $result);
-            unset($result['request']);
             return response()->json($result);
-        }
-        return parent::render($request, $exception);
+        });
+        $this->renderable(function (NotFoundHttpException $e, $request) {
+            $result = [
+                'request' => $request->input(),
+                'data'    => $e->getMessage(),
+                'code'    => 600,
+                'msg'     => '请求地址未开放',
+                'uuid'    => Uuid::uuid6(),
+            ];
+            return response()->json($result);
+        });
+        $this->renderable(function (QueryException $e, $request) {
+            $result = [
+                'request' => $request->input(),
+                'data'    => $e->getMessage(),
+                'code'    => 700,
+                'msg'     => '数据库链接错误',
+                'uuid'    => Uuid::uuid6(),
+            ];
+            return response()->json($result);
+        });
+        $this->renderable(function (\RedisException $e, $request) {
+            $result = [
+                'request' => $request->input(),
+                'data'    => $e->getMessage(),
+                'code'    => 700,
+                'msg'     => '数据库链接错误',
+                'uuid'    => Uuid::uuid6(),
+            ];
+            return response()->json($result);
+        });
+        $this->renderable(function (\ErrorException $e, $request) {
+            $result = [
+                'request' => $request->input(),
+                'data'    => $e->getMessage(),
+                'code'    => 800,
+                'msg'     => '服务端接口异常',
+                'uuid'    => Uuid::uuid6(),
+            ];
+            return response()->json($result);
+        });
+        $this->renderable(function (\Error $e, $request) {
+            $result = [
+                'request' => $request->input(),
+                'data'    => $e->getMessage(),
+                'code'    => 900,
+                'msg'     => '程序错误请重试',
+                'uuid'    => Uuid::uuid6(),
+            ];
+            return response()->json($result);
+        });
     }
 }
