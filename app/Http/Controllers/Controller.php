@@ -19,7 +19,7 @@ class Controller extends BaseController
     use ValidatesRequests;
 
     protected Client $client;
-    protected object $request;
+    protected $request;
     protected Service $service;
     protected int $code = 100;
     protected string $msg = '';
