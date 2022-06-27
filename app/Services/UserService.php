@@ -11,7 +11,7 @@ use App\Models\AreaModel;
 use App\Models\UserModel;
 use App\Models\UserThirdModel;
 use Illuminate\Support\Facades\Crypt;
-use Overtrue\Socialite\AuthorizeFailedException;
+use Overtrue\Socialite\Exceptions\AuthorizeFailedException;
 use Overtrue\Socialite\SocialiteManager;
 
 class UserService extends Service
@@ -77,7 +77,7 @@ class UserService extends Service
         return $this->userModel->whereKey($uid)->update($update);
     }
 
-    public function driver($request, $name)
+    public function driver($name)
     {
         $config = $this->configInfo($name);
         //公众号数据，使用微信驱动
@@ -88,8 +88,8 @@ class UserService extends Service
                     'client_secret' => $config['secret'],
                     'redirect'      => $config['callback'],
                 ],
-            ], $request);
-            return $socialite->driver('wechat')->scopes(['snsapi_userinfo']);
+            ]);
+            return $socialite->create('wechat')->scopes(['snsapi_userinfo']);
         } else {
             $socialite = new SocialiteManager([
                 $name => [
@@ -97,8 +97,8 @@ class UserService extends Service
                     'client_secret' => $config['secret'],
                     'redirect'      => $config['callback'],
                 ],
-            ], $request);
-            return $socialite->driver($name);
+            ]);
+            return $socialite->create($name);
         }
     }
 
@@ -111,7 +111,7 @@ class UserService extends Service
                 $this->uid = $this->redis::GET('signIn:' . $configName . ':' . $state);
                 $this->redis::DEL('signIn:' . $configName . ':' . $state);
             }
-            $user = $this->driver($request, $configName)->stateless()->user();
+            $user = $this->driver($configName)->stateless()->user();
             $user['ip'] = $request->ip();
             $config = $this->configInfo($configName);
             $config['name'] = $configName;

@@ -34,8 +34,8 @@ class UserController extends Controller
             return $this->returnApi();
         }
         $type = $this->request->input('type');
-        $data = $this->userService->driver($this->request, $type)->redirect();
-        $url = $data->getTargetUrl();
+        $data = $this->userService->driver($type);
+        $url = $data->redirect();
         $secret = $this->request->input('secret', '');
         if ($secret) {
             $auth = $this->passportDecrypt($secret, $type);
