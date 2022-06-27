@@ -91,8 +91,11 @@ class HomeService extends Service
     private function setPage()
     {
         if ($this->redis::GET('set_home')) return;
-        $where[] = ['is_delete', '=', Service::DELETE_NO];
-        $data = $this->pageModel->select('id', 'user_id', 'follow', 'browse', 'is_open', 'head_data')->where($where)->get()->toArray();
+        $where[] = ['p.is_open', '=', 1];
+        $where[] = ['u.type', '=', Service::USER_VIP];
+        $data = $this->pageModel->from('sw_page as p')->select('p.id', 'p.user_id', 'p.follow', 'p.browse', 'p.is_open', 'p.head_data')
+            ->leftJoin('sw_user as u', 'p.user_id', '=', 'u.id')
+            ->where($where)->get()->toArray();
         foreach ($data as $k => &$v) {
             $tmp = json_decode($v['head_data'], true);
             $v = array_merge($v, $tmp);
