@@ -51,7 +51,7 @@
                         请求数据
                     </td>
                     <td style="border:1px solid #ccc;padding:10px;">
-                        <strong>{{json_encode($request,256)}}</strong>
+                        <strong>{{json_encode($request,JSON_UNESCAPED_UNICODE)}}</strong>
                     </td>
                 </tr>
                 </tbody>
