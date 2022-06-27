@@ -2,8 +2,10 @@
 
 namespace App\Exceptions;
 
+use App\Mail\NotifyMail;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Mail;
 use Psr\Log\LogLevel;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -61,6 +63,7 @@ class Handler extends ExceptionHandler
                 'msg'     => '请求类型不匹配',
                 'uuid'    => Uuid::uuid6(),
             ];
+            $this->sendEmail($result);
             return response()->json($result);
         });
         $this->renderable(function (NotFoundHttpException $e, $request) {
@@ -71,6 +74,7 @@ class Handler extends ExceptionHandler
                 'msg'     => '请求地址未开放',
                 'uuid'    => Uuid::uuid6(),
             ];
+            $this->sendEmail($result);
             return response()->json($result);
         });
         $this->renderable(function (QueryException $e, $request) {
@@ -81,6 +85,7 @@ class Handler extends ExceptionHandler
                 'msg'     => '数据库链接错误',
                 'uuid'    => Uuid::uuid6(),
             ];
+            $this->sendEmail($result);
             return response()->json($result);
         });
         $this->renderable(function (\RedisException $e, $request) {
@@ -91,6 +96,7 @@ class Handler extends ExceptionHandler
                 'msg'     => '数据库链接错误',
                 'uuid'    => Uuid::uuid6(),
             ];
+            $this->sendEmail($result);
             return response()->json($result);
         });
         $this->renderable(function (\InvalidArgumentException $e, $request) {
@@ -101,6 +107,7 @@ class Handler extends ExceptionHandler
                 'msg'     => '数据库链接错误',
                 'uuid'    => Uuid::uuid6(),
             ];
+            $this->sendEmail($result);
             return response()->json($result);
         });
         $this->renderable(function (\ErrorException $e, $request) {
@@ -111,6 +118,7 @@ class Handler extends ExceptionHandler
                 'msg'     => '服务端接口异常',
                 'uuid'    => Uuid::uuid6(),
             ];
+            $this->sendEmail($result);
             return response()->json($result);
         });
         $this->renderable(function (\Error $e, $request) {
@@ -121,7 +129,19 @@ class Handler extends ExceptionHandler
                 'msg'     => '程序错误请重试',
                 'uuid'    => Uuid::uuid6(),
             ];
+            $this->sendEmail($result);
             return response()->json($result);
         });
+    }
+
+    private function sendEmail($result)
+    {
+        try {
+            Mail::to('develop@shanwo.cc')->send(new NotifyMail($result));
+            $msg = '邮件发送成功';
+        }catch (\Exception $e){
+            $msg = '邮件发送失败：'.$e->getMessage();
+        }
+        return $msg;
     }
 }
