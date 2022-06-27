@@ -111,7 +111,7 @@ class UserService extends Service
                 $this->uid = $this->redis::GET('signIn:' . $configName . ':' . $state);
                 $this->redis::DEL('signIn:' . $configName . ':' . $state);
             }
-            $user = $this->driver($configName)->stateless()->user();
+            $user = $this->driver($configName)->userFromCode($request['code']);
             $user['ip'] = $request->ip();
             $config = $this->configInfo($configName);
             $config['name'] = $configName;
