@@ -126,9 +126,9 @@ class UserService extends Service
 
     public function wechat($user, $config)
     {
-        $original = $user['original'];
+        $raw = $user['raw'];
         $where[] = ['source', '=', $config['name']];
-        $where[] = ['open_id', '=', $original['openid']];
+        $where[] = ['open_id', '=', $raw['openid']];
         if ($config['name'] == 'official') {
             $app_id = $config['app_id'];
         } else {
@@ -148,16 +148,16 @@ class UserService extends Service
             $this->userThirdModel->whereKey($userThird['id'])->update($update);
             $this->uid = $userThird['user_id'];
         } else {
-            if ($original['unionid']) {
-                $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $original['unionid'])->first(['id', 'user_id']);
+            if ($raw['unionid']) {
+                $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $raw['unionid'])->first(['id', 'user_id']);
                 $this->uid = $userThird['user_id'];
             }
-            $token = Crypt::encryptString($original['openid']);
+            $token = Crypt::encryptString($raw['openid']);
             if (!$this->uid) {
                 $insertUser = [
-                    'nickname'  => htmlspecialchars($original['nickname']),
-                    'sex'       => $original['sex'],
-                    'avatar'    => $original['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
+                    'nickname'  => htmlspecialchars($raw['nickname']),
+                    'sex'       => $raw['sex'],
+                    'avatar'    => $raw['headimgurl'] ?? 'https://cdn.shanwo.cc/img/avatar.jpg',
                     'api_token' => $token
                 ];
                 $this->uid = $this->userModel->insertGetId($insertUser);
@@ -172,13 +172,13 @@ class UserService extends Service
             }
             $insertThird = [
                 'user_id'  => $this->uid,
-                'nickname' => htmlspecialchars($original['nickname']),
-                'union_id' => $original['unionid'],
-                'open_id'  => $original['openid'],
+                'nickname' => htmlspecialchars($raw['nickname']),
+                'union_id' => $raw['unionid'],
+                'open_id'  => $raw['openid'],
                 'source'   => $config['name'],
                 'app_id'   => $app_id,
                 'login_ip' => $user['ip'],
-                'original' => json_encode($original)
+                'raw'      => json_encode($raw)
             ];
             $this->userThirdModel->insertGetId($insertThird);
         }
