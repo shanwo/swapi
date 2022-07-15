@@ -8,23 +8,20 @@
 namespace App\Http\Controllers;
 
 use App\Services\OrderService;
-use App\Services\PayService;
 use App\Services\UserService;
-use EasyWeChat\Factory;
+use EasyWeChat\Pay\Application;
 use Illuminate\Http\Request;
 
 class CallbackController extends Controller
 {
     protected $userService;
     protected $orderService;
-    protected $factory;
 
     public function __construct(Request $request)
     {
         parent::__construct($request);
         $this->userService = new UserService();
         $this->orderService = new OrderService();
-        $this->factory = new Factory();
     }
 
 
@@ -82,13 +79,13 @@ class CallbackController extends Controller
     {
         $this->service->redis::SETEX('callback:payment:' . time(), $this->service->oneDay / 2, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
-        $payment = $this->factory::Payment($config);
-        $payment['request'] = $this->request;
-        return $payment->handlePaidNotify(function ($message, $fail) use ($payment) {
+        $payment = (new Application($config));
+        $payment->setRequest($this->request);
+        return $payment->handlePaid(function ($message, $fail) use ($payment) {
             $info = $this->service->redis::GET('pay_order:' . $message['out_trade_no']);
             $info = json_decode($info, true) ?? [];
             if (!$info) {
-                $payment->refund->byTransactionId($message['transaction_id'], $message['out_trade_no'], $message['total_fee'], $message['cash_fee'], ['refund_desc' => '订单支付超时']);
+                $payment->byTransactionId($message['transaction_id'], $message['out_trade_no'], $message['total_fee'], $message['cash_fee'], ['refund_desc' => '订单支付超时']);
                 return true;
             }
             $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
@@ -122,7 +119,7 @@ class CallbackController extends Controller
         $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
         $payment = (new Application($config));
         $payment['request'] = $this->request;
-        return $payment->handleRefundedNotify(function ($message, $reqInfo, $fail) {
+        return $payment->handleRefunded(function ($message, $reqInfo, $fail) {
             $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
             $pay = $this->service->redis::HGET('pay_channel:' . $res['channel'], $res['pay_id']);
             $pay = json_decode($pay, true);
