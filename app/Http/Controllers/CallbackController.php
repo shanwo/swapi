@@ -118,9 +118,9 @@ class CallbackController extends Controller
     {
         $this->service->redis::SETEX('callback:refund:' . time(), $this->service->oneDay / 2, json_encode($this->request->getContent()));
         $config = $this->service->configInfo('payment');
-        $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
-        $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'cert' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
-        $payment = $this->factory::Payment($config);
+        $config['cert_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
+        $config['key_path'] = app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
+        $payment = (new Application($config));
         $payment['request'] = $this->request;
         return $payment->handleRefundedNotify(function ($message, $reqInfo, $fail) {
             $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
