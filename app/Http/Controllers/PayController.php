@@ -25,8 +25,8 @@ class PayController extends Controller
         $this->adService = new AdService();
         $this->payService = new PayService();
         $config = $this->service->configInfo('payment');
-        $config['private_key']= app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_key.pem');
-        $config['certificate']= app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem');
+        $config['private_key']= env('PRIVATE_KEY', app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_key.pem'));
+        $config['certificate']= env('CERTIFICATE',app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem'));
         $this->payment = new Application($config);
     }
 
