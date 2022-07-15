@@ -19,6 +19,10 @@ Route::redirect('/', 'https://shanwo.cc');
 Route::get('MP_verify_wOQevRdcPyMeqMJL.txt', function () {
     return 'wOQevRdcPyMeqMJL';
 });
+//微信支付安全医生验证
+Route::get('verify_90bdbda5dbef9a37279156dd3ece6936.html', function () {
+    return '<!DOCTYPE html><html><head><meta id="wxpaycode" content="2ec9fbfa0f5606e47e6095d122a50048"></head><body></body></html>';
+});
 
 Route::prefix('base')->group(function () {
 //文件上传
@@ -71,7 +75,7 @@ Route::prefix('user')->group(function () {
 Route::prefix('pay')->group(function () {
     Route::get('lists', 'PayController@lists');
     Route::post('send', 'PayController@send');
-    Route::post('refund', 'PayController@refund');
+    Route::post('result', 'PayController@result');
 });
 //回调
 Route::prefix('callback')->group(function () {
