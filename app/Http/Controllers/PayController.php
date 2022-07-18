@@ -9,7 +9,6 @@ namespace App\Http\Controllers;
 
 use App\Services\AdService;
 use App\Services\PayService;
-use EasyWeChat\Factory;
 use EasyWeChat\Pay\Application;
 use Illuminate\Http\Request;
 
@@ -25,8 +24,8 @@ class PayController extends Controller
         $this->adService = new AdService();
         $this->payService = new PayService();
         $config = $this->service->configInfo('payment');
-        $config['private_key']= env('PRIVATE_KEY', app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_key.pem'));
-        $config['certificate']= env('CERTIFICATE',app_path('Exceptions' . DIRECTORY_SEPARATOR . 'certs' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem'));
+        $config['private_key']= env('PRIVATE_KEY');
+        $config['certificate']= env('CERTIFICATE');
         $this->payment = new Application($config);
     }
 
