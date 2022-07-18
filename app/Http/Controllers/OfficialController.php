@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\OfficialServe;
-use EasyWeChat\Factory;
+use EasyWeChat\OfficialAccount\Application;
 use Illuminate\Http\Request;
 
 class OfficialController extends Controller
@@ -16,7 +16,7 @@ class OfficialController extends Controller
         parent::__construct($request);
         $this->officialServe = new OfficialServe();
         $config = $this->service->configInfo('official');
-        $this->official = Factory::officialAccount($config);
+        $this->official = new Application($config);
     }
 
     public function bind()
@@ -35,7 +35,7 @@ class OfficialController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        return $this->official->server->serve();
+        return $this->official->getServer()->serve();
     }
 
     public function server()
