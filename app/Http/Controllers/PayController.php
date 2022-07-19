@@ -89,7 +89,7 @@ class PayController extends Controller
                 'openid' => $third['official'] ?? ''
             ];
         }
-        $data = $this->payment->getClient()->post($url, ['json' => $body])->toArray();
+        $data = $this->payment->getClient()->postJson($url, $body)->toArray();
         $data['order_sn'] = $order_sn;
         $this->service->redis::SETEX('pay_order:' . $order_sn, $this->service->oneDay / 24, json_encode(['pay' => $info, 'user' => $user], JSON_UNESCAPED_UNICODE));
         $this->code = 200;
@@ -107,9 +107,7 @@ class PayController extends Controller
             return $this->returnApi();
         }
         $order_sn = $this->request->input('order_sn');
-        $data = $this->payment->getClient()->get('v3/pay/transactions/out-trade-no/' . $order_sn, [
-            'query' => ['mchid' => $this->payment->getConfig()->get('mch_id')]
-        ])->toArray();
+        $data = $this->payment->getClient()->withMchId()->get('v3/pay/transactions/out-trade-no/' . $order_sn)->toArray();
         $data['ad'] = $this->adService->info($this->request, 10);
         $this->code = 200;
         return $this->returnApi($data);
