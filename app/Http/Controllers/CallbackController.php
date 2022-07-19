@@ -162,6 +162,24 @@ class CallbackController extends Controller
      */
     public function refund()
     {
+        $this->validate([
+            'id'            => 'required|uuid|between:16,64',
+            'create_time'   => 'required|date',
+            'event_type'    => 'required|string|between:1,32',
+            'resource_type' => 'required|alpha_dash|between:1,16',
+            'summary'       => 'required|alpha_num|between:1,64',
+            'resource'      => 'required|array',
+        ], [
+            'id'            => '通知ID',
+            'create_time'   => '通知创建时间',
+            'event_type'    => '通知类型',
+            'resource_type' => '通知数据类型',
+            'summary'       => '回调摘要',
+            'resource'      => '通知数据',
+        ]);
+        if ($this->msg) {
+            return $this->returnApi();
+        }
         $this->service->redis::SETEX('callback:refund:' . LARAVEL_START, $this->service->oneDay / 2, json_encode($this->request->getContent()));
         return $this->payment->getServer()->handleRefunded(function ($message, $reqInfo, $fail) {
             $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
