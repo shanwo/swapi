@@ -40,9 +40,9 @@ class OrderService extends Service
             'pay_type'       => $request['trade_type'],
             'original_price' => $pay['original_price'],
             'activity_price' => $pay['activity_price'],
-            'pay_price'      => $request['cash_fee'],
+            'pay_price'      => $request['amount']['payer_total'],
             'status'         => self::ORDER_SUCCESS,
-            'payated_at'     => date('Y-m-d H:i:s', strtotime($request['time_end'])),
+            'payated_at'     => date('Y-m-d H:i:s', strtotime($request['success_time'])),
             'snapshot'       => json_encode($request, JSON_UNESCAPED_UNICODE),
         ];
         $this->orderModel->insertGetId($insert);
