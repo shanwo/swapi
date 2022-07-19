@@ -107,7 +107,9 @@ class PayController extends Controller
             return $this->returnApi();
         }
         $order_sn = $this->request->input('order_sn');
-        $data = $this->payment->getClient()->withMchId()->get('v3/pay/transactions/out-trade-no/' . $order_sn)->toArray();
+        $data = $this->payment->getClient()->get('v3/pay/transactions/out-trade-no/' . $order_sn, [
+            'query' => ['mchid' => $this->payment->getConfig()->get('mch_id')]
+        ])->toArray();
         $data['ad'] = $this->adService->info($this->request, 10);
         $this->code = 200;
         return $this->returnApi($data);
