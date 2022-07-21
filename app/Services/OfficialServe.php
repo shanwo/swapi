@@ -25,7 +25,7 @@ class OfficialServe extends Service
         $keyword = '关注';
         if (!empty($message['Content'])) {
             $keyword = trim($message['Content']);
-            $keyword = substr_replace('。','',$keyword);
+            $keyword = str_ireplace('。','',$keyword);
         }
         $data = [];
         $reply = $this->redis::HGET('reply', $keyword);
