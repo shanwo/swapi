@@ -85,7 +85,7 @@ class OfficialServe extends Service
             case'subscribe':               //订阅
                 (new UserService)->wechat($user, $config);
                 $text = $this->reply($message);
-                return $this->replyMsg($text);
+                return $text['comment'];
             case'unsubscribe':             //取消订阅
                 break;
             case'SCAN':                    //扫描带参数二维码
@@ -139,7 +139,7 @@ class OfficialServe extends Service
     {
         $text = $this->reply($message);
         if (!$text) return $this->feedback($message, $config);
-        return $this->replyMsg($text);
+        return $text['comment'];
     }
 
     public function imageType($message)
@@ -153,7 +153,7 @@ class OfficialServe extends Service
             $message['Content'] = $message['Recognition'];
             $voice = $this->reply($message);
             if (!$voice) return "识别结果\n" . $message['Recognition'];
-            return $this->replyMsg($voice);
+            return $voice['comment'];
         }
         return '语音信息识别失败';
     }
@@ -176,7 +176,7 @@ class OfficialServe extends Service
             $message['Content'] = $message['Title'];
             $link = $this->reply($message);
             if (!$link) return "识别结果\n" . $message['Title'] . "\n" . $message['Url'];
-            return $this->replyMsg($link);
+            return $link['comment'];
         }
         return '这个链接有问题啊,小闪识别不出来吖';
     }
@@ -184,38 +184,5 @@ class OfficialServe extends Service
     public function fileType($message)
     {
         return '这是一个文件';
-    }
-
-    private function replyMsg($reply)
-    {
-        $comment = $reply['comment'];
-        switch ($reply['type']) {
-            case 1:                         //文本消息
-                return $comment['Content'];
-            case 2:                         //图片消息
-                return new \EasyWeChat\Kernel\Messages\Image($comment['MediaId']);
-            case 3:                         //语音消息
-                return new \EasyWeChat\Kernel\Messages\Voice($comment['MediaId']);
-            case 4:                         //视频消息
-                return new \EasyWeChat\Kernel\Messages\Video($comment['MediaId'], [
-                    'title'       => $comment['Title'],
-                    'description' => $comment['Description'],
-                ]);
-            case 5:                         //音乐消息
-                return new \EasyWeChat\Kernel\Messages\Music([
-                    'title'          => $comment['Title'],
-                    'description'    => $comment['Description'],
-                    'url'            => $comment['MusicURL'],
-                    'hq_url'         => $comment['HQMusicUrl'],
-                    'thumb_media_id' => $comment['ThumbMediaId'],
-                ]);
-            case 6:                         //图文消息
-                return new \EasyWeChat\Kernel\Messages\NewsItem([
-                    'title'       => $comment['Title'],
-                    'description' => $comment['Description'],
-                    'url'         => $comment['Url'],
-                    'picurl'      => $comment['PicUrl'],
-                ]);
-        }
     }
 }
