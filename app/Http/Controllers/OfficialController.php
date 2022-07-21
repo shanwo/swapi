@@ -58,34 +58,35 @@ class OfficialController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $user['original'] = $this->official->getClient()->get('cgi-bin/user/info', [
-            'query' => ['openid' => $this->request->input('openid')]
-        ])->toArray();
-        $user['ip'] = $this->request->ip();
+        $this->service->redis::SETEX('request_official:xml:' . time(), $this->service->oneDay / 2, file_get_contents("php://input"));
         $this->service->redis::SETEX('request_official:param:' . time(), $this->service->oneDay / 2, json_encode($this->request->all()));
-        $message = $this->official->getServer()->getDecryptedMessage();
-//        $this->service->redis::SETEX('request_official:message:' . time(), $this->service->oneDay / 2, json_encode($message));
-        $config = $this->official->getConfig();
-        $config['name'] = 'official';
-        switch ($message['MsgType']) {
-            case 'event':
-                return $this->officialServe->eventType($message, $user, $config);
-            case 'text':
-                return $this->officialServe->textType($message,$config);
-            case 'image':
-                return $this->officialServe->imageType($message);
-            case 'voice':
-                return $this->officialServe->voiceType($message);
-            case 'video':
-                return $this->officialServe->videoType($message);
-            case 'location':
-                return $this->officialServe->locationType($message);
-            case 'link':
-                return $this->officialServe->linkType($message);
-            case 'file':
-                return $this->officialServe->fileType($message);
-            default:
-                return '未识别的消息类型';
-        }
+        return  $this->official->getServer()->with(function($message) {
+            $config = $this->official->getConfig();
+            $config['name'] = 'official';
+            switch ($message->MsgType) {
+                case 'event':
+                    $user['original'] = $this->official->getClient()->get('cgi-bin/user/info', [
+                        'query' => ['openid' => $this->request->input('openid')]
+                    ])->toArray();
+                    $user['ip'] = $this->request->ip();
+                    return $this->officialServe->eventType($message, $user, $config);
+                case 'text':
+                    return $this->officialServe->textType($message,$config);
+                case 'image':
+                    return $this->officialServe->imageType($message);
+                case 'voice':
+                    return $this->officialServe->voiceType($message);
+                case 'video':
+                    return $this->officialServe->videoType($message);
+                case 'location':
+                    return $this->officialServe->locationType($message);
+                case 'link':
+                    return $this->officialServe->linkType($message);
+                case 'file':
+                    return $this->officialServe->fileType($message);
+                default:
+                    return '未识别的消息类型';
+            }
+        })->serve();
     }
 }
