@@ -158,11 +158,6 @@ class OfficialServe extends Service
         return '语音信息识别失败';
     }
 
-    public function videoType($message)
-    {
-        return '这是一个视频';
-    }
-
     public function locationType($message)
     {
         return "此位置是：" . $message['Label'] .
@@ -179,10 +174,5 @@ class OfficialServe extends Service
             return $link['comment'];
         }
         return '这个链接有问题啊,小闪识别不出来吖';
-    }
-
-    public function fileType($message)
-    {
-        return '这是一个文件';
     }
 }

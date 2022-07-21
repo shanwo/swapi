@@ -76,16 +76,12 @@ class OfficialController extends Controller
                     return $this->officialServe->imageType($message);
                 case 'voice':
                     return $this->officialServe->voiceType($message);
-                case 'video':
-                    return $this->officialServe->videoType($message);
                 case 'location':
                     return $this->officialServe->locationType($message);
                 case 'link':
                     return $this->officialServe->linkType($message);
-                case 'file':
-                    return $this->officialServe->fileType($message);
                 default:
-                    return '未识别的消息类型';
+                    return '不支持的消息类型';
             }
         })->serve();
     }
