@@ -25,6 +25,7 @@ class OfficialServe extends Service
         $keyword = '关注';
         if (!empty($message['Content'])) {
             $keyword = trim($message['Content']);
+            $keyword = substr_replace('。','',$keyword);
         }
         $data = [];
         $reply = $this->redis::HGET('reply', $keyword);
@@ -69,7 +70,7 @@ class OfficialServe extends Service
             $this->feedbackModel->insertGetId($insert);
             return '你提交的信息小闪已经记下啦[耶]';
         }
-        return "小闪搞没懂你的意思哇[委屈]\n如果你有什么话，可以这样告诉我：\n#酱紫#[想说的话]";
+        return "小闪搞没懂你的意思哇[委屈]\n如果你有什么话，可以这样告诉我：\n#酱紫#[想说的话]\n例如：#酱紫#期待新功能哦";
     }
 
     /**
@@ -92,47 +93,10 @@ class OfficialServe extends Service
                 break;
             case'LOCATION':                 //上报地理位置
                 break;
-            case'VIEW':                     //菜单 - 点击菜单跳转链接
-                break;
-            case'CLICK':                    //菜单 - 点击菜单拉取消息
-                break;
-            case'scancode_push':            //菜单 - 扫码推事件(客户端跳URL)
-                break;
-            case'scancode_waitmsg':         //菜单 - 扫码推事件(客户端不跳URL)
-                break;
-            case'pic_sysphoto':             //菜单 - 弹出系统拍照发图
-                break;
-            case'pic_photo_or_album':       //菜单 - 弹出拍照或者相册发图
-                break;
-            case'pic_weixin':               //菜单 - 弹出微信相册发图器
-                break;
-            case'location_select':          //菜单 - 弹出地理位置选择器
-                break;
-            case'MASSSENDJOBFINISH':        //发送结果 - 高级群发完成
-                break;
-            case'TEMPLATESENDJOBFINISH':    //发送结果 - 模板消息发送结果
-                break;
-            case'kfcreatesession':          //多客服 - 接入会话
-                break;
-            case'kfclosesession':           //多客服 - 关闭会话
-                break;
-            case'kfswitchsession':          //多客服 - 转接会话
-                break;
-            case'card_pass_check':          //卡券 - 审核通过
-                break;
-            case'card_not_pass_check':      //卡券 - 审核未通过
-                break;
-            case'user_get_card':            //卡券 - 用户领取卡券
-                break;
-            case'user_del_card':            //卡券 - 用户删除卡券
-                break;
-            case'merchant_order':           //微信小店 - 订单付款通知
-                break;
-            case'ShakearoundUserShake':     //摇一摇事件通知
-                break;
             default:
+                return '暂不支持的事件类型';
         }
-        return '';
+        return '暂不支持的事件类型';
     }
 
     public function textType($message, $config)
