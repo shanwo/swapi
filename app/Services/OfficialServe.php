@@ -44,11 +44,16 @@ class OfficialServe extends Service
                 $msg = [];
                 $comment = json_decode($v['comment'], true);
                 $msg['MsgType'] = ucfirst($v['type']);
-                $msg[$msg['MsgType']] = $comment;
-                if($v['type'] == 'news'){
-                    $msg['ArticleCount'] = 1;
-                    $msg['Articles']['item'] = reset($comment['item']);
-                    unset($msg[$msg['MsgType']]);
+                if(!in_array($v['type'],['text','news'])){
+                    $msg[$msg['MsgType']] = $comment;
+                }else{
+                    if($v['type'] == 'news'){
+                        $msg['ArticleCount'] = 1;
+                        $msg['Articles']['item'] = $comment['item'];
+                    }
+                    if($v['type'] == 'text'){
+                        $msg = array_merge($msg,$comment);
+                    }
                 }
                 $this->redis::HSET('reply', $v['keyword'], json_encode($msg,JSON_UNESCAPED_UNICODE));
                 if ($v['keyword'] == $keyword) $data = $msg;
