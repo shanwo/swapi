@@ -25,7 +25,7 @@ class OfficialServe extends Service
         $keyword = '关注';
         if (!empty($message['Content'])) {
             $keyword = trim($message['Content']);
-            $keyword = str_ireplace('。','',$keyword);
+            $keyword = str_ireplace('。', '', $keyword);
         }
         $data = [];
         $reply = $this->redis::HGET('reply', $keyword);
@@ -41,9 +41,12 @@ class OfficialServe extends Service
                     $this->replyModel->whereKey($v['id'])->increment('number', $number);
                     $this->redis::ZREM('reply_number', $v['keyword']);
                 }
-                $v['comment'] = json_decode($v['comment'], true);
-                $this->redis::HSET('reply', $v['keyword'], json_encode($v));
-                if ($v['keyword'] == $keyword) $data = $v;
+                $msg = [
+                    'msgtype'  => $v['type'],
+                    $v['type'] => json_decode($v['comment'], true)
+                ];
+                $this->redis::HSET('reply', $v['keyword'], json_encode($msg));
+                if ($v['keyword'] == $keyword) $data = $msg;
             }
         }
         if ($data) $this->redis::ZINCRBY('reply_number', 1, $keyword);
@@ -85,13 +88,10 @@ class OfficialServe extends Service
         switch ($message['Event']) {
             case'subscribe':               //订阅
                 (new UserService)->wechat($user, $config);
-                $text = $this->reply($message);
-                return $text['comment'];
+                return $this->reply($message);
             case'unsubscribe':             //取消订阅
                 break;
             case'SCAN':                    //扫描带参数二维码
-                break;
-            case'LOCATION':                 //上报地理位置
                 break;
             default:
                 return '暂不支持的事件类型';
@@ -103,7 +103,7 @@ class OfficialServe extends Service
     {
         $text = $this->reply($message);
         if (!$text) return $this->feedback($message, $config);
-        return $text['comment'];
+        return $text;
     }
 
     public function imageType($message)
@@ -117,7 +117,7 @@ class OfficialServe extends Service
             $message['Content'] = $message['Recognition'];
             $voice = $this->reply($message);
             if (!$voice) return "识别结果\n" . $message['Recognition'];
-            return $voice['comment'];
+            return $voice;
         }
         return '语音信息识别失败';
     }
@@ -135,7 +135,7 @@ class OfficialServe extends Service
             $message['Content'] = $message['Title'];
             $link = $this->reply($message);
             if (!$link) return "识别结果\n" . $message['Title'] . "\n" . $message['Url'];
-            return $link['comment'];
+            return $link;
         }
         return '这个链接有问题啊,小闪识别不出来吖';
     }
