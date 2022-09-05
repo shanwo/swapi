@@ -116,37 +116,14 @@ class OfficialServe extends Service
         return $text;
     }
 
-    public function imageType($message)
-    {
-        return "识别结果\n" . $message['PicUrl'];
-    }
-
     public function voiceType($message)
     {
         if ($message['Recognition']) {
             $message['Content'] = $message['Recognition'];
             $voice = $this->reply($message);
-            if (!$voice) return "识别结果\n" . $message['Recognition'];
+            if (!$voice) return "你说：\n" . $message['Recognition'];
             return $voice;
         }
-        return '语音信息识别失败';
-    }
-
-    public function locationType($message)
-    {
-        return "此位置是：" . $message['Label'] .
-            "\n经度:" . $message['Location_Y'] .
-            "\n纬度:" . $message['Location_X'];
-    }
-
-    public function linkType($message)
-    {
-        if ($message['Title']) {
-            $message['Content'] = $message['Title'];
-            $link = $this->reply($message);
-            if (!$link) return "识别结果\n" . $message['Title'] . "\n" . $message['Url'];
-            return $link;
-        }
-        return '这个链接有问题啊,小闪识别不出来吖';
+        return '你说啥？';
     }
 }
