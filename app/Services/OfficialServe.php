@@ -46,18 +46,18 @@ class OfficialServe extends Service
                 $msg = [];
                 $comment = json_decode($v['comment'], true);
                 $msg['MsgType'] = ucfirst($v['type']);
-                if(!in_array($v['type'],['text','news'])){
+                if (!in_array($v['type'], ['text', 'news'])) {
                     $msg[$msg['MsgType']] = $comment;
-                }else{
-                    if($v['type'] == 'news'){
+                } else {
+                    if ($v['type'] == 'news') {
                         $msg['ArticleCount'] = 1;
                         $msg['Articles']['item'] = $comment['item'];
                     }
-                    if($v['type'] == 'text'){
-                        $msg = array_merge($msg,$comment);
+                    if ($v['type'] == 'text') {
+                        $msg = array_merge($msg, $comment);
                     }
                 }
-                $this->redis::HSET('reply', $v['keyword'], json_encode($msg,JSON_UNESCAPED_UNICODE));
+                $this->redis::HSET('reply', $v['keyword'], json_encode($msg, JSON_UNESCAPED_UNICODE));
                 if ($v['keyword'] == $keyword) $data = $msg;
             }
         }
@@ -88,11 +88,11 @@ class OfficialServe extends Service
         return "小闪搞没懂你的意思哇[委屈]\n如果你有什么话，可以这样告诉我：\n#酱紫#[想说的话]\n例如：#酱紫#期待新功能哦";
     }
 
-    private function pay($pay,$uid)
+    private function pay($pay, $uid)
     {
-        $info = json_decode($pay,true);
+        $info = json_decode($pay, true);
         $userInfo = $this->redis::GET('user_infos:' . $uid);
-        $data = $this->payService->send($info,json_decode($userInfo));
+        $data = $this->payService->send($info, json_decode($userInfo));
         return $data['code_url'];
     }
 
@@ -105,7 +105,7 @@ class OfficialServe extends Service
      */
     public function eventType($message, $user, $config)
     {
-        switch ($message['Event']) {
+        switch (Strtolower($message['Event'])) {
             case'subscribe':               //订阅
                 (new UserService)->wechat($user, $config);
                 return $this->reply($message);
@@ -114,17 +114,17 @@ class OfficialServe extends Service
                 $where[] = ['open_id', '=', $user['raw']['openid']];
                 $where[] = ['app_id', '=', $config['app_id']];
                 $this->userThirdModel->where($where)->update(['status' => 2]);
-                break;
-            case'CLICK':                   //点击事件
-                [$action,$channel,$id] = explode(':',$message['EventKey']);
-                $pay = $this->redis::HGET('pay_channel:' . $channel,$id);
+                return '等你回来啊';
+            case'click':                   //点击事件
+                [$action, $channel, $id] = explode(':', $message['EventKey']);
+                $pay = $this->redis::HGET('pay_channel:' . $channel, $id);
                 if (!$pay) return '支付渠道不存在';
                 $where[] = ['source', '=', 'official'];
                 $where[] = ['open_id', '=', $user['raw']['openid']];
                 $where[] = ['app_id', '=', $config['app_id']];
                 $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id']);
-                $this->$action($pay,$userThird['user_id']);
-                break;
+                return $this->$action($pay, $userThird['user_id']);
+            default:
         }
         return '小闪还没有开启这个技能哇[委屈]';
     }
