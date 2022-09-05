@@ -38,7 +38,7 @@ class UserService extends Service
             $info = $this->userModel->whereKey($id)->first();
             if ($info['type'] == Service::USER_DISABLE) return ['msg' => '当前账户已被禁用，不可登录'];
             $info['contact'] = json_decode($info['contact'], true);
-            $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'open_id', 'login_ip', 'created_at')->where(['user_id' => $id])->get()->toArray();
+            $info['third'] = $this->userThirdModel->select('id', 'logins_number', 'source', 'open_id', 'login_ip', 'created_at')->where(['user_id' => $id, 'status' => 1])->get()->toArray();
             $this->redis::SET('user_infos:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
         }
         return $info;
@@ -135,7 +135,6 @@ class UserService extends Service
             $app_id = $config['key'];
         }
         $where[] = ['app_id', '=', $app_id];
-        $where[] = ['status', '=', 1];
         $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id', 'logins_number']);
         if ($userThird) {
             if (!empty($this->uid) && $this->uid != $userThird['user_id']) {
@@ -143,13 +142,14 @@ class UserService extends Service
             }
             $update = [
                 'login_ip'      => $user['ip'],
+                'status'        => 1,
                 'logins_number' => $userThird['logins_number'] + 1
             ];
             $this->userThirdModel->whereKey($userThird['id'])->update($update);
             $this->uid = $userThird['user_id'];
         } else {
             if ($raw['unionid']) {
-                $userThird = $this->userThirdModel->where('status', 1)->where('union_id', $raw['unionid'])->first(['id', 'user_id']);
+                $userThird = $this->userThirdModel->where('union_id', $raw['unionid'])->first(['id', 'user_id']);
                 $this->uid = $userThird['user_id'];
             }
             $token = Crypt::encryptString($raw['openid']);
@@ -165,10 +165,8 @@ class UserService extends Service
                 $pageService = new PageService();
                 $pageService->initial(env('USER_TEMPLATE', 1), $insertUser);
             } else {
-                $updateUser = [
-                    'api_token' => $token
-                ];
-                $this->userModel->whereKey($this->uid)->update($updateUser);
+                $this->userModel->whereKey($this->uid)->update(['api_token' => $token]);
+                $this->userThirdModel->whereKey($userThird['id'])->update(['status' => 1]);
             }
             $insertThird = [
                 'user_id'  => $this->uid,
