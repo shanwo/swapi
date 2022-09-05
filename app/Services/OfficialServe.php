@@ -100,6 +100,10 @@ class OfficialServe extends Service
                 (new UserService)->wechat($user, $config);
                 return $this->reply($message);
             case'unsubscribe':             //取消订阅
+                $where[] = ['source', '=', 'official'];
+                $where[] = ['open_id', '=', $user['raw']['openid']];
+                $where[] = ['app_id', '=', $config['app_id']];
+                $this->userThirdModel->where($where)->update(['status' => 2]);
                 break;
             case'SCAN':                    //扫描带参数二维码
                 break;
