@@ -58,9 +58,9 @@ class OfficialController extends Controller
         if ($this->msg) {
             return $this->returnApi();
         }
-        $this->service->redis::SETEX('request_official:xml:' . LARAVEL_START, $this->service->oneDay / 2, file_get_contents("php://input"));
-        $this->service->redis::SETEX('request_official:param:' . LARAVEL_START, $this->service->oneDay / 2, json_encode($this->request->all()));
-        return  $this->official->getServer()->with(function($message) {
+        $this->service->redis::SETEX('request_official:' . LARAVEL_START . ':xml', $this->service->oneDay / 2, file_get_contents("php://input"));
+        $this->service->redis::SETEX('request_official:' . LARAVEL_START . ':param', $this->service->oneDay / 2, json_encode($this->request->all()));
+        return $this->official->getServer()->with(function ($message) {
             $config = $this->official->getConfig();
             $config['name'] = 'official';
             switch ($message->MsgType) {
@@ -69,10 +69,10 @@ class OfficialController extends Controller
                         'query' => ['openid' => $this->request->input('openid')]
                     ])->toArray();
                     $user['ip'] = $this->request->ip();
-                    $this->service->redis::SETEX('request_official:user:' . LARAVEL_START, $this->service->oneDay / 2, json_encode($user));
+                    $this->service->redis::SETEX('request_official:' . LARAVEL_START . ':user', $this->service->oneDay / 2, json_encode($user));
                     return $this->officialServe->eventType($message, $user, $config);
                 case 'text':
-                    return $this->officialServe->textType($message,$config);
+                    return $this->officialServe->textType($message, $config);
                 case 'voice':
                     return $this->officialServe->voiceType($message);
 //                case 'location':
