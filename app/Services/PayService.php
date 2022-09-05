@@ -8,17 +8,21 @@
 namespace App\Services;
 
 use App\Models\PayModel;
+use EasyWeChat\Pay\Application;
 
 class PayService extends Service
 {
-    protected $payment;
     protected $payModel;
+    protected $payment;
 
     public function __construct()
     {
         parent::__construct();
         $this->payModel = new PayModel();
-        $this->payment = $this->configInfo('payment');
+        $config = $this->configInfo('payment');
+        $config['private_key']= env('PRIVATE_KEY');
+        $config['certificate']= env('CERTIFICATE');
+        $this->payment = new Application($config);
     }
 
     public function lists($request)
@@ -72,5 +76,12 @@ class PayService extends Service
         $data['order_sn'] = $order_sn;
         $this->redis::SETEX('pay_order:' . $order_sn, $this->oneDay / 24, json_encode(['pay' => $info, 'user' => $user], JSON_UNESCAPED_UNICODE));
         return $data;
+    }
+
+    public function result($order_sn)
+    {
+        return $this->payment->getClient()->get('v3/pay/transactions/out-trade-no/' . $order_sn, [
+            'query' => ['mchid' => $this->payment->getConfig()->get('mch_id')]
+        ])->toArray();
     }
 }

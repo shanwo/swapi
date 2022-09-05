@@ -9,13 +9,12 @@ namespace App\Http\Controllers;
 
 use App\Services\AdService;
 use App\Services\PayService;
-use EasyWeChat\Pay\Application;
 use Illuminate\Http\Request;
 
 class PayController extends Controller
 {
-    protected $payService;
     protected $adService;
+    protected $payService;
 
     public function __construct(Request $request)
     {
@@ -60,9 +59,9 @@ class PayController extends Controller
             return $this->returnApi();
         }
         $info = json_decode($pay, true);
-        $type = $this->request->input('type');
         $user = $this->request->user();
-        $data = $this->payService->send($info,$type,$user);
+        $type = $this->request->input('type');
+        $data = $this->payService->send($info,$user,$type);
         $this->code = 200;
         return $this->returnApi($data);
     }
@@ -78,13 +77,7 @@ class PayController extends Controller
             return $this->returnApi();
         }
         $order_sn = $this->request->input('order_sn');
-        $config = $this->service->configInfo('payment');
-        $config['private_key']= env('PRIVATE_KEY');
-        $config['certificate']= env('CERTIFICATE');
-        $payment = new Application($config);
-        $data = $payment->getClient()->get('v3/pay/transactions/out-trade-no/' . $order_sn, [
-            'query' => ['mchid' => $payment->getConfig()->get('mch_id')]
-        ])->toArray();
+        $data = $this->payService->result($order_sn);
         $data['ad'] = $this->adService->info($this->request, 10);
         $this->code = 200;
         return $this->returnApi($data);
