@@ -73,16 +73,16 @@ class OfficialController extends Controller
                     return $this->officialServe->eventType($message, $user, $config);
                 case 'text':
                     return $this->officialServe->textType($message,$config);
-                case 'image':
-                    return $this->officialServe->imageType($message);
                 case 'voice':
                     return $this->officialServe->voiceType($message);
-                case 'location':
-                    return $this->officialServe->locationType($message);
-                case 'link':
-                    return $this->officialServe->linkType($message);
+//                case 'location':
+//                    return "此位置是：" . $message['Label'] . "\n经度:" . $message['Location_Y'] . "\n纬度:" . $message['Location_X'];
+//                case 'image':
+//                    return $message['PicUrl'];
+//                case 'link':
+//                    return $message['Title'];
                 default:
-                    return '不支持的消息类型';
+                    return '';
             }
         })->serve();
     }
