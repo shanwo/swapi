@@ -105,7 +105,7 @@ class OfficialServe extends Service
                 $where[] = ['app_id', '=', $config['app_id']];
                 $this->userThirdModel->where($where)->update(['status' => 2]);
                 break;
-            case'SCAN':                    //扫描带参数二维码
+            case'CLICK':                   //点击事件
                 break;
             default:
                 return '暂不支持的事件类型';
