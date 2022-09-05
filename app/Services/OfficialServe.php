@@ -8,6 +8,7 @@ use App\Models\UserThirdModel;
 
 class OfficialServe extends Service
 {
+    protected $payService;
     protected $replyModel;
     protected $feedbackModel;
     protected $userThirdModel;
@@ -15,6 +16,7 @@ class OfficialServe extends Service
     public function __construct()
     {
         parent::__construct();
+        $this->payService = new PayService();
         $this->replyModel = new ReplyModel();
         $this->feedbackModel = new FeedbackModel();
         $this->userThirdModel = new UserThirdModel();
@@ -86,6 +88,14 @@ class OfficialServe extends Service
         return "小闪搞没懂你的意思哇[委屈]\n如果你有什么话，可以这样告诉我：\n#酱紫#[想说的话]\n例如：#酱紫#期待新功能哦";
     }
 
+    private function pay($pay,$uid)
+    {
+        $info = json_decode($pay,true);
+        $userInfo = $this->redis::GET('user_infos:' . $uid);
+        $data = $this->payService->send($info,json_decode($userInfo));
+        return $data['code_url'];
+    }
+
     /**
      * 事件回复
      * @param $message
@@ -106,11 +116,17 @@ class OfficialServe extends Service
                 $this->userThirdModel->where($where)->update(['status' => 2]);
                 break;
             case'CLICK':                   //点击事件
+                [$action,$channel,$id] = explode(':',$message['EventKey']);
+                $pay = $this->redis::HGET('pay_channel:' . $channel,$id);
+                if (!$pay) return '支付渠道不存在';
+                $where[] = ['source', '=', 'official'];
+                $where[] = ['open_id', '=', $user['raw']['openid']];
+                $where[] = ['app_id', '=', $config['app_id']];
+                $userThird = $this->userThirdModel->where($where)->first(['id', 'user_id']);
+                $this->$action($pay,$userThird['user_id']);
                 break;
-            default:
-                return '暂不支持的事件类型';
         }
-        return '暂不支持的事件类型';
+        return '小闪还没有开启这个技能哇[委屈]';
     }
 
     public function textType($message, $config)
