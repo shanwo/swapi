@@ -64,13 +64,6 @@ Route::prefix('home')->group(function () {
     Route::get('recent', 'HomeController@recent');
     Route::get('info', 'HomeController@info');
 });
-//用户
-Route::prefix('user')->group(function () {
-    Route::get('signIn', 'UserController@signIn');
-    Route::get('signOut', 'UserController@signOut');
-    Route::get('info', 'UserController@info');
-    Route::post('edit', 'UserController@edit');
-});
 //支付
 Route::prefix('pay')->group(function () {
     Route::get('lists', 'PayController@lists');
@@ -79,9 +72,6 @@ Route::prefix('pay')->group(function () {
 });
 //回调
 Route::prefix('callback')->group(function () {
-    //登录
-    Route::get('official', 'CallbackController@official');
-    Route::get('wechat', 'CallbackController@wechat');
     //支付
     Route::post('payment', 'CallbackController@payment');
     Route::post('refund', 'CallbackController@refund');
