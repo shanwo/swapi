@@ -40,7 +40,16 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "easywechat-composer/easywechat-composer": true
+        },
+        "platform": {
+            "ext-json": "8",
+            "ext-redis": "8",
+            "ext-sodium": "8",
+            "ext-openssl": "8"
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
