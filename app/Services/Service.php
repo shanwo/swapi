@@ -7,8 +7,6 @@
 
 namespace App\Services;
 
-use App\Models\ConfigModel;
-use App\Models\TagModel;
 use App\Models\UserTagModel;
 use Illuminate\Support\Facades\Redis;
 
@@ -37,15 +35,12 @@ class Service
     public $page = 1;
     public $size = 10;
     public $oneDay = 86400;
-    protected $configModel;
     protected $tagModel;
     protected $userTagModel;
 
     public function __construct()
     {
         $this->redis = new Redis();
-        $this->configModel = new ConfigModel();
-        $this->tagModel = new TagModel();
         $this->userTagModel = new UserTagModel();
     }
 
@@ -53,17 +48,8 @@ class Service
     {
         $data = [];
         $config = $this->redis::GET('config:' . $name);
-        if ($config) {
-            $data = json_decode($config, true);
-        } else {
-            $lists = $this->configModel->where(['autoload' => 1, 'is_delete' => Service::DELETE_NO])->get()->toArray();
-            foreach ($lists as $k => $v) {
-                $this->redis::SET('config:' . $v['option_name'], $v['option_value']);
-                if ($v['option_name'] == $name) {
-                    $data = json_decode($v['option_value'], true);
-                }
-            }
-        }
+        if ($config) $data = json_decode($config, true);
+        $data['name'] = $name;
         return $data;
     }
 
@@ -108,15 +94,6 @@ class Service
     public function setTag($key, $uid, $value)
     {
         $tag = $this->redis::HGET('tags', $key);
-        if (!$tag) {
-            $lists = $this->tagModel->select('id', 'mark')->where(['status' => 1, 'is_delete' => Service::DELETE_NO])->get()->toArray();
-            foreach ($lists as $k => $v) {
-                if ($v['mark'] == $key) {
-                    $tag = $v['id'];
-                }
-                $this->redis::HSET('tags', $v['mark'], $v['id']);
-            }
-        }
         if ($tag) {
             $userTag = $this->redis::HGET('user_tags:' . $uid, $key);
 //            $userTag = $this->redis::SISMEMBER('tag_users:' . $key, $uid);
