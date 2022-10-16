@@ -52,7 +52,7 @@ class PayController extends Controller
         $this->validate([
             'id'      => 'required|integer|gt:0',
             'type'    => 'required|alpha_num|in:NATIVE,JSAPI',
-            'channel' => 'filled|integer|gt:0',
+            'channel' => 'filled|integer|gte:0',
         ], [
             'id'      => 'ID',
             'channel' => '渠道',
