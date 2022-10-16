@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 class TestController extends Controller
 {
     protected $pageService;
-    protected $userService;
 
     public function __construct(Request $request)
     {
