@@ -46,7 +46,7 @@ class OrderService extends Service
             'snapshot'       => json_encode($request, JSON_UNESCAPED_UNICODE),
         ];
         $this->orderModel->insertGetId($insert);
-        $info = $this->userAttributeModel->whereKey($user['id'])->first();
+        $info = $this->userAttributeModel->where(['page_id' => $user['id']])->first();
         $expire = time() + $this->lengthTime($pay['type']);
         if ($info['type'] == Service::USER_VIP) {
             $expire = strtotime($info['expired_at']);

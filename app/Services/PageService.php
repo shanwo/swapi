@@ -218,7 +218,7 @@ class PageService extends Service
             $this->redis::ZREM('hot', $id);
         }
         $status = $request->input('status');
-        if ($status == -1) {
+        if ($status == Service::DISABLE) {
             $this->redis::ZREM('hot', $id);
             $this->redis::SREM('recent', $id);
             $this->redis::DEL('list_pages:' . $id);
@@ -250,7 +250,7 @@ class PageService extends Service
             $this->page++;
         }
         $this->pageModel->whereKey($pid)->increment('browse', array_sum($browses));
-        $allBrowse = $this->browseModel->select('id', 'user_id')->where('page_id', '=', $pid)->get()->toArray();
+        $allBrowse = $this->browseModel->select('id', 'user_id')->where(['page_id'=> $pid])->get()->toArray();
         $original = array_column($allBrowse, 'id', 'user_id');
         $add = array_diff_key($browses, $original);
         $insert = [];
@@ -290,7 +290,7 @@ class PageService extends Service
             $attentions += $this->redis::ZREVRANGE('page_attentions:' . $pid, $start, $stop, true);
             $this->page++;
         }
-        $allAttention = $this->attentionModel->select('id', 'user_id')->where('page_id', '=', $pid)->get()->toArray();
+        $allAttention = $this->attentionModel->select('id', 'user_id')->where(['page_id'=> $pid])->get()->toArray();
         $original = array_column($allAttention, 'id', 'user_id');
         $add = array_diff_key($attentions, $original);
         foreach ($add as $uid => $num) {

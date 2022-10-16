@@ -91,7 +91,7 @@ class HomeService extends Service
     private function setPage()
     {
         if ($this->redis::GET('set_home')) return;
-        $where[] = ['p.is_open', '=', 1];
+        $where[] = ['p.is_open', '=', Service::ENABLE];
         $where[] = ['ua.type', '=', Service::USER_VIP];
         $data = $this->pageModel->from('sw_page as p')->select('p.id', 'p.user_id', 'p.follow', 'p.browse', 'p.is_open', 'p.head_data')
             ->leftJoin('sw_user_attribute as ua', 'p.user_id', '=', 'ua.user_id')
