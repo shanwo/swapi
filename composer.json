@@ -13,9 +13,8 @@
         "laravel/framework": "^9.11",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
-        "overtrue/laravel-wechat": "^7.0",
         "predis/predis": "^1.1",
-        "qcloud/cos-sdk-v5": ">=2.0"
+        "w7corp/easywechat": "^6.8"
     },
     "autoload": {
         "psr-4": {
@@ -41,9 +40,6 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
-        "allow-plugins": {
-            "easywechat-composer/easywechat-composer": true
-        },
         "platform": {
             "ext-json": "8",
             "ext-redis": "8",
