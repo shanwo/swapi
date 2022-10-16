@@ -8,18 +8,18 @@
 namespace App\Services;
 
 use App\Models\OrderModel;
-use App\Models\UserModel;
+use App\Models\UserAttributeModel;
 
 class OrderService extends Service
 {
-    protected $userModel;
     protected $orderModel;
+    protected $userAttributeModel;
 
     public function __construct()
     {
         parent::__construct();
-        $this->userModel = new UserModel();
         $this->orderModel = new OrderModel();
+        $this->userAttributeModel = new UserAttributeModel();
     }
 
     public function info($where)
@@ -46,7 +46,7 @@ class OrderService extends Service
             'snapshot'       => json_encode($request, JSON_UNESCAPED_UNICODE),
         ];
         $this->orderModel->insertGetId($insert);
-        $info = $this->userModel->whereKey($user['id'])->first();
+        $info = $this->userAttributeModel->whereKey($user['id'])->first();
         $expire = time() + $this->lengthTime($pay['type']);
         if ($info['type'] == Service::USER_VIP) {
             $expire = strtotime($info['expired_at']);
@@ -69,7 +69,7 @@ class OrderService extends Service
         }
         $update['type'] = Service::USER_VIP;
         $update['expired_at'] = date('Y-m-d H:i:s', $expire);
-        $this->userModel->whereKey($user['id'])->update($update);
+        $this->userAttributeModel->whereKey($user['id'])->update($update);
         $this->setTag('pay_vip', $user['id'], 'Y');
         $this->setTag('vip_type', $user['id'], $pay['type']);
         return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
@@ -78,7 +78,7 @@ class OrderService extends Service
     public function edit($expire, $user)
     {
         $update['expired_at'] = date('Y-m-d H:i:s', $expire);
-        $this->userModel->whereKey($user['id'])->update($update);
+        $this->userAttributeModel->whereKey($user['id'])->update($update);
         return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
     }
 
