@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', 'https://shanwo.cc');
 
-Route::prefix('base')->group(function () {
+Route::prefix('common')->group(function () {
 //浏览记录
     Route::get('browse', 'BrowseController@lists');
 //装饰
