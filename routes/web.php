@@ -49,6 +49,14 @@ Route::prefix('home')->group(function () {
     Route::get('recent', 'HomeController@recent');
     Route::get('info', 'HomeController@info');
 });
+//支付
+Route::prefix('swpay')->group(function () {
+    Route::get('lists', 'PayController@lists');
+    Route::post('send', 'PayController@send');
+    Route::post('result', 'PayController@result');
+    Route::post('payment', 'PayController@payment');
+    Route::post('refund', 'PayController@refund');
+});
 //测试接口
 Route::prefix('test')->group(function () {
     Route::get('initial', 'TestController@initial');
