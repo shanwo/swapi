@@ -15,11 +15,9 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        'MP_verify_wOQevRdcPyMeqMJL.txt',
-        'verify_90bdbda5dbef9a37279156dd3ece6936.html',
         'home/*',
-        'callback/*',
-        'official/*',
+        'pay/payment',
+        'pay/refund',
         'test/image',
         'test/check',
     ];
