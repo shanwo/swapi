@@ -51,15 +51,10 @@ class PayController extends Controller
         $id = $this->request->input('id');
         $channel = $this->request->input('channel', 0);
         $pay = $this->service->redis::HGET('pay_channel:' . $channel, $id);
-        if (!$pay) {
-            $this->msg = '支付渠道不存在';
-            return $this->returnApi();
-        }
-        $info = json_decode($pay, true);
         $user = $this->request->user();
         $type = $this->request->input('type');
-        $data = $this->payService->send($info,$user,$type);
-        if(!empty($data['msg'])){
+        $data = $this->payService->send($pay, $user, $type);
+        if (!empty($data['msg'])) {
             $this->msg = $data['msg'];
             return $this->returnApi();
         }
@@ -79,7 +74,7 @@ class PayController extends Controller
         }
         $order_sn = $this->request->input('order_sn');
         $data = $this->payService->result($order_sn);
-        if(!empty($data['msg'])){
+        if (!empty($data['msg'])) {
             $this->msg = $data['msg'];
             return $this->returnApi();
         }

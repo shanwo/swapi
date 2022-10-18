@@ -21,8 +21,8 @@ class PayService extends Service
         parent::__construct();
         $this->payModel = new PayModel();
         $config = $this->configInfo('payment');
-        $config['private_key']= env('PRIVATE_KEY');
-        $config['certificate']= env('CERTIFICATE');
+        $config['private_key'] = env('PRIVATE_KEY');
+        $config['certificate'] = env('CERTIFICATE');
         $this->payment = new Application($config);
         $this->orderService = new OrderService();
     }
@@ -50,8 +50,10 @@ class PayService extends Service
         return $data;
     }
 
-    public function send($info,$user,$type='NATIVE')
+    public function send($pay, $user, $type = 'NATIVE')
     {
+        if (!$pay) return ['msg' => '支付渠道不存在'];
+        $info = json_decode($pay, true);
         $order_sn = dechex(time()) . rand(10, 99) . mb_substr(sprintf("%04d", $user->id), -4) . rand(10, 99);
         $total_fee = $info['original_price'];
         if ($info['activity_price']) $total_fee = $info['activity_price'];
@@ -79,7 +81,7 @@ class PayService extends Service
             $data['order_sn'] = $order_sn;
             $this->redis::SETEX('pay_order:' . $order_sn, $this->oneDay / 24, json_encode(['pay' => $info, 'user' => $user], JSON_UNESCAPED_UNICODE));
             return $data;
-        }catch  (\Exception $error){
+        } catch (\Exception $error) {
             return ['msg' => $error->getMessage()];
         }
     }
@@ -90,7 +92,7 @@ class PayService extends Service
             return $this->payment->getClient()->get('v3/pay/transactions/out-trade-no/' . $order_sn, [
                 'query' => ['mchid' => $this->payment->getConfig()->get('mch_id')]
             ])->toArray();
-        }catch (\Exception $error){
+        } catch (\Exception $error) {
             return ['msg' => $error->getMessage()];
         }
     }
@@ -146,7 +148,7 @@ class PayService extends Service
                 case 'NOTPAY':      //未支付
                     break;
                 case 'REVOKED':     //已撤销（仅付款码支付会返回）
-                break;
+                    break;
                 case 'USERPAYING':  //用户支付中（仅付款码支付会返回）
                     break;
                 default:
