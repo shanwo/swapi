@@ -72,14 +72,14 @@ class OrderService extends Service
         $this->userAttributeModel->where(['user_id' => $user['id']])->update($update);
         $this->setTag('pay_vip', $user['id'], 'Y');
         $this->setTag('vip_type', $user['id'], $pay['type']);
-        return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
+        return $this->redis::SET('user_attribute:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
     }
 
     public function edit($expire, $user)
     {
         $update['expired_at'] = date('Y-m-d H:i:s', $expire);
         $this->userAttributeModel->where(['user_id' => $user['id']])->update($update);
-        return $this->redis::SET('user_infos:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
+        return $this->redis::SET('user_attribute:' . $user['id'], json_encode(array_merge($user, $update), JSON_UNESCAPED_UNICODE));
     }
 
     public function status($id, $status)

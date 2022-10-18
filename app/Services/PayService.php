@@ -79,7 +79,9 @@ class PayService extends Service
         try {
             $data = $this->payment->getClient()->postJson($url, $body)->toArray();
             $data['order_sn'] = $order_sn;
-            $this->redis::SETEX('pay_order:' . $order_sn, $this->oneDay / 24, json_encode(['pay' => $info, 'user' => $user], JSON_UNESCAPED_UNICODE));
+            $attribute = $this->redis::GET('user_attribute:' . $user->id);
+            $attribute =  json_decode($attribute,true);
+            $this->redis::SETEX('pay_order:' . $order_sn, $this->oneDay / 24, json_encode(['pay' => $info, 'user' => $attribute], JSON_UNESCAPED_UNICODE));
             return $data;
         } catch (\Exception $error) {
             return ['msg' => $error->getMessage()];

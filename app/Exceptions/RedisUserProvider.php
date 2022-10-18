@@ -26,7 +26,7 @@ class RedisUserProvider extends EloquentUserProvider
             $user = Redis::GET('user_infos:' . $userId);
             $user =  json_decode($user,true);
             $attribute = Redis::GET('user_attribute:' . $userId);
-            if(!$attribute) (new UserAttributeService())->info($userId);
+            if(!$attribute) $attribute = (new UserAttributeService())->info($userId);
             $attribute =  json_decode($attribute,true);
             return (object)array_merge($user,$attribute);
         }
