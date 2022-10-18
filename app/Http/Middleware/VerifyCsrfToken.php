@@ -16,8 +16,8 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'home/*',
-        'pay/payment',
-        'pay/refund',
+        'swpay/payment',
+        'swpay/refund',
         'test/image',
         'test/check',
     ];
