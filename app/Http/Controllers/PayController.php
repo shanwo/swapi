@@ -23,7 +23,7 @@ class PayController extends Controller
     {
         parent::__construct($request);
         $this->payService = new PayService();
-        $config = $this->configInfo('payment');
+        $config = $this->service->configInfo('payment');
         $config['private_key'] = env('PRIVATE_KEY');
         $config['certificate'] = env('CERTIFICATE');
         $this->payment = new Application($config);
