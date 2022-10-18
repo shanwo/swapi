@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', 'https://shanwo.cc');
 
 Route::prefix('common')->group(function () {
-//项目注册
-    Route::get('enrolled', 'EnrolledController@index');
 //浏览记录
     Route::get('browse', 'BrowseController@lists');
 //装饰
