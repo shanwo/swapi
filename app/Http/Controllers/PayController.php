@@ -166,11 +166,12 @@ class PayController extends Controller
                     if ($info) {
                         $this->orderService->add($data, $info);
                     } else {
+                        $this->service->redis::SETEX('callback:payment:' . LARAVEL_START . ':refunds', $this->service->oneDay / 2, json_encode($this->request->getContent()));
                         $this->payment->getClient()->postJson('v3/refund/domestic/refunds', [
                             'transaction_id' => $data['transaction_id'],     //商户订单号
                             'out_refund_no'  => $data['out_trade_no'],       //商户退款单号
                             'reason'         => '订单支付超时',                 //退款原因
-                            'notify_url'     => env('APP_URL') . '/pay/refund',
+                            'notify_url'     => env('APP_URL') . '/swpay/refund',
                             'amount'         => [
                                 'refund'   => $data['amount']['payer_total'],//退款金额
                                 'total'    => $data['amount']['total'],      //原订单金额
