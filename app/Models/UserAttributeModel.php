@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 
-class UserAttributeModel extends Authenticatable
+class UserAttributeModel extends Model
 {
     protected $table = 'sw_user_attribute';
     public $timestamps = false;

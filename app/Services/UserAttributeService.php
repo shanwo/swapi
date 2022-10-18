@@ -14,22 +14,19 @@ class UserAttributeService extends Service
         $this->userAttributeModel = new UserAttributeModel();
     }
 
-    public function add($request)
+    public function info($uid)
     {
-        $uid = $request->user()->id;
-        $info = $this->userAttributeModel->where(['user_id' => $uid])->first();
-        if(!$info) $this->userAttributeModel->insertGetId(['user_id'=>$uid]);
-    }
-
-    public function info($id)
-    {
-        $info = $this->redis::GET('user_infos:' . $id);
+        $info = $this->redis::GET('user_attribute:' . $uid);
         $info = json_decode($info, true) ?? [];
         if (!$info) {
-            $info = $this->userAttributeModel->where(['user_id' => $id])->first();
-            if ($info['type'] == Service::USER_DISABLE) return ['msg' => '当前账户已被禁用，不可登录'];
-            $info['contact'] = json_decode($info['contact'], true);
-            $this->redis::SET('user_infos:' . $id, json_encode($info, JSON_UNESCAPED_UNICODE));
+            $info = $this->userAttributeModel->where(['user_id' => $uid])->first(['type','vip_type','pages','expired_at']);
+            if(!$info) {
+                $id = $this->userAttributeModel->insertGetId(['user_id' => $uid]);
+                $info = $this->userAttributeModel->whereKey($id)->first(['type','vip_type','pages','expired_at']);
+            }else{
+                if ($info['type'] == Service::USER_DISABLE) return ['msg' => '当前账户已被禁用，不可登录'];
+            }
+            $this->redis::SET('user_attribute:' . $uid, json_encode($info, JSON_UNESCAPED_UNICODE));
         }
         return $info;
     }
