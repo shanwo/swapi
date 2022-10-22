@@ -15,11 +15,11 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        'home/*',
-        'swpay/payment',
-        'swpay/refund',
-        'test/image',
-        'test/check',
+        'sw/home/*',
+        'sw/pay/payment',
+        'sw/pay/refund',
+        'sw/test/image',
+        'sw/test/check',
     ];
 
     public function handle($request, Closure $next)

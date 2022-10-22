@@ -15,54 +15,56 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', 'https://shanwo.cc');
 
-Route::prefix('common')->group(function () {
+Route::prefix('sw')->group(function () {
+    Route::prefix('common')->group(function () {
 //浏览记录
-    Route::get('browse', 'BrowseController@lists');
+        Route::get('browse', 'BrowseController@lists');
 //装饰
-    Route::get('decoration', 'DecorationController@lists');
+        Route::get('decoration', 'DecorationController@lists');
 //教程
-    Route::get('tutorials', 'TutorialsController@lists');
+        Route::get('tutorials', 'TutorialsController@lists');
 //链接
-    Route::get('link', 'LinkController@lists');
-});
+        Route::get('link', 'LinkController@lists');
+    });
 //首页
-Route::prefix('home')->group(function () {
-    Route::get('hot', 'HomeController@hot');
-    Route::get('recent', 'HomeController@recent');
-    Route::get('info', 'HomeController@info');
-});
+    Route::prefix('home')->group(function () {
+        Route::get('hot', 'HomeController@hot');
+        Route::get('recent', 'HomeController@recent');
+        Route::get('info', 'HomeController@info');
+    });
 //模板
-Route::prefix('template')->group(function () {
-    Route::get('lists', 'TemplateController@lists');
-    Route::get('info', 'TemplateController@info');
-});
+    Route::prefix('template')->group(function () {
+        Route::get('lists', 'TemplateController@lists');
+        Route::get('info', 'TemplateController@info');
+    });
 //页面
-Route::prefix('page')->group(function () {
-    Route::get('lists', 'PageController@lists');
-    Route::get('info', 'PageController@info');
-    Route::post('add', 'PageController@add');
-    Route::post('edit', 'PageController@edit');
-    Route::post('status', 'PageController@status');
-});
+    Route::prefix('page')->group(function () {
+        Route::get('lists', 'PageController@lists');
+        Route::get('info', 'PageController@info');
+        Route::post('add', 'PageController@add');
+        Route::post('edit', 'PageController@edit');
+        Route::post('status', 'PageController@status');
+    });
 //关注
-Route::prefix('attention')->group(function () {
-    Route::get('lists', 'AttentionController@lists');
-    Route::post('status', 'AttentionController@status');
-});
+    Route::prefix('attention')->group(function () {
+        Route::get('lists', 'AttentionController@lists');
+        Route::post('status', 'AttentionController@status');
+    });
 //支付
-Route::prefix('swpay')->group(function () {
-    Route::get('lists', 'PayController@lists');
-    Route::post('send', 'PayController@send');
-    Route::post('result', 'PayController@result');
-    Route::post('payment', 'PayController@payment');
-    Route::post('refund', 'PayController@refund');
-});
+    Route::prefix('pay')->group(function () {
+        Route::get('lists', 'PayController@lists');
+        Route::post('send', 'PayController@send');
+        Route::post('result', 'PayController@result');
+        Route::post('payment', 'PayController@payment');
+        Route::post('refund', 'PayController@refund');
+    });
 //测试接口
-Route::prefix('test')->group(function () {
-    Route::get('initial', 'TestController@initial');
-    Route::get('check', 'TestController@check');
-    Route::get('info', 'TestController@info');
-    Route::get('all', 'TestController@all');
-    Route::get('image', 'TestController@image');
-});
+    Route::prefix('test')->group(function () {
+        Route::get('initial', 'TestController@initial');
+        Route::get('check', 'TestController@check');
+        Route::get('info', 'TestController@info');
+        Route::get('all', 'TestController@all');
+        Route::get('image', 'TestController@image');
+    });
 
+});
