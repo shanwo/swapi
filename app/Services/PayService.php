@@ -20,10 +20,13 @@ class PayService extends Service
     {
         parent::__construct();
         $this->payModel = new PayModel();
-        $config = $this->configInfo('payment');
-        $config['private_key'] = env('PRIVATE_KEY');
-        $config['certificate'] = env('CERTIFICATE');
-        $this->payment = new Application($config);
+        $config = $this->redis::GET('config:payment');
+        if ($config) {
+            $config = json_decode($config, true);
+            $config['private_key'] = env('PRIVATE_KEY');
+            $config['certificate'] = env('CERTIFICATE');
+            $this->payment = new Application($config);
+        }
         $this->orderService = new OrderService();
     }
 

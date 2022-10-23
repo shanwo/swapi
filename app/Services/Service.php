@@ -44,15 +44,6 @@ class Service
         $this->userTagModel = new UserTagModel();
     }
 
-    public function configInfo($name)
-    {
-        $data = [];
-        $config = $this->redis::GET('config:' . $name);
-        if ($config) $data = json_decode($config, true);
-        $data['name'] = $name;
-        return $data;
-    }
-
     public function hGetCache($key, $sort, $sids)
     {
         $data = [];
