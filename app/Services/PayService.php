@@ -165,7 +165,7 @@ class PayService extends Service
             })->serve();
         } catch (\ErrorException $error) {
             $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':error', $this->oneDay / 2, $error->getMessage());
-            return $error->getMessage();
+            return false;
         }
     }
 
