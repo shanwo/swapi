@@ -132,7 +132,7 @@ class PayService extends Service
                                 ]
                             ])->toArray();
                             $this->payment->getClient()->postJson('v3/pay/transactions/out-trade-no/' . $data['out_trade_no'] . '/close', [
-                                ['mchid' => $message['mchid']]
+                                ['mchid' => $data['mchid']]
                             ])->toArray();
                         }
                         break;
