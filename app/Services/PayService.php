@@ -108,7 +108,7 @@ class PayService extends Service
         try {
             return $this->payment->getServer()->handlePaid(function ($message, $fail) {
                 $data = $this->payment->getClient()->get('v3/pay/transactions/out-trade-no/' . $message['out_trade_no'], [
-                    'query' => ['mchid' => $this->payment->getConfig()->get('mch_id')]
+                    'query' => ['mchid' => $message['mchid']]
                 ])->toArray();
                 $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
                 $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':data', $this->oneDay / 2, json_encode($data));
@@ -132,7 +132,7 @@ class PayService extends Service
                                 ]
                             ])->toArray();
                             $this->payment->getClient()->postJson('v3/pay/transactions/out-trade-no/' . $data['out_trade_no'] . '/close', [
-                                ['mchid' => $this->payment->getConfig()->get('mch_id')]
+                                ['mchid' => $message['mchid']]
                             ])->toArray();
                         }
                         break;
