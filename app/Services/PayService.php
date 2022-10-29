@@ -81,6 +81,9 @@ class PayService extends Service
         }
         try {
             $data = $this->payment->getClient()->postJson($url, $body)->toArray();
+            if ($type === 'JSAPI') {
+                $data = $this->payment->getUtils()->buildBridgeConfig($data['prepay_id'], $this->payment->getConfig()->get('app_id'));
+            }
             $data['order_sn'] = $order_sn;
             $attribute = $this->redis::GET('user_attribute:' . $user->id);
             $attribute = json_decode($attribute, true);
