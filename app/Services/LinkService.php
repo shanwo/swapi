@@ -24,7 +24,7 @@ class LinkService extends Service
         $sort = $request->input('sort_id', Service::SORT_ALL);
         $data = $this->hGetCache('link', $sort, $sids);
         if (!$data) {
-            $where[] = ['is_delete', '=', Service::DELETE_NO];
+            $where[] = ['status', '=', Service::ENABLE];
             $data = $this->linkModel->select('id', 'sort_id', 'name', 'image', 'svg', 'url')->where($where)->get()->toArray();
             foreach ($data as $k => $v) {
                 $this->redis::HSET('link:' . $v['sort_id'], $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));

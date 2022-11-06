@@ -36,7 +36,7 @@ class PayService extends Service
         $data = $this->redis::HGETALL('pay_channel:' . $channel);
         if (!$data) {
             $where[] = ['channel', '=', $channel];
-            $where[] = ['is_delete', '=', Service::DELETE_NO];
+            $where[] = ['status', '=', Service::ENABLE];
             $data = $this->payModel->select('id', 'name', 'channel', 'original_price', 'activity_price', 'description', 'type')->where($where)->get()->toArray();
             foreach ($data as $k => $v) {
                 $this->redis::HSET('pay_channel:' . $channel, $v['id'], json_encode($v, JSON_UNESCAPED_UNICODE));
