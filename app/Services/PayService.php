@@ -21,6 +21,9 @@ class PayService extends Service
         parent::__construct();
         $this->payModel = new PayModel();
         $config = $this->redis::GET('config:payment');
+        if (strcmp(app('env'), 'prod')) {
+            $config = $this->redis::GET('config:payment-test');
+        }
         if ($config) {
             $config = json_decode($config, true);
             $config['private_key'] = env('PRIVATE_KEY');
