@@ -77,9 +77,9 @@ class PayService extends Service
         ];
         if ($type === 'JSAPI') {
             $url = 'v3/pay/transactions/jsapi';
-            $third = array_column($user->third, 'open_id', 'source');
+            $third = array_column($user->third, 'open_id', 'app_id') ?? [];
             $body['payer'] = [
-                'openid' => $third['official'] ?? ''
+                'openid' => $third[$this->payment->getConfig()->get('app_id')] ?? ''
             ];
         }
         try {
