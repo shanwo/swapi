@@ -169,7 +169,7 @@ class PayService extends Service
                 $this->redis::DEL('pay_order:' . $message['out_trade_no']);
                 return true;
             })->serve();
-        } catch (\ErrorException $error) {
+        } catch (\Exception $error) {
             $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':error', $this->oneDay / 2, $error->getMessage());
             return false;
         }
@@ -179,7 +179,7 @@ class PayService extends Service
     {
         $this->redis::SETEX('callback:refund:' . LARAVEL_START . ':request', $this->oneDay / 2, json_encode($request->all()));
         try {
-            return $this->payment->getServer()->handleRefunded(function ($message, $reqInfo, $fail) {
+            return $this->payment->getServer()->handleRefunded(function ($message, $fail) {
                 $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
                 $pay = $this->redis::HGET('pay_channel:' . $res['channel'], $res['pay_id']);
                 $pay = json_decode($pay, true);
@@ -196,8 +196,8 @@ class PayService extends Service
                 $this->orderService->edit($expired, $user);
                 $this->orderService->status($res['id'], OrderService::ORDER_REFUND);
                 return true;
-            });
-        } catch (\ErrorException $error) {
+            })->serve();
+        } catch (\Exception $error) {
             $this->redis::SETEX('callback:refund:' . LARAVEL_START . ':error', $this->oneDay / 2, $error->getMessage());
             return false;
         }
