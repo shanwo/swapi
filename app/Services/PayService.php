@@ -188,7 +188,7 @@ class PayService extends Service
                     return $fail('非会员状态不可发起退款');
                 }
                 $expired = strtotime($user['expired_at']);
-                $endTime = time() + $this->lengthTime($pay['type']) - 60;
+                $endTime = time() + $this->lengthTime($pay['type']) - $this->oneDay;
                 if ($expired < $endTime) {
                     return $fail('会员到期时间小于购买时间，不可发起退款');
                 }
