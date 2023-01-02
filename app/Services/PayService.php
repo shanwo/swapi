@@ -90,7 +90,7 @@ class PayService extends Service
             $data['order_sn'] = $order_sn;
             $attribute = $this->redis::GET('user_attribute:' . $user->id);
             $attribute = json_decode($attribute, true);
-            $this->redis::SETEX('pay_order:' . $order_sn, $this->oneDay / 24, json_encode(['pay' => $info, 'user' => $attribute], JSON_UNESCAPED_UNICODE));
+            $this->redis::SETEX('pay_order:' . $order_sn, self::ONEDAY / 24, json_encode(['pay' => $info, 'user' => $attribute], JSON_UNESCAPED_UNICODE));
             return $data;
         } catch (\Exception $error) {
             return ['msg' => $error->getMessage()];
@@ -110,14 +110,14 @@ class PayService extends Service
 
     public function payment($request)
     {
-        $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':request', $this->oneDay / 2, json_encode($request->all()));
+        $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':request', self::ONEDAY / 2, json_encode($request->all()));
         try {
             return $this->payment->getServer()->handlePaid(function ($message, $fail) {
                 $data = $this->payment->getClient()->get('v3/pay/transactions/out-trade-no/' . $message['out_trade_no'], [
                     'query' => ['mchid' => $message['mchid']]
                 ])->toArray();
                 $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
-                $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':data', $this->oneDay / 2, json_encode($data));
+                $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':data', self::ONEDAY / 2, json_encode($data));
                 switch ($data['trade_state']) {
                     case 'SUCCESS':     //支付成功
                         if ($res) break;
@@ -170,14 +170,14 @@ class PayService extends Service
                 return true;
             })->serve();
         } catch (\Exception $error) {
-            $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':error', $this->oneDay / 2, $error->getMessage());
+            $this->redis::SETEX('callback:payment:' . LARAVEL_START . ':error', self::ONEDAY / 2, $error->getMessage());
             return false;
         }
     }
 
     public function refund($request)
     {
-        $this->redis::SETEX('callback:refund:' . LARAVEL_START . ':request', $this->oneDay / 2, json_encode($request->all()));
+        $this->redis::SETEX('callback:refund:' . LARAVEL_START . ':request', self::ONEDAY / 2, json_encode($request->all()));
         try {
             return $this->payment->getServer()->handleRefunded(function ($message, $fail) {
                 $res = $this->orderService->info(['order_sn' => $message['out_trade_no']]);
@@ -188,7 +188,7 @@ class PayService extends Service
                     return $fail('非会员状态不可发起退款');
                 }
                 $expired = strtotime($user['expired_at']);
-                $endTime = time() + $this->lengthTime($pay['type']) - $this->oneDay;
+                $endTime = time() + $this->lengthTime($pay['type']) - self::ONEDAY;
                 if ($expired < $endTime) {
                     return $fail('会员到期时间小于购买时间，不可发起退款');
                 }
@@ -198,7 +198,7 @@ class PayService extends Service
                 return true;
             })->serve();
         } catch (\Exception $error) {
-            $this->redis::SETEX('callback:refund:' . LARAVEL_START . ':error', $this->oneDay / 2, $error->getMessage());
+            $this->redis::SETEX('callback:refund:' . LARAVEL_START . ':error', self::ONEDAY / 2, $error->getMessage());
             return false;
         }
     }

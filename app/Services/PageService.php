@@ -76,7 +76,7 @@ class PageService extends Service
             $info['center_data'] = json_decode($info['center_data'], true);
             $info['bottom_schema'] = json_decode($info['bottom_schema'], true);
             $info['bottom_data'] = json_decode($info['bottom_data'], true);
-            $this->redis::SETEX('info_pages:' . $id, rand($this->oneDay * 3, $this->oneDay * 7), json_encode($info, JSON_UNESCAPED_UNICODE));
+            $this->redis::SETEX('info_pages:' . $id, rand(self::ONEDAY * 3, self::ONEDAY * 7), json_encode($info, JSON_UNESCAPED_UNICODE));
             $this->redis::HSET('pages_code', $info['code'], $id);
             $head = $info['head_data'];
             $head['code'] = $info['code'];
@@ -270,7 +270,7 @@ class PageService extends Service
             $this->redis::ZRANK('user_browses_click:' . $uid, $pid);
         }
         $this->redis::DEL('page_browses_click:' . $pid);
-        return $this->redis::SETEX('set_page_number:' . $pid, $this->oneDay / 24, date('Y-m-d H:i:s'));
+        return $this->redis::SETEX('set_page_number:' . $pid, self::ONEDAY / 24, date('Y-m-d H:i:s'));
     }
 
     /**
@@ -303,6 +303,6 @@ class PageService extends Service
         $this->pageModel->whereKey($pid)->decrement('follow', count($edit));
         $this->attentionModel->whereIn('id', array_values($edit))->update(['status' => self::DISABLE]);
         $this->redis::DEL('page_attentions:' . $pid);
-        return $this->redis::SETEX('set_page_attention:' . $pid, $this->oneDay / 24, date('Y-m-d H:i:s'));
+        return $this->redis::SETEX('set_page_attention:' . $pid, self::ONEDAY / 24, date('Y-m-d H:i:s'));
     }
 }
